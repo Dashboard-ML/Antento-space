@@ -1,0 +1,516 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tarjeta Interactiva BBVA</title>
+
+    <!-- Elemento de audio -->
+    <audio loop id="backgroundMusic">
+        <source src="https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/cancion.mp3?v=1743291995193" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <!-- Agregamos Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Estilos generales */
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Capri', sans-serif;
+            touch-action: none;
+            background-color: white;
+        }
+
+        /* Contenedor principal */
+        model-viewer {
+            width: 100%;
+            height: 100vh;
+            background: white;
+            --transition-duration: 0.4s;
+            cursor: grab;
+        }
+
+        model-viewer:active {
+            cursor: grabbing;
+        }
+
+        /* Hotspots mejorados */
+        .Hotspot {
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 102, 255, 0.9);
+            border-radius: 50%;
+            border: 2px solid #0057b8;
+            cursor: pointer;
+            transition: all 1s ease;
+            box-shadow: 0 20px 16px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            opacity: 0.8;
+            visibility: visible;
+        }
+
+        .Hotspot i {
+            color: white;
+            font-size: 17px;
+            transition: all 0.3s ease;
+        }
+
+        .Hotspot.active {
+            background: #ff6600;
+            transform: scale(1.2);
+            box-shadow: 0 4px 15px rgba(255,102,0,0.4);
+            z-index: 10;
+        }
+
+        .Hotspot.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .HotspotAnnotation {
+            opacity: 0;
+            visibility: hidden;
+            background: white;
+            color: #333;
+            padding: 8px;
+            border-radius: 4px;
+            position: absolute;
+            transform: translate(-50%, -180%);
+            min-width: 180px;
+            max-width: 220px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+            z-index: 10;
+            border-top: 3px solid #0057b8;
+        }
+
+        .HotspotAnnotation strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+            color: #0057b8;
+        }
+
+        .Hotspot.active .HotspotAnnotation {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(57%, 5%);
+        }
+
+        /* Controles de música */
+        .music-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 2px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px;
+            border-radius: 30px;
+            backdrop-filter: blur(9px);
+            transition: all 0.9s ease;
+            border: 1px solid #eee;
+            opacity: 0.5;
+            pointer-events: auto;
+        }
+
+        .music-controls:hover {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+        .music-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 87, 184, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+
+        .music-btn:hover {
+            background: rgba(0, 61, 130, 0.8);
+            transform: scale(1.1);
+        }
+
+        .volume-slider {
+            width: 40px;
+            height: 2px;
+            background: rgba(0,0,0,0.2);
+            margin-top: 8px;
+            border-radius: 3px;
+            outline: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-slider:hover {
+            opacity: 1;
+        }
+
+        /* Botón de reset */
+        .reset-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #0057b8 0%, #003d82 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, 20px);
+            will-change: transform, opacity;
+        }
+
+        .reset-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #003d82 0%, #002a5c 100%);
+            transform: translate(-50%, 0) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Icono de reinicio */
+        .reset-btn span:first-child {
+            font-size: 20px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotateIcon 2s infinite linear;
+            transform-origin: center;
+        }
+
+        /* Texto del botón */
+        .reset-btn span:last-child {
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            font-size: 15px;
+        }
+
+        /* Animación del icono */
+        @keyframes rotateIcon {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Logo - Posición modificada */
+        .logo {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1;
+        }
+
+        .logo img {
+            width: 200px;
+            height: auto;
+        }
+
+        /* Nuevas clases para el comportamiento del logo */
+        .logo.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 2s ease;
+        }
+
+        .logo.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: all 3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Controles de música -->
+    <div class="music-controls">
+        <button class="music-btn" id="playPauseBtn">▶️</button>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.2">
+    </div>
+
+    <!-- Botón de reset -->
+    <button class="reset-btn" id="resetViewBtn">
+        <span>↻</span> <span>Reiniciar Vista</span>
+    </button>
+
+    <!-- Logo en posición inferior derecha -->
+    <div class="logo visible">
+        <img src="https://cdn.glitch.global/3dd7dd7b-31a6-49d1-9601-83eaece21c70/pngegg%20(1)2.png?v=1740876144457" alt="Atento Logo">
+    </div>
+
+    <!-- Modelo 3D -->
+    <model-viewer
+        id="modelViewer"
+        src="https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/Tarjeta2.glb?v=1743195474910"
+        camera-controls
+        tone-mapping="legacy"
+        shadow-intensity="2"
+        camera-orbit="0deg 78.76deg 15.33m"
+        field-of-view="30deg"
+        min-camera-orbit="auto 60deg 10m"
+        max-camera-orbit="auto 120deg 20m"
+        auto-rotate
+        auto-rotate-delay="3000"
+        interaction-policy="allow-when-focused"
+        camera-target="0m 0m 0m"
+    >
+        <!-- Hotspots con íconos personalizados -->
+        <button class="Hotspot" slot="hotspot-3" data-position="-1.3980746005241176m 0.15091723144961322m -0.0034379999248750513m">
+            <i class="fas fa-microchip"></i>
+            <div class="HotspotAnnotation">
+                <strong>Chip de Seguridad</strong>
+                Procesador EMV que cifra datos sensibles<br>
+                <em>Protección avanzada contra fraudes</em>
+            </div>
+        </button>
+
+        <button class="Hotspot" slot="hotspot-5" data-position="-1.2894785310607793m 1.2418794283846424m 0.034378533444615264m">
+            <i class="fas fa-building"></i>
+            <div class="HotspotAnnotation">
+                <strong>Identidad Emisora</strong>
+                Información institucional y datos de contacto<br>
+                <em>Verifica la autenticidad de la tarjeta</em>
+            </div>
+        </button>
+
+        <button class="Hotspot" slot="hotspot-10" data-position="-0.0834883808308m 0.217m -0.1908m">
+            <i class="fas fa-credit-card"></i>
+            <div class="HotspotAnnotation">
+                <strong>Datos de contacto Bancarios</strong>
+                Número de ejecutivos bancarios<br>
+                <em>Información del banco</em>
+            </div>
+        </button>
+    </model-viewer>
+
+    <script>
+        // Variables para guardar el estado inicial
+        let initialOrbit = '0deg 78.76deg 15.33m';
+        let initialFov = '30deg';
+        let initialTarget = '0m 0m 0m';
+        let activeHotspot = null;
+        let isTransitioning = false;
+
+        // Array de sonidos para cada hotspot
+        const hotspotSounds = {
+            'hotspot-3': new Audio('https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/Chip.wav?v=1743289704253'),
+            'hotspot-5': new Audio('https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/Identidad Emisora.wav?v=1743289908475'),
+            'hotspot-10': new Audio('https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/Datos bancarios.wav?v=1743290745059')
+        };
+
+        // Función para reproducir el sonido del hotspot
+        function playHotspotSound(hotspot) {
+            const slot = hotspot.getAttribute('slot');
+            const sound = hotspotSounds[slot];
+            
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play();
+            }
+        }
+
+        // Función para animar la cámara
+        function animateCamera(modelViewer, targetOrbit, duration) {
+            const startOrbit = modelViewer.cameraOrbit;
+            const startTime = performance.now();
+            
+            function updateCamera() {
+                const elapsed = performance.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Interpolación entre los valores iniciales y finales
+                const currentOrbit = interpolateOrbits(startOrbit, targetOrbit, progress);
+                modelViewer.cameraOrbit = currentOrbit;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCamera);
+                }
+            }
+            
+            requestAnimationFrame(updateCamera);
+        }
+        
+        // Función para interpolación de órbitas
+        function interpolateOrbits(startOrbit, targetOrbit, progress) {
+            const startParts = startOrbit.split(' ');
+            const targetParts = targetOrbit.split(' ');
+            
+            const thetaStart = parseFloat(startParts[0]);
+            const phiStart = parseFloat(startParts[1]);
+            const radiusStart = parseFloat(startParts[2]);
+            
+            const thetaTarget = parseFloat(targetParts[0]);
+            const phiTarget = parseFloat(targetParts[1]);
+            const radiusTarget = parseFloat(targetParts[2]);
+            
+            // Interpolación lineal para cada componente
+            const theta = thetaStart + (thetaTarget - thetaStart) * progress;
+            const phi = phiStart + (phiTarget - phiStart) * progress;
+            const radius = radiusStart + (radiusTarget - radiusStart) * progress;
+            
+            return `${theta}deg ${phi}deg ${radius}%`;
+        }
+        
+        // Función para resetear la vista
+        function resetView() {
+            const modelViewer = document.querySelector('#modelViewer');
+            
+            // Animación de vuelta a la vista inicial
+            animateCamera(modelViewer, initialOrbit, 800);
+            modelViewer.fieldOfView = initialFov;
+            modelViewer.cameraTarget = initialTarget;
+            modelViewer.autoRotate = true;
+            
+            // Ocultar botón de volver
+            document.getElementById('resetViewBtn').classList.remove('visible');
+            
+            // Mostrar logo
+            document.querySelector('.logo').classList.remove('hidden');
+            document.querySelector('.logo').classList.add('visible');
+            
+            // Mostrar todos los hotspots
+            document.querySelectorAll('.Hotspot').forEach(hotspot => {
+                hotspot.classList.remove('hidden', 'active');
+            });
+            
+            // Resetear hotspot activo
+            activeHotspot = null;
+        }
+
+        // Manejador de eventos para los hotspots
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelViewer = document.querySelector('#modelViewer');
+            const bgMusic = document.getElementById('backgroundMusic');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const resetBtn = document.getElementById('resetViewBtn');
+            const hotspots = document.querySelectorAll('.Hotspot');
+            const logo = document.querySelector('.logo');
+
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+
+            // Control de música
+            bgMusic.volume = 0.2;
+            volumeSlider.value = 0.2;
+
+            playPauseBtn.addEventListener('click', () => {
+                bgMusic.paused ? bgMusic.play() : bgMusic.pause();
+                playPauseBtn.textContent = bgMusic.paused ? '▶️' : '⏸️';
+            });
+
+            volumeSlider.addEventListener('input', (e) => {
+                bgMusic.volume = e.target.value;
+            });
+
+            // Control de hotspots
+            hotspots.forEach(hotspot => {
+                hotspot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    if (isTransitioning) return;
+                    
+                    playHotspotSound(hotspot);
+                    
+                    if (activeHotspot === hotspot) {
+                        resetView();
+                        return;
+                    }
+
+                    isTransitioning = true;
+                    
+                    // Ocultar todos los hotspots excepto el seleccionado
+                    hotspots.forEach(h => {
+                        if (h !== hotspot) {
+                            h.classList.add('hidden');
+                        }
+                    });
+
+                    if (activeHotspot) activeHotspot.classList.remove('active');
+                    
+                    activeHotspot = hotspot;
+                    hotspot.classList.add('active');
+                    
+                    // Desactivar rotación automática durante el zoom
+                    modelViewer.autoRotate = false;
+                    
+                    // Ocultar el logo cuando entramos en zoom
+                    logo.classList.remove('visible');
+                    logo.classList.add('hidden');
+                    
+                    // Mostrar el botón de reinicio cuando entramos en zoom
+                    resetBtn.classList.add('visible');
+                    
+                    // Calcular la órbita objetivo
+                    const targetOrbit = '0deg 75deg 50%';
+                    
+                    // Configurar animación suave
+                    modelViewer.fieldOfView = '15deg';
+                    animateCamera(modelViewer, targetOrbit, 800);
+                    
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 600);
+                });
+            });
+
+            // Resetear vista
+            resetBtn.addEventListener('click', () => {
+                if (!isTransitioning) {
+                    resetView();
+                }
+            });
+
+            modelViewer.addEventListener('click', (e) => {
+                if (!isTransitioning && !e.target.closest('.Hotspot')) {
+                    resetView();
+                }
+            });
+
+            // Iniciar música con primer clic
+            document.body.addEventListener('click', () => {
+                if (bgMusic.paused) {
+                    bgMusic.play();
+                    playPauseBtn.textContent = '⏸️';
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>

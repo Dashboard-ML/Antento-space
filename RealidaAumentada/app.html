@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AR Tarjeta BBVA</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.loaders.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+    <img src="assets/Sin título-1.png" alt="Logotipo AR" class="ar-logo">
+    <div class="full-screen-frame">
+        <div class="frame-border frame-top"></div>
+        <div class="frame-border frame-bottom"></div>
+        <div class="frame-border frame-left"></div>
+        <div class="frame-border frame-right"></div>
+    </div>
+    <div class="scanning-hint">Enfoca el marcador con tu cámara</div>
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Cargando experiencia AR...</div>
+    </div>
+
+ <a-scene vr-mode-ui="enabled: false" renderer="antialias: true; logarithmicDepthBuffer: false; precision: mediump">
+        <a-assets>
+            <a-asset-item id="drone-model" src="modelos/dodge_viper_gts.glb"></a-asset-item>
+            <a-asset-item id="modelo-1" src="modelos/tarjeta_debito_bbva_4.glb"></a-asset-item>
+            <a-asset-item id="modelo-2" src="modelos/selfix_x_now.glb"></a-asset-item>
+            <a-asset-item id="modelo-3" src="modelos/diorama_trex_rigged_free.glb"></a-asset-item>
+            <a-asset-item id="modelo-4" src="modelos/2017_chevrolet_camaro_gt4.r.glb"></a-asset-item>
+            <img id="envMap" src="https://cdn.polyhaven.com/asset_img/primary/studio_small_03.png">
+        </a-assets>
+
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.5"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1.0" position="1.5 3 2"></a-entity>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Marcadores para cada modelo -->
+        <a-entity id="marker-drone" mindar-image-target="targetIndex: 0">
+            <a-entity
+                id="model-drone"
+                gltf-model="#drone-model"
+                position="0 0.15 0"
+                scale="0.5 0.5 0.5"
+                visible="false"
+                material="envMap: #envMap; metalness: 0.3; roughness: 0.4"
+            ></a-entity>
+        </a-entity>
+
+        <a-entity id="marker-1" mindar-image-target="targetIndex: 1">
+            <a-entity
+                id="model-1"
+                gltf-model="#modelo-1"
+                position="0 0.15 0"
+                scale="0.5 0.5 0.5"
+                visible="false"
+                material="envMap: #envMap; metalness: 0.3; roughness: 0.4"
+            ></a-entity>
+        </a-entity>
+
+        <a-entity id="marker-2" mindar-image-target="targetIndex: 2">
+            <a-entity
+                id="model-2"
+                gltf-model="#modelo-2"
+                position="0 0.15 0"
+                scale="0.5 0.5 0.5"
+                visible="false"
+                material="envMap: #envMap; metalness: 0.3; roughness: 0.4"
+            ></a-entity>
+        </a-entity>
+
+        <a-entity id="marker-3" mindar-image-target="targetIndex: 3">
+            <a-entity
+                id="model-3"
+                gltf-model="#modelo-3"
+                position="0 0.15 0"
+                scale="0.5 0.5 0.5"
+                visible="false"
+                material="envMap: #envMap; metalness: 0.3; roughness: 0.4"
+            ></a-entity>
+        </a-entity>
+
+        <a-entity id="marker-4" mindar-image-target="targetIndex: 4">
+            <a-entity
+                id="model-4"
+                gltf-model="#modelo-4"
+                position="0 0.15 0"
+                scale="0.5 0.5 0.5"
+                visible="false"
+                material="envMap: #envMap; metalness: 0.3; roughness: 0.4"
+            ></a-entity>
+        </a-entity>
+    </a-scene>
+
+    <script src="app.js"></script>
+    
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', function() {
+            setTimeout(function() {
+                document.querySelector('.loading-overlay').style.opacity = '0';
+                setTimeout(function() {
+                    document.querySelector('.loading-overlay').style.display = 'none';
+                }, 500);
+            }, 1500);
+        });
+        const scanningHint = document.querySelector('.scanning-hint');
+        const screenFrame = document.querySelector('.full-screen-frame');
+        const arLogo = document.querySelector('.ar-logo');
+        
+        function handleMarkerDetection(event) {
+            scanningHint.style.opacity = '0';
+            setTimeout(() => {
+                scanningHint.style.display = 'none';
+            }, 500);
+            
+            screenFrame.classList.add('full-screen-frame-active');
+            arLogo.classList.add('ar-logo-ar-detected');
+        }
+        
+        function handleMarkerLost(event) {
+            scanningHint.style.display = 'block';
+            setTimeout(() => {
+                scanningHint.style.opacity = '1';
+            }, 10);
+            screenFrame.classList.remove('full-screen-frame-active');
+            arLogo.classList.remove('ar-logo-ar-detected');
+        }
+        const markers = [
+            document.getElementById('marker-drone'),
+            document.getElementById('marker-1'),
+            document.getElementById('marker-2'),
+            document.getElementById('marker-3'),
+            document.getElementById('marker-4')
+        ];
+        markers.forEach(marker => {
+            if (marker) {
+                marker.addEventListener('targetFound', handleMarkerDetection);
+                marker.addEventListener('targetLost', handleMarkerLost);
+            }
+        });
+    </script>
+</body>
+</html>

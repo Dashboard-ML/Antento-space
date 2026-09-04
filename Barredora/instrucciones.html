@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrucciones - Aspiradora JetBot+</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a2463 0%, #1565c0 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            display: flex;
+            justify-content: center; /* Centrado horizontal */
+            align-items: center;
+            padding: 1.5rem 2rem;
+            position: relative; /* Necesario para posicionar el logo */
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            position: absolute; /* Posicionamiento absoluto */
+            right: 2rem; /* Colocado a la derecha */
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+        
+        .page-title {
+            font-size: 5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+            letter-spacing: 1px;
+            text-align: center;
+            transform: translateY(100px); /* ← Baja el título 50px */
+        }
+                
+        .instructions-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            padding: 2rem;
+        }
+        
+        .instructions-content {
+            max-width: 700px;
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .instructions-text {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            color: white;
+            margin-bottom: 2.5rem;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .understood-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .understood-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        .particles-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s linear infinite;
+        }
+        
+        .particle:nth-child(3n+1) {
+            background: rgba(100, 181, 246, 0.6);
+        }
+        
+        .particle:nth-child(3n+2) {
+            background: rgba(255, 152, 0, 0.4);
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+            
+            .logo {
+                position: static; /* En móvil vuelve a flujo normal */
+                margin-top: 1rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .instructions-text {
+                font-size: 1.2rem;
+            }
+            
+            .instructions-content {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles"></div>
+    
+    <header>
+        <div class="page-title">Instrucciones</div> <!-- Título centrado -->
+        <div class="logo">
+            <!-- Reemplaza la URL con la ruta real de tu logo PNG -->
+            <img src="Logotipo Atento-04.png" alt="Logo JetBot+">
+        </div> <!-- Logo a la derecha -->
+    </header>
+    
+    <div class="instructions-container">
+        <div class="instructions-content">
+            <p class="instructions-text">
+                Se presentará un modelo 3D de la aspiradora con el cual podrás interactuar moviéndola de un lado a otro. También contará con puntos informativos que al presionarlos mostrarán más información específica de cada parte y harán un pequeño zoom para mayor detalle.
+            </p>
+            <a href="barredora.html" class="understood-button">Entendido</a>
+        </div>
+    </div>
+
+    <script>
+        // Crear partículas de fondo
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 40;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            const size = Math.random() * 8 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 5}s`;
+            
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

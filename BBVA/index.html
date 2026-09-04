@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Tarjeta BBVA </title>
+    <style>
+      
+        body 
+      
+      
+      
+      {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Calibri', Arial, sans-serif;
+            background-color: var(--background-color);
+        }
+
+
+        
+        /* Logo BBVA */
+        .bbva-logo-container {
+            position: absolute;
+            bottom: 2%;
+            right: 2%;
+            z-index: 10;
+            transition: all 3s ease;
+        }
+
+        .bbva-logo-img {
+            width: 30vw;
+            max-width: 150px;
+            height: auto;
+        
+        }
+        
+        .card-type {
+            position: absolute;
+            top: 3%;
+            left: 3%;
+            z-index: 10;
+            background-color: rgba(240, 240, 240, 0.9);
+            color: #004481;
+            padding: 1% 2%;
+            border-radius: 5px;
+            font-size: 2vw;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid #004481;
+            transition: all 1s ease;
+        }
+      
+      /* Texto "intrucciones" abajo a la izquierda */
+.inst {
+    position: absolute;
+    left: 3%;
+    bottom: 10%;
+    z-index: 10;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: rgba(240, 240, 240, 0.9);
+    border: 2px solid #004481;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inst:hover {
+    background: rgba(240, 240, 240, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0,68,129,0.2);
+}
+
+.inst:active {
+    transform: scale(0.95);
+}
+
+.inst svg {
+    width: 60%;
+    height: 60%;
+}
+
+@media (max-width: 768px) {
+    .inst {
+        width: 40px;
+        height: 40px;
+        bottom: 5%;
+    }
+}
+
+@media (max-width: 480px) {
+    .inst {
+        width: 36px;
+        height: 36px;
+        bottom: 3%;
+    }
+}
+      
+        
+        /* Estilos para el hotspot mejorado */
+        .Hotspot {
+            background: rgba(0, 68, 129, 0.7);
+            border-radius: 50%;
+            border: 2px solid white;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            margin: 0;
+            cursor: url ("https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/cursor.png?v=1743606798122"),pointer;
+            transition: all 2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+      
+        
+        .Hotspot:hover {
+            background: rgba(0, 68, 129, 0.9);
+            transform: scale(1.1);
+        }
+        
+        .HotspotAnnotation {
+            display: none;
+            position: absolute;
+            left: 100%;
+            white-space: nowrap;
+            margin-left: 12px;
+            background: rgba(0, 68, 129, 0.95);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .Hotspot:hover .HotspotAnnotation {
+            display: block;
+        }
+        
+
+
+        /* Panel derecho mejorado para los mensajes */
+        .info-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            right: 40px;
+            transform: translateY(-50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 100;
+            width: 320px;
+            max-width: 80%;
+            border-top: 6px solid #004481;
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translate(120%, -50%); opacity: 0; }
+            to { transform: translate(0, -50%); opacity: 1; }
+        }
+        
+        .info-panel p {
+            font-size: 17px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .info-panel button {
+            background-color: #004481;
+            color: white;
+            border: none;
+            padding: 30px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 30px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .info-panel button:hover {
+            background-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        
+      
+        @media (max-width: 2100px) {
+            .model-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 2048/1080;
+            }
+            
+            
+            .Hotspot {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            
+            
+            .info-panel {
+                right: 400px;
+                width: 350px;
+                padding: 40px;
+            }
+            
+            .info-panel p {
+                font-size: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .bbva-logo-img {
+                width: 100px;
+            }
+             }
+            
+
+            .Hotspot {
+                width: 32px;
+                height: 32px;
+                font-size: 50px;
+            }
+            
+            
+        .info-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            right: 2%;
+            transform: translateY(-50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 100;
+            width: 300px;
+            max-width: 90%;
+            border-top: 6px solid #004481;
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .info-panel p {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .info-panel button {
+            background-color: #004481;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 1s ease;
+            font-weight: bold;
+        }
+
+          
+    </style>
+</head>
+<body>
+  
+      <audio id="hotspotAudio"></audio>
+  
+    <div class="model-container">
+        <!-- Texto arriba a la izquierda -->
+        <div class="card-type">Tarjeta de Crédito</div>
+      
+      <div class="model-container">
+        <!-- Texto arriba a la izquierda -->
+        <button class="inst" onclick="mostrarInstrucciones()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 16V12" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 8H12.01" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+</button>
+
+
+        
+        <!-- Logo BBVA abajo a la derecha (PNG) -->
+        <div class="bbva-logo-container">
+            <img src="LogoAtento.png" 
+                 alt="Logo Atento" 
+                 class="bbva-logo-img">
+        </div>
+        
+
+        
+        <!-- Panel derecho para mensajes -->
+        <div class="info-panel" id="infoPanel">
+            <p id="panelMessage"></p>
+            <button onclick="closePanel()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M5 13L9 17L19 7M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Entendido
+            </button>
+        </div>
+        
+        <!-- Modelo 3D con hotspots -->
+        <model-viewer 
+            id="tarjeta-model"
+            src="Tarjeta2.glb" 
+            camera-controls 
+            tone-mapping="neutral" 
+            poster="poster.webp" 
+            shadow-intensity="1"
+            exposure="15"
+            environment-image="https://cdn.polyhaven.com/asset_img/primary/moon_lab.png?height=760"
+            camera-orbit="0deg 75deg 120%"
+            field-of-view="35deg"
+            style="width: 100%; height: 100%;">
+            
+          <!-- Hotspot Reciclaje Simple (Parte trasera tarjeta) - Versión modificada -->
+          <button class="Hotspot Hotspot-reciclaje" 
+                  slot="hotspot-reciclaje"
+                  data-position="-.5m .05m -0.01m"
+                  data-normal="0m 0m -1m"
+                  onclick="showReciclajeMessage()"
+                  style="background: #00C853; border-radius: 50%; width: 44px; height: 44px; border: 2px solid white; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+
+              <!-- Símbolo de reciclaje básico -->
+              <svg width="24" height="24" viewBox="0 0 24 24" style="display: block;">
+                  <text x="12" y="18" font-family="Arial" font-weight="bold" font-size="20" fill="white" text-anchor="middle">♻</text>
+              </svg>
+
+              <!-- Tooltip modificado para mostrar solo "Reciclaje" -->
+              <div class="HotspotAnnotation" style="background: #00796B;">
+                  Material reciclado
+              </div>
+          </button>
+          
+            <!-- Hotspot sobre el chip en la parte frontal -->
+            <button class="Hotspot" slot="hotspot-chip" 
+                    data-position="-1.3980746005241176m 0.15091723144961322m -0.0034379999248750513m" 
+                    data-normal="0m 0m 1m"
+                    onclick="zoomToChip()">
+                <div class="HotspotAnnotation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                        <path d="M9 3V5M15 3V5M9 19V21M15 19V21M5 9H3M5 15H3M21 9H19M21 15H19M7 19H17C18.1046 19 19 18.1046 19 17V7C19 5.89543 18.1046 5 17 5H7C5.89543 5 5 5.89543 5 7V17C5 18.1046 5.89543 19 7 19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Chip
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 3V5M15 3V5M9 19V21M15 19V21M5 9H3M5 15H3M21 9H19M21 15H19M7 19H17C18.1046 19 19 18.1046 19 17V7C19 5.89543 18.1046 5 17 5H7C5.89543 5 5 5.89543 5 7V17C5 18.1046 5.89543 19 7 19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+          
+          <!-- Hotspot Banda Magnética - Parte trasera de la tarjeta -->
+<button class="Hotspot Hotspot-banda" slot="hotspot-banda"
+        data-position="2.20834883808308m 1.0271202226042895m -0.050887818481860636m"
+        data-normal="0m 0m -1m"
+        onclick="showBandaMessage()">
+
+    <!-- Icono SVG de banda magnética -->
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="8" width="16" height="3" fill="white"/>
+        <rect x="4" y="12" width="16" height="1" fill="white"/>
+        <rect x="4" y="14" width="16" height="2" fill="white"/>
+    </svg>
+
+    <!-- Tooltip elevado -->
+    <div class="HotspotAnnotation" style="left: 100%; margin-left: 1px; bottom: 35px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+            <rect x="4" y="8" width="16" height="3" fill="white"/>
+            <rect x="4" y="12" width="16" height="1" fill="white"/>
+            <rect x="4" y="14" width="16" height="2" fill="white"/>
+        </svg>
+        Banda Magnética
+    </div>
+  
+  
+</button>
+          
+          <!-- Hotspot para la tecnología Contactless (parte frontal) -->
+            <button class="Hotspot Hotspot-contactless" slot="hotspot-contactless" 
+                    data-position="-2.45m -0.m 0.00m" 
+                    data-normal="0m 0m 1m"
+                    onclick="showContactlessMessage()">
+                <div class="HotspotAnnotation" style="left: auto; right: 100%; margin-left: 0; margin-right: 12px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                        <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" fill="white" stroke="white"/>
+                        <path d="M16.24 7.76C16.7979 8.31739 17.2404 8.98052 17.5424 9.71172C17.8444 10.4429 18 11.2281 18 12.0222C18 12.8164 17.8444 13.6016 17.5424 14.3328C17.2404 15.064 16.7979 15.7271 16.24 16.2845" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7.76 16.24C7.20211 15.6826 6.75963 15.0195 6.45762 14.2883C6.15561 13.5571 6 12.7719 6 11.9778C6 11.1836 6.15561 10.3984 6.45762 9.66723C6.75963 8.93602 7.20211 8.27291 7.76 7.71554" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19.07 4.93C20.9447 6.80527 21.9979 9.34835 21.9979 12C21.9979 14.6517 20.9447 17.1947 19.07 19.07" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4.93 19.07C3.05526 17.1947 2.0021 14.6517 2.0021 12C2.0021 9.34835 3.05526 6.80527 4.93 4.93" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Tecnología Contactless
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" fill="white" stroke="white"/>
+                    <path d="M16.24 7.76C16.7979 8.31739 17.2404 8.98052 17.5424 9.71172C17.8444 10.4429 18 11.2281 18 12.0222C18 12.8164 17.8444 13.6016 17.5424 14.3328C17.2404 15.064 16.7979 15.7271 16.24 16.2845" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7.76 16.24C7.20211 15.6826 6.75963 15.0195 6.45762 14.2883C6.15561 13.5571 6 12.7719 6 11.9778C6 11.1836 6.15561 10.3984 6.45762 9.66723C6.75963 8.93602 7.20211 8.27291 7.76 7.71554" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.07 4.93C20.9447 6.80527 21.9979 9.34835 21.9979 12C21.9979 14.6517 20.9447 17.1947 19.07 19.07" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4.93 19.07C3.05526 17.1947 2.0021 14.6517 2.0021 12C2.0021 9.34835 3.05526 6.80527 4.93 4.93" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            
+            <!-- Hotspot sobre el QR en la parte trasera -->
+            <button class="Hotspot" slot="hotspot-qr" 
+                    data-position="1.32821930586536245m -1.0754210467947898m -0.07088816997795466m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToQR()">
+                <div class="HotspotAnnotation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                        <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="white"/>
+                        <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="white"/>
+                        <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="white"/>
+                        <path d="M21 19H19V21H21V19Z" fill="white"/>
+                        <path d="M15 19H17V21H15V19Z" fill="white"/>
+                        <path d="M13 13H15V15H13V13Z" fill="white"/>
+                        <path d="M15 15H17V17H15V15Z" fill="white"/>
+                        <path d="M17 13H19V15H17V13Z" fill="white"/>
+                        <path d="M17 17H19V19H17V17Z" fill="white"/>
+                        <path d="M13 17H15V19H13V17Z" fill="white"/>
+                    </svg>
+                    Código QR
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="white"/>
+                    <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="white"/>
+                    <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="white"/>
+                    <path d="M21 19H19V21H21V19Z" fill="white"/>
+                    <path d="M15 19H17V21H15V19Z" fill="white"/>
+                    <path d="M13 13H15V15H13V13Z" fill="white"/>
+                    <path d="M15 15H17V17H15V15Z" fill="white"/>
+                    <path d="M17 13H19V15H17V13Z" fill="white"/>
+                    <path d="M17 17H19V19H17V17Z" fill="white"/>
+                    <path d="M13 17H15V19H13V17Z" fill="white"/>
+                </svg>
+            </button>
+            
+          <!-- Hotspot para el nuevo diseño seguro (parte frontal) -->
+            <button class="Hotspot Hotspot-seguridad" slot="hotspot-seguridad" 
+                    data-position=".8m .1m 0.00m" 
+                    data-normal="0m 0m 1m"
+                    onclick="showSeguridadMessage()">
+                <div class="HotspotAnnotation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                        <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Diseño Seguro
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+          
+          
+            <!-- Hotspot para el área de firma en la parte trasera -->
+            <button class="Hotspot" slot="hotspot-firma" 
+                    data-position="-1.52821930586536245m -1.5754210467947898m -0.35088816997795466m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToFirma()">
+                <div class="HotspotAnnotation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                        <path d="M9 12L11 14L15 10M12 3C13.2875 3 14.5681 3.26392 15.764 3.775C16.9599 4.28609 18.0466 5.03482 18.9635 5.97703C19.8804 6.91924 20.6086 8.03498 21.1082 9.26317C21.6078 10.4914 21.8688 11.807 21.8688 13.1364C21.8688 14.4657 21.6078 15.7814 21.1082 17.0096C20.6086 18.2378 19.8804 19.3535 18.9635 20.2957C18.0466 21.2379 16.9599 21.9867 15.764 22.4978C14.5681 23.0088 13.2875 23.2727 12 23.2727C10.7125 23.2727 9.43194 23.0088 8.23604 22.4978C7.04013 21.9867 5.95344 21.2379 5.03654 20.2957C4.11963 19.3535 3.39142 18.2378 2.89183 17.0096C2.39224 15.7814 2.13125 14.4657 2.13125 13.1364C2.13125 11.807 2.39224 10.4914 2.89183 9.26317C3.39142 8.03498 4.11963 6.91924 5.03654 5.97703C5.95344 5.03482 7.04013 4.28609 8.23604 3.775C9.43194 3.26392 10.7125 3 12 3Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Área de firma del titular
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M12 3C13.2875 3 14.5681 3.26392 15.764 3.775C16.9599 4.28609 18.0466 5.03482 18.9635 5.97703C19.8804 6.91924 20.6086 8.03498 21.1082 9.26317C21.6078 10.4914 21.8688 11.807 21.8688 13.1364C21.8688 14.4657 21.6078 15.7814 21.1082 17.0096C20.6086 18.2378 19.8804 19.3535 18.9635 20.2957C18.0466 21.2379 16.9599 21.9867 15.764 22.4978C14.5681 23.0088 13.2875 23.2727 12 23.2727C10.7125 23.2727 9.43194 23.0088 8.23604 22.4978C7.04013 21.9867 5.95344 21.2379 5.03654 20.2957C4.11963 19.3535 3.39142 18.2378 2.89183 17.0096C2.39224 15.7814 2.13125 14.4657 2.13125 13.1364C2.13125 11.807 2.39224 10.4914 2.89183 9.26317C3.39142 8.03498 4.11963 6.91924 5.03654 5.97703C5.95344 5.03482 7.04013 4.28609 8.23604 3.775C9.43194 3.26392 10.7125 3 12 3Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+          
+          <!-- Hotspot VISA - Versión que mantiene proporciones -->
+          <button class="Hotspot" slot="hotspot-visa" 
+                  data-position="1.5175789822391197m -1.712572806924568m -0.0034382503012321776m" 
+                  data-normal="0m 0m 1m"
+                  onclick="showVisaMessage()"
+                  style="border-radius: 8px; width: 60px; height: 38px; background: rgba(21, 101, 192, 0.7);">
+              <div class="HotspotAnnotation">
+                  <svg width="18" height="18" viewBox="0 0 24 24" style="margin-right: 6px;">
+                      <path d="M9.5 8.5L11 12l-1.5 3.5H7l1.5-3.5L7 8.5h2.5zM13 8.5h2.5l1.5 7h-2.5l-.35-1.7h-2.3L11 15.5H8.5L13 8.5zm2.15 3.3l-.4-1.8s-.1-.4-.15-.6h-.05l-.15.6-.4 1.8h1.15z" fill="white"/>
+                  </svg>
+                  Respaldo VISA
+              </div>
+              <svg width="100%" height="100%" viewBox="0 0 80 50" preserveAspectRatio="xMidYMid meet">
+                  <rect width="80" height="50" rx="5" fill="#1a5f9c"/>
+                  <text x="40" y="30" font-family="Arial" font-weight="bold" font-size="24" fill="white" text-anchor="middle">VISA</text>
+              </svg>
+          </button>
+            
+        <!-- Hotspot Logo BBVA - Misma interfaz que otros hotspots -->
+        <button class="Hotspot" slot="hotspot-logo-bbva" 
+                data-position="-1.2894785310607793m 1.2418794283846424m -0.034378533444615264m" 
+                data-normal="0m 0m 1m"
+                onclick="showLogoBBVAMessage()">
+            <div class="HotspotAnnotation">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                    <path d="M12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3Z" stroke="white" stroke-width="2"/>
+                    <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" fill="white"/>
+                </svg>
+                Identidad emisora
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3Z" stroke="white" stroke-width="2"/>
+                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" fill="white"/>
+            </svg>
+        </button>
+
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    
+    <script>
+      
+   function playSound(soundUrl) {
+        const audio = document.getElementById('hotspotAudio');
+        audio.src = soundUrl;
+        audio.play().catch(error => {
+            console.log('Error al reproducir sonido:', error);
+        });
+    }
+
+        // Variables para guardar el estado inicial
+        let initialOrbit = '0deg 75deg 120%';
+        let initialFov = '35deg';
+        let initialTarget = '0m 0m 0m';
+      
+      
+      
+        
+        // Función para acercar al chip con animación
+           async function zoomToChip() {
+           playSound('Chip.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-.5m -.4m -2.5m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el chip (parte frontal)
+            animateCamera(modelViewer, '0deg 75deg 50%', 800);
+            
+            
+            // Mostrar panel con el mensaje sobre el chip
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Microprocesador capaz de guardar grandes cantidades de información al cliente.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+      
+           // Función para mostrar el mensaje de reciclaje (igual estructura que las demás)
+             function showReciclajeMessage() {
+             playSound('Reciclado.wav');
+             const modelViewer = document.querySelector('#tarjeta-model');
+    
+    // Guardar estado inicial (igual que en las demás funciones)
+    initialOrbit = modelViewer.cameraOrbit;
+    initialFov = modelViewer.fieldOfView;
+    initialTarget = modelViewer.cameraTarget;
+    
+    // Configuración de cámara para la vista de reciclaje (parte trasera)
+    modelViewer.cameraTarget = '-.2m 0.8m -2m'; // Ajusta estas coordenadas según necesidad
+    modelViewer.fieldOfView = '15deg'; // Mismo zoom que los demás
+    
+    // Animación de cámara idéntica a las demás funciones
+    animateCamera(modelViewer, '180deg 75deg 50%', 800); // 180° para vista trasera
+    
+    // Mostrar botón "Volver" con el mismo comportamiento
+    setTimeout(() => {
+        const backButton = document.querySelector('.back-button');
+        backButton.style.display = 'block';
+        backButton.style.animation = 'fadeIn 8s ease-out';
+        
+        // Asegurar que el texto del botón sea consistente
+        backButton.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <path d="M10 19L3 12L10 5M5 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver
+        `;
+    }, 400);
+    
+    // Mostrar panel informativo con el mismo formato que los demás
+    setTimeout(() => {
+        const panel = document.getElementById('infoPanel');
+        const message = document.getElementById('panelMessage');
+        
+        message.innerHTML = `
+            <strong style="color: #004481;">MATERIAL RECICLABLE</strong>
+            <p style="margin-top: 10px;">
+                Diseño ecofrendly, hecho de plástico reciclado 
+                    <path d="M5 12V19H19V12M12 5L8 9H11V15H13V9H16L12 5Z" stroke="#004481" stroke-width="2"/>
+                
+        `;
+        
+        panel.style.display = 'block';
+        panel.style.animation = 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        
+        // Configurar el botón de cierre igual que en los demás
+        const closeBtn = panel.querySelector('button');
+        closeBtn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                <path d="M5 13L9 17L19 7M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Entendido
+        `;
+        closeBtn.onclick = closePanel;
+        
+    }, 600);
+}
+      
+      // Función para mostrar mensaje de tecnología Contactless
+        function showContactlessMessage() {
+         playSound('Tecnología de comunicación sin contacto.wav');
+         const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-1.2m -1m -4.5m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área contactless (parte frontal)
+            animateCamera(modelViewer, '0deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre contactless
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Tecnología de comunicación sin contacto que permite pagar con tan sólo acercar la tarjeta a la terminal.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+        
+      // Función para mostrar mensaje sobre la banda magnética
+        function showBandaMessage() {
+        playSound('Banda magnetica.mp3');
+        const modelViewer = document.querySelector('#tarjeta-model');
+        
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+        
+        // Configurar el zoom
+        modelViewer.cameraTarget = '-1m 1.5m -4.0m';
+        modelViewer.fieldOfView = '15deg';
+        
+        // Orientar la cámara hacia la banda (parte trasera)
+        animateCamera(modelViewer, '180deg 75deg 50%', 800);
+        
+        // Mostrar botón de volver
+        setTimeout(() => {
+            document.querySelector('.back-button').style.display = 'block';
+        }, 400);
+        
+        // Mostrar panel informativo
+        setTimeout(() => {
+            document.getElementById('panelMessage').innerHTML = `
+                <strong style="color: #004481;">BANDA MAGNÉTICA</strong>
+                <p>Soporte de almacenamiento de datos.</p>
+            `;
+            document.getElementById('infoPanel').style.display = 'block';
+        }, 600);
+    }
+      
+            // Función para mostrar mensaje del diseño seguro
+            function showSeguridadMessage() {
+            playSound('Diseñoseguro.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '0m .3m 1m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de diseño seguro (parte frontal)
+            animateCamera(modelViewer, '0deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el diseño seguro
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Tu tarjeta cuenta con un nuevo diseño seguro que no muestra datos sensibles.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+      
+            // Función para acercar al QR con animación
+            async function zoomToQR() {
+            playSound('Qr.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '.5m -.5m 1.0m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el QR (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el QR
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Puedes escanear este código QR dentro de tu aplicación de BBVA para obtener la información completa de tu tarjeta.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+        
+        // Función para acercar al área de firma con animación
+        async function zoomToFirma() {
+              playSound('Firma.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-1.3m -.m -.9m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de firma (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el área de firma
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Esta es el área donde debes firmar tu tarjeta.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+        
+             // Función para mostrar mensaje del logo BBVA
+            function showLogoBBVAMessage() {
+            playSound('Identidad Emisora.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-.7m .1m -3.00m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el logo BBVA (parte frontal)
+            animateCamera(modelViewer, '0deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el logo BBVA
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Logotipo de BBVA.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+        
+             // Función para mostrar mensaje de VISA
+            function showVisaMessage() {
+            playSound('Tarjetavisa.wav');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '1.7m -1.1m -2.00m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el logo VISA
+            animateCamera(modelViewer, '0deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre VISA
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Tarjeta respaldada por VISA.';
+                document.getElementById('infoPanel').style.display = 'block';
+            }, 600);
+        }
+      
+        // Función para animar la cámara
+        function animateCamera(modelViewer, targetOrbit, duration) {
+            const startOrbit = modelViewer.cameraOrbit;
+            const startTime = performance.now();
+            
+            function updateCamera() {
+                const elapsed = performance.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Interpolación entre los valores iniciales y finales
+                const currentOrbit = interpolateOrbits(startOrbit, targetOrbit, progress);
+                modelViewer.cameraOrbit = currentOrbit;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCamera);
+                }
+            }
+            
+            requestAnimationFrame(updateCamera);
+        }
+        
+        // Función para interpolación de órbitas
+        function interpolateOrbits(startOrbit, targetOrbit, progress) {
+            const startParts = startOrbit.split(' ');
+            const targetParts = targetOrbit.split(' ');
+            
+            const thetaStart = parseFloat(startParts[0]);
+            const phiStart = parseFloat(startParts[1]);
+            const radiusStart = parseFloat(startParts[2]);
+            
+            const thetaTarget = parseFloat(targetParts[0]);
+            const phiTarget = parseFloat(targetParts[1]);
+            const radiusTarget = parseFloat(targetParts[2]);
+            
+            // Interpolación lineal para cada componente
+            const theta = thetaStart + (thetaTarget - thetaStart) * progress;
+            const phi = phiStart + (phiTarget - phiStart) * progress;
+            const radius = radiusStart + (radiusTarget - radiusStart) * progress;
+            
+            return `${theta}deg ${phi}deg ${radius}%`;
+        
+        
+        }
+      
+              // Modificar la función animateCamera para mantener el logo oculto durante el zoom
+function animateCamera(modelViewer, targetOrbit, duration) {
+    const startOrbit = modelViewer.cameraOrbit;
+    const startTime = performance.now();
+    // Ocultar el logotipo al iniciar el zoom
+    document.querySelector('.bbva-logo-container').style.opacity = '0';
+    function updateCamera() {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentOrbit = interpolateOrbits(startOrbit, targetOrbit, progress);
+        modelViewer.cameraOrbit = currentOrbit;
+        if (progress < 1) {
+            requestAnimationFrame(updateCamera);
+        }
+    }
+    requestAnimationFrame(updateCamera);
+}
+      // Función para resetear la vista con animación
+        function resetView() {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Animación de vuelta a la vista inicial
+            animateCamera(modelViewer, initialOrbit, 800);
+            modelViewer.fieldOfView = initialFov;
+            modelViewer.cameraTarget = initialTarget;
+            
+            // Ocultar botón de volver con animación
+            document.querySelector('.back-button').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'none';
+            }, 300);
+            
+            // Ocultar panel con animación
+            document.getElementById('infoPanel').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.getElementById('infoPanel').style.display = 'none';
+            }, 300);
+        }
+        
+        // Función para cerrar el panel
+        function closePanel() {
+            document.getElementById('infoPanel').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.getElementById('infoPanel').style.display = 'none';
+            }, 300);
+        }
+      
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuración inicial
+            const modelViewer = document.querySelector('#tarjeta-model');
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+ 
+            
+        });
+ 
+        // Función para cerrar el panel y restaurar vista
+        function closePanel() {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            
+            // Ocultar panel con animación
+            document.getElementById('infoPanel').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.getElementById('infoPanel').style.display = 'none';
+            }, 300);
+            
+            // Restaurar vista original
+            animateCamera(modelViewer, initialOrbit, 800);
+            modelViewer.fieldOfView = initialFov;
+            modelViewer.cameraTarget = initialTarget;
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+        });
+ 
+ 
+// Modificar la función resetView para mostrar el logo solo cuando se regresa a la vista general
+function resetView() {
+    const modelViewer = document.querySelector('#tarjeta-model');
+    // Mantener el logotipo oculto durante la transición
+    document.querySelector('.bbva-logo-container').style.opacity = '0';
+    document.querySelector('.card-type').style.opacity = '0';
+    document.querySelector('.inst').style.opacity = '0';
+  
+    animateCamera(modelViewer, initialOrbit, 800);
+    modelViewer.fieldOfView = initialFov;
+    modelViewer.cameraTarget = initialTarget;
+    // Verificar si estamos en la vista general y mostrar el logo
+    setTimeout(() => {
+        if (modelViewer.cameraOrbit === initialOrbit && 
+            modelViewer.fieldOfView === initialFov && 
+            modelViewer.cameraTarget === initialTarget) {
+            document.querySelector('.bbva-logo-container').style.opacity = '1';
+          document.querySelector('.card-type').style.opacity = '1';
+          document.querySelector('.inst').style.opacity = '1';
+          
+        }
+    }, 800);
+}
+ 
+// Agregar función para verificar y actualizar la visibilidad del logo
+function updateLogoVisibility() {
+    const modelViewer = document.querySelector('#tarjeta-model');
+    const logo = document.querySelector('.bbva-logo-container');
+    const tipodetarjeta = document.querySelector('.card-type');
+    const informes= document.querySelector('.inst');
+  
+  
+  
+  
+    if (modelViewer.cameraOrbit === initialOrbit && 
+        modelViewer.fieldOfView === initialFov && 
+        modelViewer.cameraTarget === initialTarget) {
+        logo.style.opacity = '1';
+        tipodetarjeta.style.opacity = '1';
+        informes.style.opacity = '1';
+      
+    } else {
+        logo.style.opacity = '0';
+        tipodetarjeta.style.opacity = '0';
+        informes.style.opacity = '0';
+    }
+}
+      function mostrarInstrucciones() {
+    const panel = document.getElementById('infoPanel');
+    const message = document.getElementById('panelMessage');
+    
+    message.innerHTML = `
+        <strong style="color: #004481;">INSTRUCCIONES</strong>
+        <p style="margin-top: 10px;">
+            Presiona los botones circulares azules en la tarjeta 
+            para descubrir información sobre cada elemento.
+        </p>
+    `;
+    
+    panel.style.display = 'block';
+    panel.style.animation = 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    
+    // Opcional: Agrega esta línea si quieres un sonido al hacer clic
+    playSound('pick.mp3');
+}
+ 
+   
+// Agregar verificación periódica de la visibilidad del logo
+setInterval(updateLogoVisibility, 100);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuración inicial
+            const modelViewer = document.querySelector('#tarjeta-model');
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+        });
+    </script>
+</body>
+</html>

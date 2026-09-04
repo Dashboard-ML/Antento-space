@@ -1,0 +1,26 @@
+<head>
+    <style>
+        /* Aquí van todos los estilos CSS nuevos */
+        .model-container {
+            --hdri-intensity: 7.0;
+            --hdri-blur: 2px;
+        }
+        
+        .model-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://cdn.polyhaven.com/asset_img/primary/studio_small_03.png?height=760');
+            background-size: cover;
+            opacity: var(--hdri-intensity);
+            filter: blur(var(--hdri-blur));
+            transform: rotate(calc(var(--rotation) * 1deg));
+            transition: all 0.5s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>

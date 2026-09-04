@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Mariano</title>
+     <link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Pantalla de portada -->
+<div id="cover-screen">
+    <!-- Contenedor para partículas -->
+    <div id="pixel-particles-container" class="pixel-particles-container"></div>
+    
+    <!-- Efectos CRT -->
+    <div class="crt-overlay"></div>
+    <div class="crt-border"></div>
+    <h1 class="game-title">SUPER JUMPER</h1>
+    <p class="game-subtitle"></p>
+    <button class="start-button" id="start-game">INICIAR JUEGO</button>
+</div>
+
+<!-- Elementos de audio -->
+<audio id="background-music" loop>
+    <source src="assets/level1.mp3" type="audio/mpeg">
+</audio>
+
+
+<audio id="correct-sound">
+    <source src="assets/mario-bros-1-up.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="incorrect-sound">
+    <source src="assets/mario-bros-die.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="cube-break-sound">
+    <source src="assets/romper.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="princess-sound">
+    <source src="assets/mario-bros-mamma-mia.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="jump-sound">
+    <source src="assets/mario-bros-jump.mp3" type="audio/mpeg">
+</audio>
+
+
+
+
+    <div id="princess-sign">
+    <img src="assets/princess_sign.png" alt="¡Has salvado a la princesa!">
+</div>
+<div id="correct-sign">
+    <img src="assets/letrero.png" alt="¡Correcto!">
+</div>
+    <div id="stars-container">
+</div>
+    <div id="loading">Cargando escenario y personaje...</div>
+    <div id="controls" style="display: none;">
+        Controles: A - Izquierda | D - Derecha | ESPACIO - Saltar
+    </div>
+    <div id="question-container">
+        <div id="question-box">¿Cuál es la capital de Francia?</div>
+    </div>
+    <div id="tooltip-container"></div>
+    <div id="feedback"></div>
+    <div id="score">Puntuación: 0</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+let scene, camera, renderer, controls;
+let character, mixer, environment;
+const clock = new THREE.Clock();
+let starsCollected = 0;
+const totalStars = 5;
+const keys = {};
+const moveSpeed = 0.13;
+const jumpForce = 0.4;
+const gravity = 0.03;
+const characterState = {
+    isMoving: false,
+    isJumping: false,
+    isGrounded: true,
+    velocityY: 0,
+    lastDirection: 0
+};
+let audioContext;
+let backgroundMusic, correctSound, incorrectSound, cubeBreakSound, princessSound, jumpSound;
+let soundsLoaded = false;
+let musicVolume = 0.7;
+let effectsVolume = 0.8;
+let princess = null;
+let princessMixer = null;
+let princessFound = false;
+let animations = {};
+let currentAction = null;
+let idleAction, runAction, jumpAction;
+let sceneBounds = { minX: -30, maxX: 25, minZ: -4.5, maxZ: 37 };
+const cameraConfig = { offset: new THREE.Vector3(-20, 12, 0), smoothness: 0.05 };
+const cajas = [];
+const cubosFractura = [];
+const plantasCarnivoras = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let questionVisible = false;
+let currentQuestionZone = null;
+
+const questions = [
+    {
+        question: "¿Cuál es la capital de Francia?",
+        answers: ["París", "Londres", "Madrid"],
+        correctAnswer: 0,
+        cajaPositions: [
+            {x: 0, y: 6, z: 8},
+            {x: 0, y: 6, z: 14}, 
+            {x: 0, y: 6, z: 20}
+        ]
+    },
+    {
+        question: "¿Cuántos lados tiene un triángulo?",
+        answers: ["Cuatro", "Tres", "Cinco"],
+        correctAnswer: 1,
+        cajaPositions: [
+            {x: 0, y: 6, z: 70},
+            {x: 0, y: 6, z: 76},
+            {x: 0, y: 6, z: 86}
+        ]
+    },
+    {
+        question: "¿Qué planeta es conocido como el planeta rojo?",
+        answers: ["Venus", "Júpiter", "Marte"],
+        correctAnswer: 2,
+        cajaPositions: [
+            {x: 0, y: 6, z: 132},
+            {x: 0, y: 6, z: 142},
+            {x: 0, y: 6, z: 149}
+        ]
+    },
+    {
+        question: "¿Cuál es el océano más grande?",
+        answers: ["Atlántico", "Índico", "Pacífico"],
+        correctAnswer: 2,
+        cajaPositions: [
+            {x: 0, y: 6, z: 179},
+            {x: 0, y: 6, z: 185},
+            {x: 0, y: 6, z: 192}
+        ]
+    },
+    {
+        question: "¿Quién pintó la Mona Lisa?",
+        answers: ["Van Gogh", "Picasso", "Da Vinci"],
+        correctAnswer: 2,
+        cajaPositions: [
+            {x: 0, y: 6, z: 230},
+            {x: 0, y: 6, z: 240},
+            {x: 0, y: 6, z: 250}
+        ]
+    }
+];
+
+const cubosFracturaPositions = [
+            {x: 0, y: 6, z: 10},
+            {x: 0, y: 6, z: 16}, 
+            {x: 0, y: 6, z: 22},
+            {x: 0, y: 6, z: 24},
+
+            {x: 0, y: 6, z: 72},
+            {x: 0, y: 6, z: 74},
+            {x: 0, y: 6, z: 78},
+            {x: 0, y: 6, z: 80},
+            {x: 0, y: 6, z: 82},
+            {x: 0, y: 6, z: 84},
+
+            {x: 0, y: 6, z: 130},
+            {x: 0, y: 6, z: 138},
+            {x: 0, y: 6, z: 147},
+            {x: 0, y: 6, z: 151},
+
+            {x: 0, y: 6, z: 177},
+            {x: 0, y: 6, z: 181},
+            {x: 0, y: 6, z: 183},
+            {x: 0, y: 6, z: 190},
+            {x: 0, y: 6, z: 194},
+
+
+            {x: 0, y: 6, z: 228},
+            {x: 0, y: 6, z: 238},
+            {x: 0, y: 6, z: 242},
+            {x: 0, y: 6, z: 248}
+];
+
+function init() {
+
+    // Configurar la pantalla de portada
+function setupCoverScreen() {
+    const coverScreen = document.getElementById('cover-screen');
+    const startButton = document.getElementById('start-game');
+    
+    startButton.addEventListener('click', function() {
+        // Ocultar portada
+        coverScreen.classList.add('hidden');
+        
+        // Iniciar audio del juego
+        if (soundsLoaded && backgroundMusic) {
+            backgroundMusic.play().catch(error => {
+                console.warn("No se pudo reproducir música:", error);
+            });
+        }
+        
+        // Quitar la portada del DOM después de la animación
+        setTimeout(() => {
+            coverScreen.style.display = 'none';
+        }, 1000);
+    });
+}
+
+// Llamar esta función al inicio de init()
+setupCoverScreen();
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 50);
+    camera.position.set(0, 0, 0);
+    renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMappingExposure = 1;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    document.body.appendChild(renderer.domElement);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enabled = false;
+
+    createLights();
+    initAudio(); 
+    loadEnvironment();
+    setupKeyboardControls();
+    window.addEventListener('resize', onWindowResize);
+    showQuestion();
+    animate();
+    initializeStars(); 
+}
+
+function setupKeyboardControls() {
+    document.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+        keys[key] = true;
+        if (key === ' ' && characterState.isGrounded && !characterState.isJumping) {
+            event.preventDefault();
+            characterState.isJumping = true;
+            characterState.isGrounded = false;
+            characterState.velocityY = jumpForce;
+            setAnimation('Jump');
+            playJumpSound();
+        }
+        if (['a','d',' '].includes(key)) event.preventDefault();
+    });
+    document.addEventListener('keyup', (event) => {
+        keys[event.key.toLowerCase()] = false;
+        characterState.isMoving = keys['a'] || keys['d'];
+    });
+}
+
+function initializeStars() {
+    const starsContainer = document.getElementById('stars-container');
+    starsContainer.innerHTML = '';
+    
+    for (let i = 0; i < totalStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.innerHTML = '⭐';
+        starsContainer.appendChild(star);
+    }
+}
+
+// Funciones para reproducir sonidos
+function playSound(soundElement) {
+    if (!soundsLoaded || !soundElement) return;
+    
+    try {
+        soundElement.currentTime = 0;
+        soundElement.play().catch(error => {
+            console.warn("❌ Error reproduciendo sonido:", error);
+        });
+    } catch (error) {
+        console.warn("❌ Error con el elemento de audio:", error);
+    }
+}
+
+function playCorrectSound() {
+    playSound(correctSound);
+}
+
+function playIncorrectSound() {
+    playSound(incorrectSound);
+}
+
+function playCubeBreakSound() {
+    playSound(cubeBreakSound);
+}
+
+function playPrincessSound() {
+    playSound(princessSound);
+}
+
+function playJumpSound() {
+    playSound(jumpSound);
+}
+
+// Función para pausar/reanudar música
+function toggleBackgroundMusic() {
+    if (!backgroundMusic) return;
+    
+    if (backgroundMusic.paused) {
+        backgroundMusic.play();
+    } else {
+        backgroundMusic.pause();
+    }
+}
+
+// Función para ajustar volúmenes
+function setMusicVolume(volume) {
+    musicVolume = Math.max(0, Math.min(1, volume));
+    if (backgroundMusic) {
+        backgroundMusic.volume = musicVolume;
+    }
+}
+
+function setEffectsVolume(volume) {
+    effectsVolume = Math.max(0, Math.min(1, volume));
+    const effects = [correctSound, incorrectSound, cubeBreakSound, princessSound, jumpSound];
+    effects.forEach(sound => {
+        if (sound) {
+            sound.volume = effectsVolume;
+        }
+    });
+}
+
+function addStar() {
+    if (starsCollected < totalStars) {
+        const stars = document.querySelectorAll('.star');
+        stars[starsCollected].classList.add('active');
+
+        createStarCelebration(starsCollected);
+        
+        starsCollected++;
+    }
+}
+
+function createStarCelebration(starIndex) {
+    const starsContainer = document.getElementById('stars-container');
+    const stars = starsContainer.querySelectorAll('.star');
+    const targetStar = stars[starIndex];
+    const rect = targetStar.getBoundingClientRect();
+    
+    for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background: gold;
+            border-radius: 50%;
+            top: ${rect.top + rect.height / 2}px;
+            left: ${rect.left + rect.width / 2}px;
+            pointer-events: none;
+            z-index: 99;
+        `;
+        document.body.appendChild(particle);
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 40 + Math.random() * 20;
+        const duration = 1000 + Math.random() * 400;
+        
+        particle.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { 
+                transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`, 
+                opacity: 0 
+            }
+        ], {
+            duration: duration,
+            easing: 'ease-out'
+        }).onfinish = () => particle.remove();
+    }
+}
+function initAudio() {
+    try {
+        // Crear contexto de audio
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Obtener elementos de audio
+        backgroundMusic = document.getElementById('background-music');
+        correctSound = document.getElementById('correct-sound');
+        incorrectSound = document.getElementById('incorrect-sound');
+        cubeBreakSound = document.getElementById('cube-break-sound');
+        princessSound = document.getElementById('princess-sound');
+        jumpSound = document.getElementById('jump-sound');
+        
+        // Configurar volúmenes
+        backgroundMusic.volume = musicVolume;
+        correctSound.volume = effectsVolume;
+        incorrectSound.volume = effectsVolume;
+        cubeBreakSound.volume = effectsVolume;
+        princessSound.volume = effectsVolume;
+        jumpSound.volume = effectsVolume * 0.7;
+        
+        // Precargar sonidos
+        preloadSounds();
+        
+        console.log("🔊 Sistema de audio inicializado");
+        
+    } catch (error) {
+        console.warn("❌ Audio no soportado:", error);
+        soundsLoaded = false;
+    }
+}
+
+function preloadSounds() {
+    const sounds = [backgroundMusic, correctSound, incorrectSound, cubeBreakSound, princessSound, jumpSound];
+    let loadedCount = 0;
+    
+    sounds.forEach(sound => {
+        sound.addEventListener('canplaythrough', () => {
+            loadedCount++;
+            console.log(`🔊 Sonido cargado: ${sound.id}`);
+            
+            if (loadedCount === sounds.length) {
+                soundsLoaded = true;
+                console.log("✅ Todos los sonidos cargados correctamente");
+                // Iniciar música de fondo cuando todo esté listo
+                startBackgroundMusic();
+            }
+        });
+        
+        sound.addEventListener('error', (e) => {
+            console.warn(`❌ Error cargando sonido ${sound.id}:`, e);
+            loadedCount++;
+        });
+        
+        // Forzar carga
+        sound.load();
+    });
+}
+
+function startBackgroundMusic() {
+    if (soundsLoaded && backgroundMusic) {
+        backgroundMusic.play().catch(error => {
+            console.warn("❌ No se pudo reproducir música de fondo:", error);
+        });
+    }
+}
+
+// Función para mostrar el letrero de respuesta correcta
+function showCorrectSign() {
+    return new Promise((resolve) => {
+        const correctSign = document.getElementById('correct-sign');
+        
+        // Resetear
+        correctSign.classList.remove('show');
+        void correctSign.offsetWidth;
+        
+        console.log("⏰ Esperando 3 segundos para mostrar letrero...");
+        
+        // Esperar 3 segundos antes de mostrar
+        setTimeout(() => {
+            console.log("🎉 Mostrando letrero después de 3 segundos");
+            correctSign.classList.add('show');
+            createSignParticles();
+            setTimeout(resolve, 800); // Tiempo de animación de entrada
+        }, 3000);
+    });
+}
+
+
+// Función para ocultar el letrero
+function hideCorrectSign() {
+    const correctSign = document.getElementById('correct-sign');
+    correctSign.classList.remove('show');
+}
+
+// Función para crear partículas alrededor del letrero
+function createSignParticles() {
+    const correctSign = document.getElementById('correct-sign');
+    const rect = correctSign.getBoundingClientRect();
+    
+    // Crear contenedor de partículas si no existe
+    let particlesContainer = document.querySelector('.sign-particles');
+    if (!particlesContainer) {
+        particlesContainer = document.createElement('div');
+        particlesContainer.className = 'sign-particles';
+        correctSign.appendChild(particlesContainer);
+    }
+    
+    // Crear partículas
+    for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #FFEB3B, #FFC107);
+            border-radius: 50%;
+            top: ${rect.height / 2}px;
+            left: ${rect.width / 2}px;
+            pointer-events: none;
+            z-index: 1002;
+        `;
+        particlesContainer.appendChild(particle);
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 80 + Math.random() * 60;
+        const duration = 1200 + Math.random() * 600;
+        
+        particle.animate([
+            { 
+                transform: 'translate(0, 0) scale(1)', 
+                opacity: 1 
+            },
+            { 
+                transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`, 
+                opacity: 0 
+            }
+        ], {
+            duration: duration,
+            easing: 'ease-out'
+        }).onfinish = () => particle.remove();
+    }
+    setTimeout(() => {
+        if (particlesContainer && particlesContainer.children.length === 0) {
+            particlesContainer.remove();
+        }
+    }, 2000);
+}
+function handleCharacterMovement() {
+    if (!character) return;
+    let moved = false, direction = 0;
+
+    if (keys['a']) { character.position.z -= moveSpeed; direction = -1; moved = true; }
+    if (keys['d']) { character.position.z += moveSpeed; direction = 1; moved = true; }
+
+    if (!characterState.isGrounded) {
+        character.position.y += characterState.velocityY;
+        characterState.velocityY -= gravity;
+        const groundHeight = 0;
+        if (character.position.y <= groundHeight) {
+            character.position.y = groundHeight;
+            characterState.isGrounded = true;
+            characterState.isJumping = false;
+            characterState.velocityY = 0;
+            setAnimation(characterState.isMoving ? 'Run' : 'Idle');
+        }
+    }
+
+    if (moved) {
+        characterState.isMoving = true;
+        characterState.lastDirection = direction;
+        character.rotation.y = direction > 0 ? 0 : Math.PI;
+        if (characterState.isGrounded) setAnimation('Run');
+    } else if (characterState.isGrounded && !characterState.isJumping) {
+        setAnimation('Idle');
+        characterState.isMoving = false;
+    }
+
+    character.position.z = Math.max(sceneBounds.minZ, Math.min(sceneBounds.maxZ, character.position.z));
+    character.position.x = Math.max(sceneBounds.minX, Math.min(sceneBounds.maxX, character.position.x));
+}
+
+function updateCamera() {
+    if (!character) return;
+    const baseHeight = 0; 
+    const targetPosition = character.position.clone().add(cameraConfig.offset);
+    camera.position.lerp(targetPosition, cameraConfig.smoothness);
+    const desiredY = character.position.y * 0.3 + 1;
+    camera.position.y += (desiredY - camera.position.y) * 0.1;
+    const lookAtY = character.position.y * 0.4 + 3.7;
+    camera.lookAt(character.position.x, lookAtY, character.position.z);
+}
+
+function setAnimation(animationName) {
+    if (!mixer || !animations[animationName]) return;
+    if (currentAction === animations[animationName]) return;
+    if (currentAction) currentAction.fadeOut(0.2);
+    const newAction = animations[animationName];
+    newAction.reset();
+    newAction.fadeIn(0.2);
+    newAction.play();
+    currentAction = newAction;
+}
+
+function setupAnimations(gltf) {
+    if (!gltf.animations || gltf.animations.length === 0) return;
+    mixer = new THREE.AnimationMixer(character);
+
+    gltf.animations.forEach(clip => {
+        const action = mixer.clipAction(clip);
+        const name = clip.name.toLowerCase();
+        if (name.includes('idle')) { animations['Idle'] = action; idleAction = action; }
+        else if (name.includes('run')) { animations['Run'] = action; runAction = action; }
+        else if (name.includes('jump')) { animations['Jump'] = action; jumpAction = action; }
+    });
+
+    if (animations['Idle']) setAnimation('Idle');
+    else { gltf.animations[0].play(); currentAction = mixer.clipAction(gltf.animations[0]); }
+}
+
+function loadEnvironment() {
+    const loader = new THREE.GLTFLoader();
+    loader.load('assets/escenario.glb', function(gltf){
+        environment = gltf.scene;
+        environment.position.set(0,0,0);
+        environment.scale.set(1,1,1);
+        environment.traverse(node => { if (node.isMesh){ node.castShadow = true; node.receiveShadow = true; }});
+        scene.add(environment);
+        loadCharacter();
+        loadExtraModels();
+    },
+    xhr => { document.getElementById('loading').textContent = `Cargando escenario... ${(xhr.loaded/xhr.total*100).toFixed(0)}%`; },
+    error => { console.error(error); loadCharacter(); loadExtraModels(); });
+}
+function loadExtraModels() {
+    generateAllCajas();
+    generateCubosFractura();
+    generatePlantasCarnivoras(); 
+    loadPrincess(); 
+}
+function generatePlantasCarnivoras() {
+    const loader = new THREE.GLTFLoader();
+    questions.forEach((question, questionIndex) => {
+        if (question.cajaPositions && question.cajaPositions.length > 0) {
+            let maxZInPhase = 0;
+            question.cajaPositions.forEach(pos => {
+                if (pos.z > maxZInPhase) maxZInPhase = pos.z;
+            });
+            const plantaPosition = {
+                x: 0, 
+                y: 0, 
+                z: maxZInPhase + 19
+            };
+            
+            loader.load('assets/plantacarnivora.glb', function(gltf){
+                const plantaObj = gltf.scene.clone();
+                plantaObj.position.set(plantaPosition.x, plantaPosition.y, plantaPosition.z);
+                plantaObj.scale.set(1, 1, 1);
+                 plantaObj.rotation.y = Math.PI / -4;
+                plantaObj.traverse(node => { 
+                    if(node.isMesh){ 
+                        node.castShadow = true; 
+                        node.receiveShadow = true; 
+                    } 
+                });
+                
+                const plantaMixer = new THREE.AnimationMixer(plantaObj);
+                const plantaAnimations = {};
+                gltf.animations.forEach((clip, clipIndex) => { 
+                    const clipName = clip.name.toLowerCase();
+                    if (clipName.startsWith('planta')) {
+                        const action = plantaMixer.clipAction(clip);
+                        plantaAnimations[clip.name || `anim_${clipIndex}`] = action;
+                        action.setLoop(THREE.LoopRepeat);
+                        action.play();
+                    }
+                });
+                   makePlantaMaterialsTransparent({ mesh: plantaObj });
+                scene.add(plantaObj);
+                plantasCarnivoras.push({ 
+                    mesh: plantaObj, 
+                    mixer: plantaMixer, 
+                    animations: plantaAnimations,
+                    questionIndex: questionIndex,
+                    position: plantaPosition
+                });
+                
+                console.log(`Planta carnívora para fase ${questionIndex + 1} cargada en posición:`, plantaPosition);
+            },
+            undefined,
+            error => { 
+                console.error('Error al cargar planta carnívora:', error);
+                createFallbackPlantaCarnivora(plantaPosition, questionIndex);
+            });
+        }
+    });
+}
+function loadCharacter() {
+    const loader = new THREE.GLTFLoader();
+    loader.load('assets/Mariano.glb', function(gltf){
+        character = gltf.scene;
+        character.position.set(0, 0, 0);
+        character.scale.set(1, 1, 1);
+        character.traverse(node => { 
+            if(node.isMesh){ 
+                node.castShadow = true; 
+                node.receiveShadow = true;
+                
+                if (node.material) {
+                    if (Array.isArray(node.material)) {
+                        node.material.forEach(mat => {
+                            if (!mat.isMeshStandardMaterial && !mat.isMeshPhysicalMaterial) {
+                                const newMat = new THREE.MeshStandardMaterial({
+                                    color: mat.color || 0xffffff,
+                                    map: mat.map,
+                                    roughness: 0.7,
+                                    metalness: 0.1
+                                });
+                                node.material = newMat;
+                            } else {
+                                mat.roughness = mat.roughness || 0.7;
+                                mat.metalness = mat.metalness || 0.1;
+                                mat.needsUpdate = true;
+                            }
+                        });
+                    } else {
+                        if (!node.material.isMeshStandardMaterial && !node.material.isMeshPhysicalMaterial) {
+                            const newMat = new THREE.MeshStandardMaterial({
+                                color: node.material.color || 0xffffff,
+                                map: node.material.map,
+                                roughness: 0.7,
+                                metalness: 0.1
+                            });
+                            node.material = newMat;
+                        } else {
+                            node.material.roughness = node.material.roughness || 0.7;
+                            node.material.metalness = node.material.metalness || 0.1;
+                            node.material.needsUpdate = true;
+                        }
+                    }
+                }
+            } 
+        });
+        
+        scene.add(character);
+        setupAnimations(gltf);
+        updateCamera();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('controls').style.display = 'block';
+        
+        console.log("✅ Personaje cargado con materiales optimizados para iluminación");
+    }, xhr => { 
+        document.getElementById('loading').textContent = `Cargando personaje... ${(xhr.loaded/xhr.total*100).toFixed(0)}%`; 
+    }, error => { 
+        console.error(error); 
+        createFallbackCharacter(); 
+        document.getElementById('loading').style.display = 'none'; 
+        document.getElementById('controls').style.display = 'block'; 
+    });
+}
+
+function generateCubosFractura() {
+    const loader = new THREE.GLTFLoader();
+    
+    cubosFracturaPositions.forEach((pos, index) => {
+        loader.load('assets/cubofractura.glb', function(gltf){
+            const cuboObj = gltf.scene.clone();
+            cuboObj.position.set(pos.x, pos.y, pos.z);
+            cuboObj.scale.set(1,1,1);
+            cuboObj.traverse(node => { 
+                if(node.isMesh){ 
+                    node.castShadow = true; 
+                    node.receiveShadow = true; 
+                } 
+            });
+            
+            const cuboMixer = new THREE.AnimationMixer(cuboObj);
+            const cuboAnimations = {};
+            gltf.animations.forEach((clip, clipIndex) => { 
+                const action = cuboMixer.clipAction(clip);
+                cuboAnimations[clip.name || `anim_${clipIndex}`] = action;
+                action.setLoop(THREE.LoopOnce);
+                action.clampWhenFinished = true;
+                action.paused = true;
+                
+                // AJUSTAR VELOCIDAD PARA QUE DURE APROX 3 SEGUNDOS
+                if (clip.duration > 0) {
+                    const targetDuration = 3.0; // 3 segundos
+                    action.timeScale = clip.duration / targetDuration;
+                }
+            });
+            
+            scene.add(cuboObj);
+            cubosFractura.push({ 
+                mesh: cuboObj, 
+                mixer: cuboMixer, 
+                animations: cuboAnimations,
+                animationActivated: false,
+                index: index,
+                alreadyPlayed: false
+            });
+            
+            console.log(`Cubo fractura ${index+1} cargado en posición:`, pos);
+        },
+        undefined,
+        error => { 
+            console.error('Error al cargar cubo fractura:', error);
+            createFallbackCuboFractura(pos, index);
+        });
+    });
+}
+function checkCubosFracturaProximity() {
+    if(!character) return;
+    
+    cubosFractura.forEach((cuboItem) => {
+        // NO activar si ya se reprodujo
+        if (cuboItem.alreadyPlayed) return;
+        
+        const dx = character.position.x - cuboItem.mesh.position.x;
+        const dz = character.position.z - cuboItem.mesh.position.z;
+        const distanciaXZ = Math.sqrt(dx*dx + dz*dz);
+        const dy = (character.position.y + 1) - cuboItem.mesh.position.y;
+        if(distanciaXZ < 1 && dy < 0 && characterState.velocityY > 0 && !cuboItem.animationActivated){
+            activateCuboFracturaAnimations(cuboItem);
+        } else if(distanciaXZ >= 1.5 || dy >= 0 || characterState.velocityY <= 0){
+            cuboItem.animationActivated = false;
+        }
+    });
+}
+function activateCuboFracturaAnimations(cuboItem) {
+    cuboItem.animationActivated = true;
+    cuboItem.alreadyPlayed = true;
+    
+    playCubeBreakSound(); // ← Agregar esta línea
+    
+    let animationsCompleted = 0;
+    const totalAnimations = Object.keys(cuboItem.animations).length;
+    
+    if (totalAnimations === 0) {
+        showFracturaEffect(cuboItem.mesh.position);
+        removeCuboFractura(cuboItem);
+        return;
+    }
+    
+    Object.values(cuboItem.animations).forEach(action => {
+        if (action) {
+            action.reset();
+            action.paused = false;
+            action.play();
+            
+            const onFinished = () => {
+                animationsCompleted++;
+                
+                if (animationsCompleted >= totalAnimations) {
+                    cuboItem.animationActivated = false;
+                    console.log(`Animaciones del cubo fractura ${cuboItem.index + 1} completadas - ELIMINANDO OBJETO`);
+                    cuboItem.mixer.removeEventListener('finished', onFinished);
+                    removeCuboFractura(cuboItem);
+                }
+            };
+            
+            cuboItem.mixer.addEventListener('finished', onFinished);
+        }
+    });
+    
+    console.log(`Animaciones del cubo fractura ${cuboItem.index + 1} activadas (duración: ~3 segundos)`);
+    showFracturaEffect(cuboItem.mesh.position);
+}
+
+function removeCuboFractura(cuboItem) {
+    if (cuboItem.mesh && scene) {
+        scene.remove(cuboItem.mesh);
+        if (cuboItem.mesh.geometry) {
+            cuboItem.mesh.geometry.dispose();
+        }
+        if (cuboItem.mesh.material) {
+            if (Array.isArray(cuboItem.mesh.material)) {
+                cuboItem.mesh.material.forEach(material => material.dispose());
+            } else {
+                cuboItem.mesh.material.dispose();
+            }
+        }
+        if (cuboItem.mixer) {
+            cuboItem.mixer.stopAllAction();
+            cuboItem.mixer.uncacheRoot(cuboItem.mesh);
+        }
+    }
+    const index = cubosFractura.indexOf(cuboItem);
+    if (index > -1) {
+        cubosFractura.splice(index, 1);
+    }
+    
+    console.log(`Cubo fractura ${cuboItem.index + 1} eliminado de la escena`);
+}
+function generateAllCajas() {
+    cajas.forEach(cajaItem => {
+        scene.remove(cajaItem.mesh);
+    });
+    cajas.length = 0;
+    
+    const loader = new THREE.GLTFLoader();
+    questions.forEach((question, questionIndex) => {
+        if (question.cajaPositions) {
+            question.cajaPositions.forEach((pos, answerIndex) => {
+                loader.load('assets/caja.glb', function(gltf){
+                    const cajaObj = gltf.scene.clone();
+                    cajaObj.position.set(pos.x, pos.y, pos.z);
+                    cajaObj.scale.set(1,1,1);
+                    cajaObj.traverse(node => { 
+                        if(node.isMesh){ 
+                            node.castShadow = true; 
+                            node.receiveShadow = true; 
+                        } 
+                    });
+                    
+                    const cajaMixerLocal = new THREE.AnimationMixer(cajaObj);
+                    const cajaAnimationsLocal = {};
+                    gltf.animations.forEach(clip => { 
+                        cajaAnimationsLocal[clip.name] = cajaMixerLocal.clipAction(clip); 
+                    });
+                    
+                    scene.add(cajaObj);
+                    cajas.push({ 
+                        mesh: cajaObj, 
+                        mixer: cajaMixerLocal, 
+                        animations: cajaAnimationsLocal, 
+                        reboteActivated: false,
+                        answerIndex: answerIndex,
+                        questionIndex: questionIndex,
+                        // 🔥 INICIALIZAR LA PROPIEDAD
+                        isActivated: false,
+                        isCorrect: (answerIndex === question.correctAnswer) 
+                    });
+                    
+                    console.log(`Caja para pregunta ${questionIndex+1}, respuesta ${answerIndex+1} en posición:`, pos);
+                },
+                undefined,
+                error => { 
+                    console.error('Error al cargar la caja:', error);
+                    createFallbackCaja(pos, answerIndex, questionIndex);
+                });
+            });
+        }
+    });
+}
+
+function updateCajaAppearance(cajaItem) {
+    if (!cajaItem.mesh) return;
+    
+    cajaItem.mesh.traverse((node) => {
+        if (node.isMesh && node.material) {
+            const materials = Array.isArray(node.material) ? node.material : [node.material];
+            
+            materials.forEach(mat => {
+                if (mat.isMeshStandardMaterial || mat.isMeshBasicMaterial) {
+                    if (cajaItem.isActivated && !cajaItem.isCorrect) {
+                        // Caja incorrecta activada - hacer más oscura
+                        mat.color.set(0x634705);
+                    }
+                    mat.needsUpdate = true;
+                }
+            });
+        }
+    });
+}
+function generateCajasForPhase(phaseIndex) {
+    cajas.forEach(cajaItem => {
+        scene.remove(cajaItem.mesh);
+    });
+    cajas.length = 0; 
+    const baseZ = 15 + (phaseIndex * 25);
+    
+    const positions = [
+        {x: -3, y: 6, z: baseZ},
+        {x: 0, y: 6, z: baseZ + 4},
+        {x: 3, y: 6, z: baseZ + 8}
+    ];
+    
+    const loader = new THREE.GLTFLoader();
+    
+    positions.forEach((pos, index) => {
+        loader.load('assets/caja.glb', function(gltf){
+            const cajaObj = gltf.scene.clone();
+            cajaObj.position.set(pos.x, pos.y, pos.z);
+            cajaObj.scale.set(1,1,1);
+            cajaObj.traverse(node => { 
+                if(node.isMesh){ 
+                    node.castShadow = true; 
+                    node.receiveShadow = true; 
+                } 
+            });
+            
+            const cajaMixerLocal = new THREE.AnimationMixer(cajaObj);
+            const cajaAnimationsLocal = {};
+            gltf.animations.forEach(clip => { 
+                cajaAnimationsLocal[clip.name] = cajaMixerLocal.clipAction(clip); 
+            });
+            
+            scene.add(cajaObj);
+            cajas.push({ 
+                mesh: cajaObj, 
+                mixer: cajaMixerLocal, 
+                animations: cajaAnimationsLocal, 
+                reboteActivated: false,
+                answerIndex: index,
+                phase: phaseIndex
+            });
+            
+            console.log(`Caja ${index+1} de fase ${phaseIndex+1} cargada en posición:`, pos);
+        },
+        undefined,
+        error => { 
+            console.error('Error al cargar la caja:', error);
+  
+        });
+    });
+}
+
+function loadPrincess() {
+    const loader = new THREE.GLTFLoader();
+    
+    // Calcular posición al final del escenario (más allá de la última planta)
+    let maxZ = 0;
+    
+    // Buscar la posición más lejana entre plantas, cubos y cajas
+    plantasCarnivoras.forEach(planta => {
+        if (planta.position && planta.position.z > maxZ) maxZ = planta.position.z;
+    });
+    
+    cubosFracturaPositions.forEach(pos => {
+        if (pos.z > maxZ) maxZ = pos.z;
+    });
+    
+    questions.forEach(question => {
+        if (question.cajaPositions) {
+            question.cajaPositions.forEach(pos => {
+                if (pos.z > maxZ) maxZ = pos.z;
+            });
+        }
+    });
+    
+    // 🔧 MODIFICAR AQUÍ: POSICIÓN DE LA PRINCESA
+    const princessPosition = { 
+        x: 1,      // ← Cambia este valor para posición X (izquierda/derecha)
+        y: 0.5,    // ← Cambia este valor para posición Y (altura)
+        z: maxZ + 32  // ← Cambia este valor para posición Z (distancia final)
+    };
+    
+    loader.load('assets/princesa.glb', function(gltf){
+        princess = gltf.scene;
+        
+        // 🔧 MODIFICAR AQUÍ: POSICIÓN
+        princess.position.set(princessPosition.x, princessPosition.y, princessPosition.z);
+        
+        // 🔧 MODIFICAR AQUÍ: ESCALA
+        princess.scale.set(3, 3, 3); // ← Cambia estos valores para el tamaño
+        
+        // 🔧 MODIFICAR AQUÍ: ROTACIÓN
+        //princess.rotation.y = Math.PI; // ← Cambia este valor para rotación (en radianes)
+        princess.rotation.y = Math.PI /-2;   // 90 grados
+        // princess.rotation.y = 0;            // 0 grados (mirando hacia +Z)
+        // princess.rotation.y = Math.PI;      // 180 grados (mirando hacia -Z)
+     princess.traverse(node => { 
+            if(node.isMesh){ 
+                node.castShadow = true; 
+                node.receiveShadow = true; 
+                
+                if (node.material) {
+                    if (Array.isArray(node.material)) {
+                        node.material.forEach(mat => {
+                            if (!mat.isMeshStandardMaterial && !mat.isMeshPhysicalMaterial) {
+                                const newMat = new THREE.MeshStandardMaterial({
+                                    color: mat.color || 0xffffff,
+                                    map: mat.map,
+                                    roughness: 0.7,
+                                    metalness: 0.1
+                                });
+                                node.material = newMat;
+                            }
+                        });
+                    } else if (!node.material.isMeshStandardMaterial && !node.material.isMeshPhysicalMaterial) {
+                        const newMat = new THREE.MeshStandardMaterial({
+                            color: node.material.color || 0xffffff,
+                            map: node.material.map,
+                            roughness: 0.7,
+                            metalness: 0.1
+                        });
+                        node.material = newMat;
+                    }
+                }
+            } 
+        });
+        princessMixer = new THREE.AnimationMixer(princess);
+        const princessAnimations = {};
+        
+        if (gltf.animations && gltf.animations.length > 0) {
+            gltf.animations.forEach((clip, index) => {
+                const action = princessMixer.clipAction(clip);
+                const clipName = clip.name.toLowerCase();
+                
+                if (clipName.includes('dance')) {
+                    princessAnimations['dance'] = action;
+                    console.log("💃 Animación de dance encontrada");
+                } else if (clipName.includes('idle') || clipName.includes('wait') || clipName.includes('stand')) {
+                    princessAnimations['idle'] = action;
+                    console.log("🔄 Animación idle encontrada");
+                } else {
+                    // Guardar cualquier otra animación por si acaso
+                    princessAnimations[`anim_${index}`] = action;
+                }
+            });
+            
+            // 🔧 INICIAR CON ANIMACIÓN IDLE
+            if (princessAnimations['idle']) {
+                princessAnimations['idle'].setLoop(THREE.LoopRepeat);
+                princessAnimations['idle'].play();
+                princess.currentAnimation = 'idle';
+                console.log("✅ Animación idle activada para la princesa");
+            } else if (Object.keys(princessAnimations).length > 0) {
+                // Usar la primera animación disponible si no hay idle
+                const firstAnim = Object.values(princessAnimations)[0];
+                firstAnim.setLoop(THREE.LoopRepeat);
+                firstAnim.play();
+                princess.currentAnimation = 'first';
+                console.log("⚠️ Usando primera animación disponible para la princesa");
+            }
+            
+            // Guardar las animaciones en el objeto princesa
+            princess.animations = princessAnimations;
+        }
+        
+        scene.add(princess);
+        console.log(`👸 Princesa cargada en posición:`, princessPosition);
+        
+    }, undefined, error => {
+        console.error('❌ Error al cargar la princesa:', error);
+        createFallbackPrincess(princessPosition);
+    });
+}
+function checkPrincessProximity() {
+    if (!character || !princess || princessFound) return;
+    
+    const dx = character.position.x - princess.position.x;
+    const dz = character.position.z - princess.position.z;
+    const distancia = Math.sqrt(dx * dx + dz * dz);
+    
+    if (distancia < 3) {
+        princessFound = true;
+        activatePrincessDance();
+        showPrincessFound();
+    }
+}
+function activatePrincessDance() {
+    if (!princess || !princess.animations || !princessMixer) return;
+    
+    console.log("🎵 Activando animación de dance para la princesa");
+    
+    // Detener animación actual
+    if (princess.currentAnimation && princess.animations[princess.currentAnimation]) {
+        princess.animations[princess.currentAnimation].fadeOut(0.5);
+    }
+    
+    // Buscar animación de dance
+    if (princess.animations['dance']) {
+        const danceAction = princess.animations['dance'];
+        
+        // Configurar la animación de dance
+        danceAction.reset();
+        danceAction.setLoop(THREE.LoopRepeat);
+        danceAction.fadeIn(0.5);
+        danceAction.play();
+        
+        princess.currentAnimation = 'dance';
+        console.log("💃 Animación de dance activada");
+        
+        // 🔧 OPCIONAL: Hacer que dance por un tiempo específico
+        // setTimeout(() => {
+        //     // Volver a idle después de 10 segundos
+        //     if (princess.animations['idle']) {
+        //         danceAction.fadeOut(0.5);
+        //         princess.animations['idle'].reset().fadeIn(0.5).play();
+        //         princess.currentAnimation = 'idle';
+        //         console.log("🔄 Princesa volvió a animación idle");
+        //     }
+        // }, 10000);
+        
+    } else {
+        console.log("❌ No se encontró animación de dance");
+        
+        // Intentar encontrar cualquier animación que no sea la actual
+        const availableAnims = Object.keys(princess.animations).filter(anim => anim !== princess.currentAnimation);
+        if (availableAnims.length > 0) {
+            const alternativeAnim = princess.animations[availableAnims[0]];
+            alternativeAnim.reset().fadeIn(0.5).play();
+            princess.currentAnimation = availableAnims[0];
+            console.log(`🎭 Usando animación alternativa: ${availableAnims[0]}`);
+        }
+    }
+    
+    // 🔧 Efectos especiales adicionales para el dance
+    createDanceEffects();
+}
+function createDanceEffects() {
+    if (!princess) return;
+    
+    // Crear partículas musicales
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            createMusicNoteParticle(princess.position);
+        }, i * 200);
+    }
+    
+    // Luz especial para el dance
+    const danceLight = new THREE.PointLight(0xFF69B4, 2, 10);
+    danceLight.position.copy(princess.position);
+    danceLight.position.y += 3;
+    scene.add(danceLight);
+    
+    // Animación pulsante de la luz
+    let lightIntensity = 2;
+    const lightInterval = setInterval(() => {
+        lightIntensity = lightIntensity === 2 ? 1 : 2;
+        danceLight.intensity = lightIntensity;
+    }, 500);
+    
+    // Remover efectos después de 5 segundos
+    setTimeout(() => {
+        clearInterval(lightInterval);
+        scene.remove(danceLight);
+    }, 5000);
+}
+
+function createMusicNoteParticle(position) {
+    const noteTypes = ['🎵', '🎶', '🎼', '♪', '♫'];
+    const note = noteTypes[Math.floor(Math.random() * noteTypes.length)];
+    
+    const particle = document.createElement('div');
+    particle.innerHTML = note;
+    particle.style.cssText = `
+        position: fixed;
+        font-size: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1003;
+        opacity: 0;
+    `;
+    document.body.appendChild(particle);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 100 + Math.random() * 50;
+    
+    particle.animate([
+        { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 0 },
+        { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1 },
+        { 
+            transform: `translate(${-50 + Math.cos(angle) * distance}px, ${-50 + Math.sin(angle) * distance}px) scale(0.5)`, 
+            opacity: 0 
+        }
+    ], {
+        duration: 2000,
+        easing: 'ease-out'
+    }).onfinish = () => particle.remove();
+}
+function showPrincessFound() {
+    const princessSign = document.getElementById('princess-sign');
+    
+    // Mostrar letrero
+    princessSign.classList.add('show');
+    createPrincessParticles();
+    
+    // Efectos especiales
+    createPrincessCelebration();
+    
+    // Reproducir sonido de princesa con verificación adicional
+    console.log("👸 Intentando reproducir sonido de princesa...");
+    
+    if (princessSound) {
+        // Verificar si el sonido está listo
+        if (princessSound.readyState >= 2) { // 2 = HAVE_CURRENT_DATA, 3 = HAVE_FUTURE_DATA, 4 = HAVE_ENOUGH_DATA
+            playPrincessSound();
+        } else {
+            console.warn("❌ Sonido de princesa no está listo, estado:", princessSound.readyState);
+            
+            // Intentar cargar de nuevo
+            princessSound.load();
+            princessSound.addEventListener('canplaythrough', () => {
+                console.log("✅ Sonido de princesa listo, reproduciendo...");
+                playPrincessSound();
+            }, { once: true });
+        }
+    } else {
+        console.error("❌ Elemento princessSound no encontrado");
+    }
+    
+    // Actualizar puntuación
+    score += 50; // Bonus por encontrar a la princesa
+    updateScore();
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+        princessSign.classList.remove('show');
+    }, 5000);
+    
+    console.log("🎉 ¡Princesa encontrada! +50 puntos");
+}
+function createPrincessCelebration() {
+    if (!princess) return;
+    
+    // Crear explosión de corazones alrededor de la princesa
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            createHeartParticle(princess.position);
+        }, i * 100);
+    }
+    const spotlight = new THREE.SpotLight(0xFF69B4, 2);
+    spotlight.position.set(princess.position.x, 10, princess.position.z);
+    spotlight.target.position.copy(princess.position);
+    scene.add(spotlight);
+    scene.add(spotlight.target);
+    setTimeout(() => {
+        scene.remove(spotlight);
+        scene.remove(spotlight.target);
+    }, 3000);
+}
+
+function createHeartParticle(position) {
+    const heartShape = new THREE.Shape();
+    heartShape.moveTo(0, 0);
+    heartShape.bezierCurveTo(0.5, 0.5, 1, 1, 0, 1.5);
+    heartShape.bezierCurveTo(-1, 1, -0.5, 0.5, 0, 0);
+    
+    const geometry = new THREE.ShapeGeometry(heartShape);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: new THREE.Color().setHSL(Math.random(), 1, 0.7),
+        side: THREE.DoubleSide 
+    });
+    
+    const heart = new THREE.Mesh(geometry, material);
+    heart.position.copy(position);
+    heart.position.y += 2;
+    heart.scale.set(0.1, 0.1, 0.1);
+    scene.add(heart);
+    
+    // Animación
+    const startTime = Date.now();
+    const duration = 2000;
+    
+    function animateHeart() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress < 1) {
+            heart.position.y += 0.03;
+            heart.rotation.z += 0.05;
+            heart.scale.x = heart.scale.y = heart.scale.z = 0.1 + progress * 0.2;
+            material.opacity = 1 - progress;
+            
+            requestAnimationFrame(animateHeart);
+        } else {
+            scene.remove(heart);
+            geometry.dispose();
+            material.dispose();
+        }
+    }
+    
+    animateHeart();
+}
+function checkCajasProximity() {
+    if(!character) return;
+    
+    cajas.forEach((cajaItem, index) => {
+        showTooltip(cajaItem.mesh.position, cajaItem.answerIndex, cajaItem.questionIndex);
+        
+        const dx = character.position.x - cajaItem.mesh.position.x;
+        const dz = character.position.z - cajaItem.mesh.position.z;
+        const distanciaXZ = Math.sqrt(dx*dx + dz*dz);
+        const dy = (character.position.y+1) - cajaItem.mesh.position.y;
+        const isCloseEnough = distanciaXZ < 1;
+        const isAboveCaja = dy < 0;
+        const isJumpingUp = characterState.velocityY > 0;
+        
+        // 🔥 AGREGAR VERIFICACIÓN DE ACTIVACIÓN
+        const canActivate = !cajaItem.reboteActivated && !cajaItem.isActivated;
+        
+        if(isCloseEnough && isAboveCaja && isJumpingUp && canActivate){
+            activateCajaAnimation(cajaItem);
+        } else if(distanciaXZ >= 1.5 || dy >= 0 || characterState.velocityY <= 0){
+            cajaItem.reboteActivated = false;
+        }
+    });
+}
+function createStarEffect(position) {
+    const loader = new THREE.GLTFLoader();
+    const modelPath = 'assets/estrella.glb';
+
+    loader.load(
+        modelPath,
+        function (gltf) {
+            console.log('✅ Estrella.glb cargada correctamente');
+
+            const star = gltf.scene;
+            star.position.copy(position);
+            star.position.y += 1;
+            star.scale.set(0.6, 0.6, 0.6);
+
+            // Material brillante y metálico
+            star.traverse(node => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                    node.visible = true;
+                    node.material = new THREE.MeshStandardMaterial({
+                        color: 0xFFD700,
+                        emissive: 0xFFF166,
+                        emissiveIntensity: 0.3,
+                        roughness: 0.3,
+                        metalness: 0.4
+                    });
+                }
+            });
+
+            scene.add(star);
+            createStarParticles(position);
+            createStarFlash(position);
+
+            const startTime = Date.now();
+            const duration = 6000; // duración 
+            const startY = star.position.y;
+            const riseHeight = 2.5; 
+
+            function animateStar() {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+
+                if (progress < 1) {
+                    const t = elapsed * 0.002;
+
+                    // Movimiento ascendente suave (sin bajar)
+                    if (progress < 0.3) {
+                        const easeOut = 1 - Math.pow(1 - progress / 0.3, 3);
+                        star.position.y = startY + riseHeight * easeOut;
+                    }
+
+                    // Rotación suave solo en eje Y
+                    star.rotation.y += 0.05;
+
+                    // Pulsación leve tipo “latido”
+                    const pulse = 1 + Math.sin(t * 3) * 0.1;
+                    star.scale.set(0.6 * pulse, 0.6 * pulse, 0.6 * pulse);
+
+                    // Desvanecimiento progresivo al final
+                    if (progress > 0.8) {
+                        star.traverse(node => {
+                            if (node.isMesh && node.material) {
+                                node.material.transparent = true;
+                                node.material.opacity = 1 - ((progress - 0.8) / 0.2);
+                            }
+                        });
+                    }
+
+                    requestAnimationFrame(animateStar);
+                } else {
+                    scene.remove(star);
+                    star.traverse(node => {
+                        if (node.isMesh) {
+                            node.geometry.dispose();
+                            node.material.dispose();
+                        }
+                    });
+                }
+            }
+
+            animateStar();
+        },
+        xhr => {
+            console.log(`📦 Cargando estrella: ${(xhr.loaded / xhr.total * 100).toFixed(1)}%`);
+        },
+        error => {
+            console.error('❌ Error al cargar estrella.glb', error);
+            createFallbackStar(position);
+        }
+    );
+}
+
+function createStarFlash(position) {
+    const flashGeometry = new THREE.SphereGeometry(0.2, 16, 8);
+    const flashMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFFFFCC,
+        transparent: true,
+        opacity: 0.8
+    });
+    const flash = new THREE.Mesh(flashGeometry, flashMaterial);
+    flash.position.copy(position);
+    flash.position.y += 1.2;
+    scene.add(flash);
+
+    const startTime = Date.now();
+    const duration = 600;
+
+    function animateFlash() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const scale = 1 + progress * 3;
+            flash.scale.set(scale, scale, scale);
+            flashMaterial.opacity = 0.8 * (1 - progress);
+            requestAnimationFrame(animateFlash);
+        } else {
+            scene.remove(flash);
+            flashGeometry.dispose();
+            flashMaterial.dispose();
+        }
+    }
+
+    animateFlash();
+}
+
+
+function createStarParticles(position) {
+    const particleCount = 25;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    const goldColors = [
+        new THREE.Color(0xFFD700),
+        new THREE.Color(0xFFE55C),
+        new THREE.Color(0xFFA500),
+        new THREE.Color(0xFFEC8B),
+        new THREE.Color(0xFFFF00),
+        new THREE.Color(0xFFF380)
+    ];
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        const angle = (i / particleCount) * Math.PI * 2;
+        const radius = 1.5 + Math.random() * 1.0;
+        
+        positions[i3] = position.x + Math.cos(angle) * radius;
+        positions[i3 + 1] = position.y + 2 + (Math.random() - 0.5) * 1.5;
+        positions[i3 + 2] = position.z + Math.sin(angle) * radius;
+
+        const color = goldColors[Math.floor(Math.random() * goldColors.length)];
+        colors[i3] = color.r;
+        colors[i3 + 1] = color.g;
+        colors[i3 + 2] = color.b;
+
+        sizes[i] = Math.random() * 0.8 + 0.6;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 0.6,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending
+    });
+
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
+
+    const particleData = [];
+    for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * Math.PI * 2;
+        particleData.push({
+            velocity: new THREE.Vector3(
+                Math.cos(angle) * 0.02,
+                Math.random() * 0.03 + 0.01,
+                Math.sin(angle) * 0.02
+            ),
+            life: 1.0,
+            decay: Math.random() * 0.01 + 0.005,
+            startSize: sizes[i],
+            angle: angle,
+            radius: 1.5 + Math.random() * 1.0,
+            rotationSpeed: (Math.random() - 0.5) * 0.02
+        });
+    }
+
+    const startTime = Date.now();
+    const duration = 5000;
+
+    function animateParticles() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const positions = particleSystem.geometry.attributes.position.array;
+            const sizes = particleSystem.geometry.attributes.size.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                const data = particleData[i];
+
+                data.angle += data.rotationSpeed;
+                const targetX = position.x + Math.cos(data.angle) * data.radius;
+                const targetZ = position.z + Math.sin(data.angle) * data.radius;
+                
+                positions[i3] += (targetX - positions[i3]) * 0.05;
+                positions[i3 + 2] += (targetZ - positions[i3 + 2]) * 0.05;
+
+                positions[i3 + 1] += Math.sin(elapsed * 0.002 + i) * 0.01;
+
+                const sizePulse = Math.sin(elapsed * 0.004 + i) * 0.2 + 0.8;
+                sizes[i] = data.startSize * sizePulse;
+
+                if (progress > 0.7) {
+                    data.life = 1 - ((progress - 0.7) / 0.3);
+                    sizes[i] = data.startSize * data.life;
+                }
+            }
+
+            if (progress > 0.7) {
+                particleMaterial.opacity = 1 - ((progress - 0.7) / 0.3);
+            }
+
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.size.needsUpdate = true;
+
+            requestAnimationFrame(animateParticles);
+        } else {
+            scene.remove(particleSystem);
+            particles.dispose();
+            particleMaterial.dispose();
+        }
+    }
+
+    animateParticles();
+}
+
+function activateCajaAnimation(cajaItem) {
+    // 🔥 VERIFICAR SI LA CAJA YA FUE ACTIVADA
+    if (cajaItem.isActivated) {
+        return; // Salir si ya fue activada
+    }
+    
+    if(cajaItem.animations['rebote1']){
+        cajaItem.animations['rebote1'].setLoop(THREE.LoopOnce);
+        cajaItem.animations['rebote1'].clampWhenFinished = true;
+        cajaItem.animations['rebote1'].reset().play();
+        cajaItem.reboteActivated = true;
+        
+        // 🔥 MARCAR COMO ACTIVADA INMEDIATAMENTE
+        cajaItem.isActivated = true;
+        updateCajaAppearance(cajaItem);
+        
+        // SOLO verificar respuesta si es la pregunta actual
+        if (cajaItem.questionIndex === currentQuestionIndex) {
+            checkAnswer(cajaItem.answerIndex);
+        }
+    }
+}
+function showQuestion() {
+    if (currentQuestionIndex >= questions.length) {
+        document.getElementById('question-box').textContent = "¡Juego completado!";
+        document.getElementById('question-box').classList.add('completed');
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => tooltip.style.display = 'none');
+        return;
+    }
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    const questionBox = document.getElementById('question-box');
+    
+    if (questionVisible) {
+        // Mostrar pregunta con animación
+        questionBox.classList.remove('completed', 'new-question', 'hidden');
+        questionBox.textContent = `Fase ${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+        
+        setTimeout(() => {
+            questionBox.classList.add('new-question');
+        }, 100);
+    } else {
+        // Ocultar pregunta
+        questionBox.classList.add('hidden');
+    }
+    
+    updateScore();
+}
+
+// Nueva función para verificar si el personaje está en la zona de preguntas
+function checkQuestionZone() {
+    if (!character || currentQuestionIndex >= questions.length) return;
+    
+    const currentQuestion = questions[currentQuestionIndex];
+
+    if (currentQuestion.cajaPositions && currentQuestion.cajaPositions.length > 0) {
+        let minZ = Infinity;
+        let maxZ = -Infinity;
+        
+        currentQuestion.cajaPositions.forEach(pos => {
+            if (pos.z < minZ) minZ = pos.z;
+            if (pos.z > maxZ) maxZ = pos.z;
+        });
+        
+        // Definir la zona de la pregunta (un poco antes de las cajas)
+        const questionZoneStart = minZ - 8;
+        const questionZoneEnd = maxZ + 5;
+        
+        // Verificar si el personaje está en la zona
+        const inQuestionZone = character.position.z >= questionZoneStart && character.position.z <= questionZoneEnd;
+        
+        if (inQuestionZone && !questionVisible) {
+            // Entró a la zona de pregunta
+            questionVisible = true;
+            showQuestion();
+            console.log(`🔔 Mostrando pregunta ${currentQuestionIndex + 1} - Zona: ${questionZoneStart} a ${questionZoneEnd}`);
+        } else if (!inQuestionZone && questionVisible) {
+            // Salió de la zona de pregunta
+            questionVisible = false;
+            showQuestion();
+            console.log(`🔕 Ocultando pregunta ${currentQuestionIndex + 1}`);
+        }
+    }
+}
+function showTooltip(position, answerIndex, questionIndex) {
+    const tooltipId = `tooltip-${questionIndex}-${answerIndex}`;
+    
+    let tooltip = document.getElementById(tooltipId);
+    
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = tooltipId;
+        tooltip.className = 'tooltip';
+        document.getElementById('tooltip-container').appendChild(tooltip);
+    }
+    
+    const question = questions[questionIndex];
+    if (question && question.answers[answerIndex]) {
+        tooltip.textContent = question.answers[answerIndex];
+        tooltip.style.borderColor = "#4CAF50";
+        tooltip.style.background = "#2E7D32"; 
+        tooltip.style.color = "white";
+        
+        if (questionIndex === currentQuestionIndex) {
+            tooltip.style.opacity = '1';
+            tooltip.style.borderWidth = '3px';
+            tooltip.style.background = "#2E7D32";
+        } else {
+            tooltip.style.opacity = '0.6';
+            tooltip.style.borderWidth = '1px';
+            tooltip.style.background = "#666666"; 
+        }
+        
+    } else {
+        tooltip.textContent = "Respuesta no disponible";
+    }
+    
+    const vector = new THREE.Vector3(position.x, position.y + 2, position.z);
+    vector.project(camera);
+    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+    const isVisible = vector.z > -1 && vector.z < 1;
+    
+    if (isVisible) {
+        tooltip.style.left = `${x - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${y - 50}px`; 
+        tooltip.style.display = 'block';
+        tooltip.style.visibility = 'visible';
+    } else {
+        tooltip.style.display = 'none';
+    }
+}
+async function checkAnswer(selectedIndex) {
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = (selectedIndex === currentQuestion.correctAnswer);
+
+    if (isCorrect) {
+        score += 10;
+        addStar();
+        playCorrectSound();
+
+        // Ocultar pregunta
+        questionVisible = false;
+        showQuestion();
+
+        // Efecto estrella en la caja correcta
+        const correctCaja = cajas.find(caja =>
+            caja.questionIndex === currentQuestionIndex &&
+            caja.answerIndex === selectedIndex
+        );
+        if (correctCaja) {
+            createStarEffect(correctCaja.mesh.position);
+        }
+
+        // Mostrar letrero "Correcto"
+        await showCorrectSign();
+
+        // Esperar un poco y ocultar
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        hideCorrectSign();
+
+        // Eliminar planta de la fase
+        removePlantaCarnivoraByPhase(currentQuestionIndex);
+
+        currentQuestionIndex++;
+
+        // Limpiar tooltips
+        document.querySelectorAll('.tooltip').forEach(t => t.remove());
+
+        if (currentQuestionIndex < questions.length) {
+            advanceToNextPhase();
+        } else {
+            document.getElementById('question-box').textContent =
+                "¡Juego completado! Puntuación final: " + score;
+            document.getElementById('question-box').classList.remove('hidden');
+            expandFinalBounds();
+            createCompletionEffect();
+        }
+
+        updateScore();
+
+} else {
+    console.log("❌ Respuesta incorrecta"); 
+      playIncorrectSound(); 
+    const wrongCaja = cajas.find(caja =>
+        caja.questionIndex === currentQuestionIndex &&
+        caja.answerIndex === selectedIndex
+    );
+
+    if (wrongCaja) {
+        createErrorEffect(wrongCaja.mesh.position);
+    }
+}
+
+}
+
+// 💥 Efecto visual para respuesta incorrecta (versión corregida)
+function createErrorEffect(position) {
+    const particleCount = 40;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    // Colores tipo explosión roja intensa
+    const redColors = [
+        new THREE.Color(0xFF3800), // rojo puro
+        new THREE.Color(0x631806), // rojo anaranjado
+        new THREE.Color(0xFC9500), // naranja brillante
+        new THREE.Color(0x991D78)  // rojo oscuro
+    ];
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        positions[i3] = position.x;
+        positions[i3 + 1] = position.y + 1.5;
+        positions[i3 + 2] = position.z;
+
+        const color = redColors[Math.floor(Math.random() * redColors.length)];
+        colors[i3] = color.r;
+        colors[i3 + 1] = color.g;
+        colors[i3 + 2] = color.b;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    // Material con brillo fuerte tipo “energía”
+    const material = new THREE.PointsMaterial({
+        size: 0.6,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false, // evita que se oculten entre sí
+        map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/circle.png')
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // Asignar velocidades de expansión
+    const velocities = Array.from({ length: particleCount }, () => ({
+        x: (Math.random() - 0.5) * 0.5,
+        y: Math.random() * 0.4 + 0.1,
+        z: (Math.random() - 0.5) * 0.5
+    }));
+
+    const startTime = Date.now();
+    const duration = 1000;
+
+    function animateParticles() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const pos = geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                pos[i3] += velocities[i].x;
+                pos[i3 + 1] += velocities[i].y;
+                pos[i3 + 2] += velocities[i].z;
+                velocities[i].y -= 0.02; // caída leve
+            }
+
+            material.opacity = 1 - progress; // se desvanece
+            geometry.attributes.position.needsUpdate = true;
+            requestAnimationFrame(animateParticles);
+        } else {
+            scene.remove(particles);
+            geometry.dispose();
+            material.dispose();
+        }
+    }
+
+    animateParticles();
+}
+
+
+
+function createStarParticles(position) {
+    const particleCount = 35;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    // Colores dorados para las partículas
+    const goldColors = [
+        new THREE.Color(0xFFD700), // Dorado
+        new THREE.Color(0xFFE55C), // Dorado claro
+        new THREE.Color(0xFFA500), // Naranja dorado
+        new THREE.Color(0xFFEC8B)  // Dorado muy claro
+    ];
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        // Posiciones iniciales alrededor del centro
+        positions[i3] = position.x + (Math.random() - 0.5) * 2;
+        positions[i3 + 1] = position.y + (Math.random() - 0.5) * 2;
+        positions[i3 + 2] = position.z + (Math.random() - 0.5) * 2;
+
+        // Colores dorados aleatorios
+        const color = goldColors[Math.floor(Math.random() * goldColors.length)];
+        colors[i3] = color.r;
+        colors[i3 + 1] = color.g;
+        colors[i3 + 2] = color.b;
+
+        // Tamaños aleatorios
+        sizes[i] = Math.random() * 0.5 + 0.4;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 0.4,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1,
+        sizeAttenuation: true
+    });
+
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
+
+    // Datos de animación para cada partícula
+    const particleData = [];
+    for (let i = 0; i < particleCount; i++) {
+        particleData.push({
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.08, // Movimiento horizontal aleatorio
+                Math.random() * 0.05 + 0.02,   // Movimiento vertical hacia arriba
+                (Math.random() - 0.5) * 0.08   // Movimiento en Z aleatorio
+            ),
+            life: 1.0,
+            decay: Math.random() * 0.03 + 0.01,
+            startSize: sizes[i]
+        });
+    }
+
+    const startTime = Date.now();
+    const duration = 1800; 
+
+    function animateParticles() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const positions = particleSystem.geometry.attributes.position.array;
+            const sizes = particleSystem.geometry.attributes.size.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                const data = particleData[i];
+                positions[i3] += data.velocity.x;
+                positions[i3 + 1] += data.velocity.y;
+                positions[i3 + 2] += data.velocity.z;
+                data.velocity.multiplyScalar(0.98);
+                data.life -= data.decay;
+                sizes[i] = Math.max(0, data.startSize * data.life);
+                if (progress > 0.3) {
+                    data.velocity.y -= 0.005;
+                }
+            }
+            particleMaterial.opacity = 1 - progress;
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.size.needsUpdate = true;
+
+            requestAnimationFrame(animateParticles);
+        } else {
+            scene.remove(particleSystem);
+            particles.dispose();
+            particleMaterial.dispose();
+        }
+    }
+
+    animateParticles();
+}
+
+function advanceToNextPhase() {
+    questionVisible = false;
+    showQuestion();
+
+    const previousPhaseIndex = currentQuestionIndex - 1;
+    if (previousPhaseIndex >= 0) {
+        removePlantaCarnivoraByPhase(previousPhaseIndex);
+    }
+    const currentQuestion = questions[currentQuestionIndex];
+    if (currentQuestion && currentQuestion.cajaPositions) {
+        let maxZInPhase = 0;
+        currentQuestion.cajaPositions.forEach(pos => {
+            if (pos.z > maxZInPhase) maxZInPhase = pos.z;
+        });
+        sceneBounds.maxZ = maxZInPhase + 15;
+    }
+
+    console.log(`✅ Fase ${currentQuestionIndex + 1} desbloqueada (sin mostrar mensaje en pantalla).`);
+}
+
+
+function removePlantaCarnivoraByPhase(phaseIndex) {
+    if (phaseIndex < 0) return;
+
+    const plantaIndex = plantasCarnivoras.findIndex(planta => planta.questionIndex === phaseIndex);
+    
+    if (plantaIndex !== -1) {
+        const plantaItem = plantasCarnivoras[plantaIndex];
+        createDisintegrationEffect(plantaItem.mesh.position);
+        fadeOutAndRemovePlanta(plantaItem);
+        
+        console.log(`🌿 Planta carnívora de fase ${phaseIndex + 1} iniciando desintegración`);
+    }
+}
+
+function expandFinalBounds() {
+    console.log("🎉 ¡Juego completado! Expandiendo límites finales...");
+
+    let maxZOverall = 0;
+    plantasCarnivoras.forEach(planta => {
+        if (planta.position && planta.position.z > maxZOverall) {
+            maxZOverall = planta.position.z;
+        }
+    });
+    cubosFracturaPositions.forEach(pos => {
+        if (pos.z > maxZOverall) {
+            maxZOverall = pos.z;
+        }
+    });
+    const lastQuestion = questions[questions.length - 1];
+    if (lastQuestion && lastQuestion.cajaPositions) {
+        lastQuestion.cajaPositions.forEach(pos => {
+            if (pos.z > maxZOverall) {
+                maxZOverall = pos.z;
+            }
+        });
+    }
+    
+
+    const finalMargin =17; // 80 unidades más allá del último objeto
+    sceneBounds.maxZ = maxZOverall + finalMargin;
+    
+    console.log(`🚀 Límites expandidos: Máximo Z encontrado: ${maxZOverall}, Nuevo límite: ${sceneBounds.maxZ}`);
+    
+    // Feedback especial de juego completado
+    const feedback = document.getElementById('feedback');
+    feedback.textContent = "¡Felicidades! Has completado todas las preguntas. Puedes seguir explorando.";
+    feedback.style.borderColor = "#9C27B0";
+    feedback.style.display = 'block';
+    
+    setTimeout(() => {
+        feedback.style.display = 'none';
+    }, 5000);
+}
+function createCompletionEffect() {
+    // Crear partículas de celebración por todo el escenario
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const x = (Math.random() - 0.5) * 50;
+            const z = Math.random() * sceneBounds.maxZ;
+            const y = 10 + Math.random() * 20;
+            
+            createCompletionParticle(x, y, z);
+        }, i * 100);
+    }
+}
+
+function createCompletionParticle(x, y, z) {
+    const geometry = new THREE.SphereGeometry(0.3, 8, 6);
+    const material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color().setHSL(Math.random(), 1, 0.7),
+        transparent: true,
+        opacity: 0.8
+    });
+    
+    const particle = new THREE.Mesh(geometry, material);
+    particle.position.set(x, y, z);
+    scene.add(particle);
+    
+    // Animación de la partícula
+    const startY = y;
+    const startTime = Date.now();
+    const duration = 3000 + Math.random() * 2000;
+    
+    function animateParticle() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+        
+        if (progress < 1) {
+            particle.position.y = startY + Math.sin(elapsed * 0.002) * 2;
+            particle.rotation.y += 0.05;
+            particle.rotation.x += 0.02;
+            if (progress > 0.7) {
+                material.opacity = 0.8 * (1 - ((progress - 0.7) / 0.3));
+            }
+            
+            requestAnimationFrame(animateParticle);
+        } else {
+            scene.remove(particle);
+            geometry.dispose();
+            material.dispose();
+        }
+    }
+    
+    animateParticle();
+}
+
+function createDisintegrationEffect(position) {
+    const particleCount = 80;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    // Colores verdes para las partículas (como la planta)
+    const greenColors = [
+        new THREE.Color(0x2E7D32), // Verde oscuro
+        new THREE.Color(0x4CAF50), // Verde medio
+        new THREE.Color(0x8BC34A), // Verde claro
+        new THREE.Color(0xCDDC39)  // Verde lima
+    ];
+
+    for (let i = 0; i < particleCount; i++) {
+
+        const i3 = i * 3;
+        positions[i3] = position.x + (Math.random() - 0.5) * 3;
+        positions[i3 + 1] = position.y + Math.random() * 10;
+        positions[i3 + 2] = position.z + (Math.random() - 0.5) * 3;
+        const color = greenColors[Math.floor(Math.random() * greenColors.length)];
+        colors[i3] = color.r;
+        colors[i3 + 1] = color.g;
+        colors[i3 + 2] = color.b;
+        sizes[i] = Math.random() * 0.5 + 0.2;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1,
+        sizeAttenuation: true
+    });
+
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
+    const particleData = [];
+    for (let i = 0; i < particleCount; i++) {
+        particleData.push({
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.1,
+                Math.random() * 0.08 + 0.02,
+                (Math.random() - 0.5) * 0.1
+            ),
+            life: 1.0,
+            decay: Math.random() * 0.02 + 0.01
+        });
+    }
+    const startTime = Date.now();
+    const duration = 3000; 
+
+    function animateParticles() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const positions = particleSystem.geometry.attributes.position.array;
+            const sizes = particleSystem.geometry.attributes.size.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                const data = particleData[i];
+                positions[i3] += data.velocity.x;
+                positions[i3 + 1] += data.velocity.y;
+                positions[i3 + 2] += data.velocity.z;
+                data.life -= data.decay;
+                sizes[i] = Math.max(0, sizes[i] * data.life);
+                data.velocity.y -= 0.005;
+            }
+            particleMaterial.opacity = 1 - progress;
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.size.needsUpdate = true;
+
+            requestAnimationFrame(animateParticles);
+        } else {
+            scene.remove(particleSystem);
+            particleSystem.geometry.dispose();
+            particleSystem.material.dispose();
+        }
+    }
+
+    animateParticles();
+}
+
+function fadeOutAndRemovePlanta(plantaItem) {
+    const duration = 1500;
+    const startTime = Date.now();
+    const originalScale = plantaItem.mesh.scale.clone();
+
+    function fadeOut() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            const scale = 1 - (progress * 0.8); 
+            plantaItem.mesh.scale.set(
+                originalScale.x * scale,
+                originalScale.y * scale,
+                originalScale.z * scale
+            );
+            plantaItem.mesh.traverse((node) => {
+                if (node.isMesh && node.material) {
+                    if (Array.isArray(node.material)) {
+                        node.material.forEach(mat => {
+                            if (mat.transparent) {
+                                mat.opacity = 1 - progress;
+                            }
+                        });
+                    } else if (node.material.transparent) {
+                        node.material.opacity = 1 - progress;
+                    }
+                }
+            });
+
+            requestAnimationFrame(fadeOut);
+        } else {
+            if (plantaItem.mesh && scene) {
+                scene.remove(plantaItem.mesh);
+                if (plantaItem.mesh.geometry) {
+                    plantaItem.mesh.geometry.dispose();
+                }
+                if (plantaItem.mesh.material) {
+                    if (Array.isArray(plantaItem.mesh.material)) {
+                        plantaItem.mesh.material.forEach(material => material.dispose());
+                    } else {
+                        plantaItem.mesh.material.dispose();
+                    }
+                }
+                
+                if (plantaItem.mixer) {
+                    plantaItem.mixer.stopAllAction();
+                    plantaItem.mixer.uncacheRoot(plantaItem.mesh);
+                }
+            }
+            const index = plantasCarnivoras.indexOf(plantaItem);
+            if (index > -1) {
+                plantasCarnivoras.splice(index, 1);
+            }
+            
+            console.log(`🌿 Planta carnívora eliminada completamente`);
+        }
+    }
+
+    fadeOut();
+}
+function makePlantaMaterialsTransparent(plantaItem) {
+    plantaItem.mesh.traverse((node) => {
+        if (node.isMesh && node.material) {
+            if (Array.isArray(node.material)) {
+                node.material.forEach(mat => {
+                    mat.transparent = true;
+                    mat.opacity = 1;
+                });
+            } else {
+                node.material.transparent = true;
+                node.material.opacity = 1;
+            }
+        }
+    });
+}
+function updateScore() {
+    document.getElementById('score').textContent = `Puntuación: ${score}`;
+}
+function createLights() {
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 100;
+    dirLight.shadow.camera.left = -50;
+    dirLight.shadow.camera.right = 50;
+    dirLight.shadow.camera.top = 50;
+    dirLight.shadow.camera.bottom = -50;
+    scene.add(dirLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    fillLight.position.set(-10, 10, -10);
+    scene.add(fillLight);
+    const bounceLight = new THREE.PointLight(0xfff5cc, 0.3);
+    bounceLight.position.set(0, 5, 0);
+    scene.add(bounceLight);
+
+    console.log("💡 Iluminación configurada correctamente");
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    
+    handleCharacterMovement();
+    updateCamera();
+    
+    if(mixer) mixer.update(delta);
+    if(princessMixer) princessMixer.update(delta); 
+    
+    cajas.forEach(cajaItem => { 
+        if(cajaItem.mixer) cajaItem.mixer.update(delta); 
+    });
+    cubosFractura.forEach(cuboItem => { 
+        if(cuboItem.mixer) cuboItem.mixer.update(delta); 
+    });
+    plantasCarnivoras.forEach(plantaItem => { 
+        if(plantaItem.mixer) plantaItem.mixer.update(delta); 
+    });
+    
+    checkCajasProximity();
+    checkCubosFracturaProximity();
+    checkQuestionZone();
+    checkPrincessProximity();
+    
+    renderer.render(scene, camera);
+}
+
+// Sistema de partículas retro
+function initParticleSystem() {
+    const particlesContainer = document.getElementById('pixel-particles-container');
+    if (!particlesContainer) return;
+    
+    // Crear partículas iniciales
+    createParticleBatch(25);
+    
+    // Crear nuevas partículas continuamente
+    setInterval(() => {
+        if (particlesContainer.children.length < 30) {
+            createParticleBatch(5);
+        }
+    }, 2000);
+    
+    // Crear chispas aleatorias
+    setInterval(createSparkle, 500);
+}
+
+function createParticleBatch(count) {
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            createParticle();
+        }, i * 100);
+    }
+}
+
+function createParticle() {
+    const container = document.getElementById('pixel-particles-container');
+    if (!container) return;
+    
+    const particle = document.createElement('div');
+    particle.className = 'pixel-particle';
+    
+    // Tipos de partículas aleatorias
+    const particleTypes = ['square', 'circle', 'diamond', 'star'];
+    const type = particleTypes[Math.floor(Math.random() * particleTypes.length)];
+    particle.classList.add(type);
+    
+    // Posición inicial aleatoria
+    const startX = Math.random() * 100;
+    particle.style.left = `${startX}%`;
+    
+    // Configuración de animación
+    const delay = Math.random() * 5;
+    const duration = 6 + Math.random() * 4;
+    
+    // Elegir animación aleatoria
+    const animations = ['pixelFloat', 'pixelFloatLeft', 'pixelFloatRight'];
+    const animation = animations[Math.floor(Math.random() * animations.length)];
+    
+    particle.style.animation = `${animation} ${duration}s linear ${delay}s infinite`;
+    
+    // Variables CSS para controlar el movimiento
+    particle.style.setProperty('--end-x', `${(Math.random() - 0.5) * 200}px`);
+    
+    // Tamaño aleatorio
+    const size = 4 + Math.random() * 8;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    // Opacidad aleatoria
+    particle.style.opacity = Math.random() * 0.8 + 0.2;
+    
+    container.appendChild(particle);
+    
+    // Remover partícula después de que termine la animación
+    setTimeout(() => {
+        if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+        }
+    }, (duration + delay) * 1000);
+}
+
+function createSparkle() {
+    const container = document.getElementById('pixel-particles-container');
+    if (!container) return;
+    
+    const sparkle = document.createElement('div');
+    sparkle.className = 'pixel-sparkle';
+    
+    // Posición aleatoria en la pantalla
+    const posX = Math.random() * 100;
+    const posY = Math.random() * 100;
+    
+    sparkle.style.left = `${posX}%`;
+    sparkle.style.top = `${posY}%`;
+    
+    // Duración y delay aleatorios
+    const delay = Math.random() * 1;
+    const duration = 0.8 + Math.random() * 0.7;
+    
+    sparkle.style.animation = `sparkleFlash ${duration}s ease-in-out ${delay}s infinite`;
+    
+    container.appendChild(sparkle);
+    
+    // Remover después de la animación
+    setTimeout(() => {
+        if (sparkle.parentNode) {
+            sparkle.parentNode.removeChild(sparkle);
+        }
+    }, (duration + delay) * 1000);
+}
+
+// Función para crear explosión de partículas (para efectos especiales)
+function createParticleExplosion(x, y, count = 20) {
+    const container = document.getElementById('pixel-particles-container');
+    if (!container) return;
+    
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            createExplosionParticle(x, y);
+        }, i * 50);
+    }
+}
+
+function createExplosionParticle(x, y) {
+    const container = document.getElementById('pixel-particles-container');
+    if (!container) return;
+    
+    const particle = document.createElement('div');
+    particle.className = 'pixel-particle square';
+    
+    // Posición inicial en el punto de explosión
+    particle.style.left = `${x}%`;
+    particle.style.top = `${y}%`;
+    
+    // Animación de explosión
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 50 + Math.random() * 100;
+    const endX = Math.cos(angle) * distance;
+    const endY = Math.sin(angle) * distance;
+    
+    particle.style.animation = `none`;
+    particle.style.transition = `all 1.5s ease-out`;
+    
+    // Colores de explosión
+    const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#FF8E53', '#FFFFFF'];
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+    
+    container.appendChild(particle);
+    
+    // Forzar reflow
+    void particle.offsetWidth;
+    
+    // Aplicar transformación
+    particle.style.transform = `translate(${endX}px, ${endY}px) rotate(720deg)`;
+    particle.style.opacity = '0';
+    
+    // Remover después de la animación
+    setTimeout(() => {
+        if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+        }
+    }, 1500);
+}
+init();
+</script>
+</body>
+</html>

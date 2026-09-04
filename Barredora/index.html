@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspiradora JetBot+</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a2463 0%, #1565c0 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            padding: 2rem;
+        }
+        
+        .logo-container {
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            padding: 10px;
+        }
+        
+        .logo img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: 5rem;
+            text-shadow: 0 0 20px rgba(0, 119, 255, 0.7);
+            letter-spacing: 2px;
+            background: linear-gradient(to right, white, #e3f2fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            margin-bottom: 2rem;
+            font-weight: 800;
+        }
+        
+        h1::after {
+            content: "+";
+            color: #ff9800;
+            font-size: 5.5rem;
+            position: relative;
+            top: 0;
+            right: 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(to right, #1976d2, #0d47a1);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(13, 71, 161, 0.4);
+            position: relative;
+            overflow: hidden;
+            font-size: 1.2rem;
+            z-index: 20;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(13, 71, 161, 0.6);
+            background: linear-gradient(to right, #1e88e5, #1565c0);
+        }
+        
+        .cta-button:active {
+            transform: translateY(0);
+        }
+        
+        .cta-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .particles-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: float 15s linear infinite;
+        }
+        
+        .particle:nth-child(3n+1) {
+            background: rgba(100, 181, 246, 0.6);
+        }
+        
+        .particle:nth-child(3n+2) {
+            background: rgba(255, 152, 0, 0.5);
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3.5rem;
+            }
+            
+            h1::after {
+                font-size: 4rem;
+            }
+            
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1.1rem;
+            }
+            
+            .logo {
+                width: 140px;
+                height: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles"></div>
+    
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo">
+                <!-- Reemplaza la URL con la ruta real de tu logo PNG -->
+                <img src="Logotipo Atento-04.png" alt="Logo JetBot+">
+            </div>
+        </div>
+        
+        <h1>Aspiradora JetBot</h1>
+        <a href="instrucciones.html" class="cta-button">Comenzar</a>
+    </div>
+
+    <script>
+        // Crear partículas de fondo
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 60;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            const size = Math.random() * 12 + 3;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 5}s`;
+            
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

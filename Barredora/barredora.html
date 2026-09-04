@@ -1,0 +1,3141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Barredora JetBot+ - Modelo 3D</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <style>
+    :root{
+      --hotspot-size: 46px;
+      --hotspot-bg: #ff9800;
+      --hotspot-glow: rgba(255,152,0,.55);
+      --hotspot-text: #0b1026;
+      --hotspot-label-bg: rgba(255,255,255,.96);
+      --hotspot-label-text: #0a2463;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+    body{background:linear-gradient(135deg,#0a2463 0%,#1565c0 100%);color:white;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+    header{display:flex;justify-content:center;align-items:center;padding:1.2rem 2rem;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.1);position:relative}
+    .logo{width:64px;height:64px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;justify-content:center;align-items:center;padding:6px;position:absolute;left:2rem}
+    .logo img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+    .page-title{font-size:2rem;font-weight:700;color:white;text-shadow:0 0 12px rgba(0,0,0,.4)}
+    .model-container{flex-grow:1;display:flex;justify-content:center;align-items:center;padding:1rem;width:100%;position:relative}
+    model-viewer{
+      width:100%;height:80vh;background:transparent;border-radius:15px;overflow:hidden;
+      --poster-color:transparent;--progress-bar-color:#ff9800;
+      --min-hotspot-opacity: 0;
+    }
+
+    .hotspot{
+      width: var(--hotspot-size);
+      height: var(--hotspot-size);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      background: radial-gradient(120% 120% at 30% 30%, #ffd699 0%, var(--hotspot-bg) 52%, #e07f00 100%);
+      color: var(--hotspot-text);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:
+        0 6px 18px var(--hotspot-glow),
+        inset 0 2px 6px rgba(255,255,255,.35),
+        inset 0 -3px 8px rgba(0,0,0,.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      isolation: isolate;
+    }
+    .hotspot .icon{display:grid; place-items:center; filter: drop-shadow(0 1px 0 rgba(255,255,255,.6));}
+    .hotspot:hover{transform: scale(1.06);}
+    .hotspot:active{transform: scale(0.97); filter: brightness(.96);}
+    .hotspot:focus-visible{
+      outline: none;
+      box-shadow:
+        0 0 0 3px #fff,
+        0 0 0 6px var(--hotspot-bg),
+        0 10px 24px var(--hotspot-glow),
+        inset 0 2px 8px rgba(255,255,255,.5);
+    }
+    .hotspot::after{
+      content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      border: 2px solid var(--hotspot-bg);
+      transform: scale(1);
+      opacity: .35;
+      animation: hotspotPulse 1.8s ease-out infinite;
+    }
+    @keyframes hotspotPulse{
+      0%   { transform: scale(1);   opacity:.35; }
+      60%  { transform: scale(1.6); opacity:.08; }
+      100% { transform: scale(1.85);opacity:0;   }
+    }
+
+    .hotspot--robot{ --hotspot-bg:#00e5ff; --hotspot-glow:rgba(0,229,255,.45); --hotspot-size:50px; }
+    .hotspot--suction{ --hotspot-bg:#9b59b6; --hotspot-glow:rgba(155,89,182,.45); --hotspot-size:40px; display:none; }
+    .hotspot--terminal{ --hotspot-bg:#4caf50; --hotspot-glow:rgba(76,175,80,.45); --hotspot-size:40px; display:none; }
+    .hotspot--indicator{ --hotspot-bg:#ffc107; --hotspot-glow:rgba(255,193,7,.45); --hotspot-size:38px; display:none; }
+    .hotspot--cover{ --hotspot-bg:#e91e63; --hotspot-glow:rgba(233,30,99,.45); --hotspot-size:42px; display:none; }
+    .hotspot--bag{ --hotspot-bg:#795548; --hotspot-glow:rgba(121,85,72,.45); --hotspot-size:36px; display:none; }
+    .hotspot--transmitter{ --hotspot-bg:#00bfa5; --hotspot-glow:rgba(0,191,165,.45); --hotspot-size:40px; display:none; position: relative; }
+    .hotspot--cable{ --hotspot-bg:#3f51b5; --hotspot-glow:rgba(63,81,181,.45); --hotspot-size:40px; display:none; }
+    .hotspot--filter{ --hotspot-bg:#607d8b; --hotspot-glow:rgba(96,125,139,.45); --hotspot-size:40px; display:none; }
+    .hotspot--finefilter{ --hotspot-bg:#90a4ae; --hotspot-glow:rgba(144,164,174,.45); --hotspot-size:38px; display:none; }
+
+    /* 🔒 Scope de Barredora: ocultos fuera del panel de Barredora */
+    .hotspot--robot-scope{ display:none; }
+
+    /* Sensor de obstáculos (scope Barredora) */
+    .hotspot--obstacle{
+      --hotspot-bg:#26c6da;
+      --hotspot-glow:rgba(38,198,218,.45);
+      --hotspot-size:40px;
+    }
+
+    .info-panel{
+      position:fixed; background:rgba(255,255,255,.96); color:#0a2463; border-radius:14px; padding:1rem;
+      box-shadow:0 5px 25px rgba(0,0,0,.2); z-index:100; text-align:center;
+      opacity:0; visibility:hidden; transform:translateY(6px) translateZ(0);
+      transition:opacity .18s ease, transform .18s ease, visibility 0s .18s;
+      will-change:opacity, transform; backface-visibility:hidden;
+    }
+    .info-panel.visible{ opacity:1; visibility:visible; transform:translateY(0) translateZ(0); transition:opacity .18s ease, transform .18s ease; }
+    .info-title{margin:0;font-weight:800;color:#0d47a1}
+    .back-button{padding:.6rem 1.2rem;background:#0d47a1;color:white;border:none;border-radius:999px;font-weight:700;cursor:pointer;margin-top:.8rem}
+    .back-button:hover{background:#1565c0}
+
+    /* 🔌 Botón de encendido (scope Barredora) */
+    .hotspot--power{ --hotspot-bg:#ff7043; --hotspot-glow:rgba(255,112,67,.45); --hotspot-size:38px; }
+    /* Sensor LiDAR (scope Barredora) */
+    .hotspot--lidar{ --hotspot-bg:#29b6f6; --hotspot-glow:rgba(41,182,246,.45); --hotspot-size:40px; }
+    /* Contenedor de polvo (scope Barredora) */
+    .hotspot--dust{
+      --hotspot-bg:#ffb74d;
+      --hotspot-glow:rgba(255,183,77,.45);
+      --hotspot-size:40px;
+      display:none; /* ← solo visible dentro de Cubierta superior */
+    }
+    /* Botón de inicio (scope Barredora) */
+    .hotspot--start{ --hotspot-bg:#66bb6a; --hotspot-glow:rgba(102,187,106,.45); --hotspot-size:40px; }
+    /* Botón de carga/descarga (scope Barredora) */
+    .hotspot--charge{ --hotspot-bg:#00bfa5; --hotspot-glow:rgba(0,191,165,.45); --hotspot-size:40px; }
+    /* Indicador de estado (scope Barredora, cenital) */
+    .hotspot--status{ --hotspot-bg:#ffc107; --hotspot-glow:rgba(255,193,7,.45); --hotspot-size:40px; }
+    /* Cubierta superior (scope Barredora, cenital) */
+    .hotspot--topcover{ --hotspot-bg:#f06292; --hotspot-glow:rgba(240,98,146,.45); --hotspot-size:40px; }
+    /* Pin de carga (inferior) — scope Barredora */
+.hotspot--chargepin{
+  --hotspot-bg:#00acc1;            /* cian sobrio, misma línea */
+  --hotspot-glow:rgba(0,172,193,.45);
+  --hotspot-size:40px;
+}
+/* Cepillo (inferior) — scope Barredora */
+.hotspot--brush{
+  --hotspot-bg:#00897b;            /* verde-agua, misma línea gráfica */
+  --hotspot-glow:rgba(0,137,123,.45);
+  --hotspot-size:40px;
+}
+.hotspot--brushtop{
+  --hotspot-bg:#00695c;           /* misma línea gráfica */
+  --hotspot-glow:rgba(0,105,92,.45);
+  --hotspot-size:40px;
+}
+/* Sensor de desnivel (inferior) — scope Barredora */
+.hotspot--cliff{
+  --hotspot-bg:#00796b;            /* misma línea gráfica */
+  --hotspot-glow:rgba(0,121,107,.45);
+  --hotspot-size:40px;
+}
+/* Sensores de desnivel adicionales (inferior) */
+.hotspot--cliff2{
+  --hotspot-bg:#00796b;
+  --hotspot-glow:rgba(0,121,107,.45);
+  --hotspot-size:40px;
+}
+.hotspot--cliff3{
+  --hotspot-bg:#00796b;
+  --hotspot-glow:rgba(0,121,107,.45);
+  --hotspot-size:40px;
+}
+.hotspot--cliff4{
+  --hotspot-bg:#00796b;
+  --hotspot-glow:rgba(0,121,107,.45);
+  --hotspot-size:40px;
+}
+/* Rodillo (inferior) — scope Barredora */
+.hotspot--roller{
+  --hotspot-bg:#6d4c41;             /* marrón/rodillo */
+  --hotspot-glow:rgba(109,76,65,.45);
+  --hotspot-size:40px;
+}
+/* Cubierta de la batería (inferior) — scope Barredora */
+.hotspot--batterycover{
+  --hotspot-bg:#455a64;              /* gris azulado */
+  --hotspot-glow:rgba(69,90,100,.45);
+  --hotspot-size:40px;
+}
+/* Rueda motriz (inferior) — scope Barredora */
+.hotspot--drivewheel{
+  --hotspot-bg:#5c6bc0;              /* índigo suave */
+  --hotspot-glow:rgba(92,107,192,.45);
+  --hotspot-size:40px;
+}
+/* Cepillo lateral (inferior) — scope Barredora */
+.hotspot--sidebrush{
+  --hotspot-bg:#26a69a;              /* teal suave */
+  --hotspot-glow:rgba(38,166,154,.45);
+  --hotspot-size:40px;
+}
+/* Salida de vaciado de polvo (inferior) — scope Barredora */
+.hotspot--dustout{
+  --hotspot-bg:#8d6e63;              /* café/gris industrial */
+  --hotspot-glow:rgba(141,110,99,.45);
+  --hotspot-size:40px;
+}
+/* Bloqueo de la tapa del cepillo (inferior) — scope Barredora */
+.hotspot--brushlock{
+  --hotspot-bg:#5c6bc0;              /* violeta-azul discreto */
+  --hotspot-glow:rgba(92,107,192,.45);
+  --hotspot-size:40px;
+}
+/* 🆕 Media dentro de los paneles */
+.info-panel .media {
+  margin-top: .6rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f6fc;
+  border: 1px solid rgba(13,71,161,.12);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.info-panel .media img{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit: cover;
+}
+.info-panel .media .caption{
+  display:block;
+  font-size:.78rem;
+  color:#335;
+  opacity:.8;
+  padding:.35rem .6rem .55rem;
+}
+
+    /* Posiciones base de paneles (se ajustan dinámicamente cuando hace falta) */
+    #panel-transmitter{ bottom:220px; left:28%; transform:translateX(-50%); width:260px; }
+    #panel-estacion{ bottom:120px; left:80%; transform:translateX(-30%); width:240px; }
+    #panel-barredora{ bottom:100px; right:1500px; width:260px; }
+    #panel-suction{ bottom:400px; left:30%; transform:translateX(-50%); width:260px; }
+    #panel-terminal{ bottom:220px; left:20%; transform:translateX(-50%); width:260px; }
+    #panel-indicator{ bottom:180px; left:70%; transform:translateX(-50%); width:240px; }
+    #panel-cover{ bottom:400px; left:80%; transform:translateX(-50%); width:240px; }
+    #panel-bag{ bottom:300px; left:80%; transform:translateX(-50%); width:240px; }
+    #panel-cable{ bottom:360px; left:32%; transform:translateX(-50%); width:260px; }
+    #panel-filter{ bottom:340px; left:35%; transform:translateX(-50%); width:260px; }
+    #panel-finefilter{ bottom:320px; left:38%; transform:translateX(-50%); width:260px; }
+    #panel-obstacle{ bottom:360px; right:80%; transform:translateX(30%); width:260px; }
+    #panel-power{ bottom:340px; right:78%; transform:translateX(26%); width:260px; }
+    #panel-lidar{ bottom:340px; right:78%; transform:translateX(26%); width:260px; }
+    #panel-dust{ bottom:340px; right:78%; transform:translateX(26%); width:260px; }
+    #panel-start{ bottom:300px; right:72%; transform:translateX(18%); width:260px; }
+    #panel-charge{ bottom:200px; right:30%; transform:translateX(14%); width:260px; }
+    #panel-status{ bottom:350px; right:80%; transform:translateX(20%); width:260px; }
+    #panel-topcover{ bottom:300px; right:70%; transform:translateX(18%); width:260px; }
+    #panel-chargepin{ bottom:300px; right:80%; transform:translateX(18%); width:260px; }
+    #panel-brush{ 
+  bottom:300px; 
+  right:82%; 
+  transform:translateX(18%); 
+  width:260px; 
+  }
+  @media (min-width: 1024px){
+  #panel-bag { width: 440px; }
+}
+@media (min-width: 1280px){
+  #panel-bag { width: 520px; }
+}
+#panel-bag .media img { width: 100%; height: auto; }
+
+  #panel-brushtop{
+    bottom:300px;
+    right:84%;
+    transform:translateX(18%);
+    width:260px;
+  }
+
+  /* Panel del contenedor de polvo más ancho */
+#panel-dust { width: 200px; }          /* antes 260px */
+@media (min-width: 1280px){
+  #panel-dust { width: 400px; }
+}
+
+.hotspot[visible="false"]{
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+/* Posición base del panel */
+#panel-cliff{
+  bottom:300px;
+  right:86%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-cliff2, #panel-cliff3, #panel-cliff4{
+  bottom:300px;
+  right:86%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-roller{
+  bottom:300px;
+  right:80%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-batterycover{
+  bottom:300px;
+  right:86%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-drivewheel-left{
+  bottom:300px;
+  right:88%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-drivewheel-right{
+  bottom:300px;
+  right:84%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-sidebrush{
+  bottom:300px;
+  right:75%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-dustout{
+  bottom:300px;
+  right:88%;
+  transform:translateX(18%);
+  width:260px;
+}
+#panel-brushlock{
+  bottom:300px;
+  right:80%;
+  transform:translateX(18%);
+  width:260px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="Logotipo Atento-04.png" alt="Logo JetBot+"></div>
+    <div class="page-title">Barredora JetBot+</div>
+  </header>
+
+  <div class="model-container">
+    <model-viewer
+      id="mv"
+      src="barredora_animaciones12.glb"
+      alt="Barredora JetBot+ 3D"
+      camera-controls
+      ar
+      animation-crossfade-duration="0"
+      shadow-intensity="1"
+      environment-image="neutral"
+      exposure="1.0"
+      camera-orbit="0deg 75deg 7m"
+      field-of-view="45deg"
+      min-camera-orbit="auto auto 0.5m"
+      max-camera-orbit="auto auto 10m">
+      <div class="progress-bar" slot="progress-bar"><div class="update-bar"></div></div>
+
+      <!-- Estación -->
+      <button class="hotspot" id="hotspot-estacion" slot="hotspot-estacion"
+        data-position="0 1.3 -0.5" data-normal="0 1 0" aria-label="Estación de limpieza">
+        <span class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>
+        </span>
+      </button>
+
+      <!-- 🔒 Bloqueo de la tapa del cepillo (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--brushlock"
+id="hotspot-brushlock"
+slot="hotspot-brushlock"
+data-position="0 -0.02 1.4"  
+data-normal="0 -1 0"
+aria-label="Bloqueo de la tapa del cepillo (inferior)">
+<span class="icon">
+  <!-- Icono candado -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2a4 4 0 00-4 4v3H6a2 2 0 00-2 2v7a2 2 0 002 2h12a2 2 0 002-2v-7a2 2 0 00-2-2h-2V6a4 4 0 00-4-4zm-2 7V6a2 2 0 114 0v3h-4z"/>
+  </svg>
+</span>
+</button>
+
+
+      <!-- ⬇️ Salida de vaciado de polvo (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--dustout"
+id="hotspot-dustout"
+slot="hotspot-dustout"
+data-position="-0.1 -0.02 1.22" 
+data-normal="0 -1 0"
+aria-label="Salida de vaciado de polvo (inferior)">
+<span class="icon">
+  <!-- icono: compuerta/descarga -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M4 6h16v5H4V6zM6 13h12l-3 5H9l-3-5z"/>
+    <path d="M8 8h8v1H8z" />
+  </svg>
+</span>
+</button>
+
+      <!-- 🧹 Cepillo lateral (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--sidebrush"
+id="hotspot-sidebrush"
+slot="hotspot-sidebrush"
+data-position="-0.35 0 1.5"   
+data-normal="0 -1 0"
+aria-label="Cepillo lateral (inferior)">
+<span class="icon">
+  <!-- icono tipo cepillo de 3 aspas -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="12" r="2.2"/>
+    <path d="M12 2v6M19.09 4.91l-4.24 4.24M22 12h-6M19.09 19.09l-4.24-4.24M12 22v-6M4.91 19.09l4.24-4.24M2 12h6M4.91 4.91l4.24 4.24" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  </svg>
+</span>
+</button>
+
+      <!-- ⚙️ Rueda motriz IZQUIERDA (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--drivewheel"
+id="hotspot-drivewheel-left"
+slot="hotspot-drivewheel-left"
+data-position="-0.4 0 1.22"  
+data-normal="0 -1 0"
+aria-label="Rueda motriz izquierda (inferior)">
+<span class="icon">
+  <!-- icono rueda -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="12" r="8"/>
+    <circle cx="12" cy="12" r="3" fill="white"/>
+  </svg>
+</span>
+</button>
+
+<!-- ⚙️ Rueda motriz DERECHA (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--drivewheel"
+id="hotspot-drivewheel-right"
+slot="hotspot-drivewheel-right"
+data-position="0.4 0 1.22"    
+data-normal="0 -1 0"
+aria-label="Rueda motriz derecha (inferior)">
+<span class="icon">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="12" r="8"/>
+    <circle cx="12" cy="12" r="3" fill="white"/>
+  </svg>
+</span>
+</button>
+
+      <!-- 🔋 Cubierta de la batería (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--batterycover"
+id="hotspot-batterycover"
+slot="hotspot-batterycover"
+data-position="0 0 1.05"   
+data-normal="0 -1 0"
+aria-label="Cubierta de la batería (inferior)">
+<span class="icon">
+  <!-- Icono tapa/batería -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <rect x="3" y="8" width="16" height="8" rx="2" ry="2"/>
+    <rect x="19" y="10" width="2" height="4" rx="1" ry="1"/>
+    <rect x="7" y="11" width="6" height="2" rx="1" ry="1"/>
+  </svg>
+</span>
+</button>
+
+
+<!-- 🔄 Rodillo (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--roller"
+  id="hotspot-roller"
+  slot="hotspot-roller"
+  data-position="0 0.05 0.67"  
+  data-normal="0 -1 0"
+  aria-label="Rodillo (inferior)">
+  <span class="icon">
+    <!-- Icono alusivo a rodillo/cepillo cilíndrico -->
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="4" y="9" width="16" height="6" rx="2" ry="2"/>
+      <circle cx="7" cy="12" r="1.2"/>
+      <circle cx="12" cy="12" r="1.2"/>
+      <circle cx="17" cy="12" r="1.2"/>
+    </svg>
+  </span>
+</button>
+
+      <!-- 🛡️ Sensor de desnivel 2 -->
+<button class="hotspot hotspot--robot-scope hotspot--cliff2"
+id="hotspot-cliff2"
+slot="hotspot-cliff2"
+data-position="0.5 0 1.3"  
+data-normal="0 -1 0"
+aria-label="Sensor de desnivel 2">
+<span class="icon">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 3h6v2H5v14h14v-4h2v6H3V3z"/>
+    <path d="M13 5h6l-6 10h6l-8 4 2-6H9l4-8z"/>
+  </svg>
+</span>
+</button>
+
+<!-- 🛡️ Sensor de desnivel 3 -->
+<button class="hotspot hotspot--robot-scope hotspot--cliff3"
+id="hotspot-cliff3"
+slot="hotspot-cliff3"
+data-position="-0.075 0 1.62"  
+data-normal="0 -1 0"
+aria-label="Sensor de desnivel 3">
+<span class="icon">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 3h6v2H5v14h14v-4h2v6H3V3z"/>
+    <path d="M13 5h6l-6 10h6l-8 4 2-6H9l4-8z"/>
+  </svg>
+</span>
+</button>
+
+<!-- 🛡️ Sensor de desnivel 4 -->
+<button class="hotspot hotspot--robot-scope hotspot--cliff4"
+id="hotspot-cliff4"
+slot="hotspot-cliff4"
+data-position="0.075 0 1.62"  
+data-normal="0 -1 0"
+aria-label="Sensor de desnivel 4">
+<span class="icon">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 3h6v2H5v14h14v-4h2v6H3V3z"/>
+    <path d="M13 5h6l-6 10h6l-8 4 2-6H9l4-8z"/>
+  </svg>
+</span>
+</button>
+
+      <!-- 🛡️ Sensor de desnivel (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--cliff"
+id="hotspot-cliff"
+slot="hotspot-cliff"
+data-position="-0.5 0 1.3"
+data-normal="0 -1 0"
+aria-label="Sensor de desnivel (inferior)">
+<span class="icon">
+  <!-- Icono: borde/precipicio -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M3 3h6v2H5v14h14v-4h2v6H3V3z"/>
+    <path d="M13 5h6l-6 10h6l-8 4 2-6H9l4-8z"/>
+  </svg>
+</span>
+</button>
+
+      <!-- 🧹🧩 Tapa del cepillo (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--brushtop"
+  id="hotspot-brushtop"
+  slot="hotspot-brushtop"
+  data-position="-0.2 0 1.4"
+  data-normal="0 -1 0"
+  aria-label="Tapa del cepillo (inferior)">
+  <span class="icon">
+    <!-- Icono tapa/cobertura -->
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M4 10h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5zm2-4h12l2 4H4l2-4z"/>
+    </svg>
+  </span>
+</button>
+
+
+      <!-- 🧹 Cepillo (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--brush" 
+    id="hotspot-brush" 
+    slot="hotspot-brush"
+    data-position="0 0 1.5" 
+    data-normal="0 -1 0" 
+    aria-label="Cepillo (inferior)">
+<span class="icon">
+  <!-- Icono alusivo a cepillo/rodillo -->
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M3 10h18v4H3v-4zm2 1v2h2v-2H5zm4 0v2h2v-2H9zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2zM7 16h10v2H7v-2z"/>
+    </svg>
+  </span>
+</button>
+
+      <!-- 🔌📍 Pin de carga (inferior) -->
+<button class="hotspot hotspot--robot-scope hotspot--chargepin" id="hotspot-chargepin" slot="hotspot-chargepin"
+data-position="0 0 0.9" data-normal="0 -1 0" aria-label="Pin de carga (inferior)">
+<span class="icon">
+  <!-- Icono tipo pin/plug -->
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M7 2h2v6H7V2zm8 0h2v6h-2V2zM6 10h12v3a6 6 0 01-12 0v-3z"/>
+  </svg>
+</span>
+</button>
+
+      <!-- 🧢 Cubierta superior -->
+      <button class="hotspot hotspot--robot-scope hotspot--topcover" id="hotspot-topcover" slot="hotspot-topcover"
+        data-position="0 0.4 1.4" data-normal="0 1 0" aria-label="Cubierta superior">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 9a8 8 0 0116 0v2H4V9zm0 4h16v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- 🟡 Indicador de estado (superior) -->
+      <button class="hotspot hotspot--robot-scope hotspot--status" id="hotspot-status" slot="hotspot-status"
+        data-position="0.05 0.4 1.71" data-normal="0 1 0" aria-label="Indicador de estado (superior)">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 5v5h4v2h-6V7h2z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- ▶️ Botón de inicio -->
+      <button class="hotspot hotspot--robot-scope hotspot--start" id="hotspot-start" slot="hotspot-start"
+        data-position="0 0.4 1.65" data-normal="0 1 0" aria-label="Botón de inicio">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7-11-7z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- ⚡ Botón de carga/descarga -->
+      <button class="hotspot hotspot--robot-scope hotspot--charge" id="hotspot-charge" slot="hotspot-charge"
+        data-position="0.1 0.4 1.65" data-normal="0 1 0" aria-label="Botón de carga/descarga">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M13 2l-7 11h5l-1 7 7-11h-4z"/>
+            <path d="M12 14v6m0 0l-3-3m3 3l3-3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" />
+          </svg>
+        </span>
+      </button>
+
+      <!-- 🧺 Contenedor de polvo (visible solo dentro de Cubierta superior) -->
+      <button class="hotspot hotspot--robot-scope hotspot--dust" id="hotspot-dust" slot="hotspot-dust"
+      data-position="0 0.4 0.12" data-normal="0 1 0" aria-label="Contenedor de polvo (superior)"
+      data-image="contenedro_polvo.png">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 7l9-4 9 4v10l-9 4-9-4V7zm2 1.2v7.9l7 3.1v-7.9l-7-3.1zm16 0l-7 3.1v7.9l7-3.1V8.2z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- 🛰️ Sensor LiDAR (superior) -->
+      <button class="hotspot hotspot--robot-scope hotspot--lidar" id="hotspot-lidar" slot="hotspot-lidar"
+        data-position="0 0.4 0.75" data-normal="0 1 0" aria-label="Sensor LiDAR (superior)">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 4a8 8 0 108 8h-2a6 6 0 11-6-6V4z"/>
+            <circle cx="12" cy="12" r="1.4"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- 🔌 Botón de encendido -->
+      <button class="hotspot hotspot--robot-scope hotspot--power" id="hotspot-power" slot="hotspot-power"
+        data-position="-0.4 0.15 0.7" data-normal="0 1 0" aria-label="Botón de encendido">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M11 3h2v10h-2z"/><path d="M7.05 7.05a7 7 0 109.9 0l-1.41 1.41a5 5 0 11-7.07 0L7.05 7.05z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Filtro del polvo fino -->
+      <button class="hotspot hotspot--finefilter" id="hotspot-finefilter" slot="hotspot-finefilter"
+        data-position="0 0.8 -1" data-normal="0 1 0" aria-label="Filtro del polvo fino"data-visibility-attribute="visible">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 4h16v3l-6 6v5l-4-2v-3L4 7V4z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Cubierta de filtro de polvo fino -->
+      <button class="hotspot hotspot--filter" id="hotspot-filter" slot="hotspot-filter"
+        data-position="0 1.3 -1" data-normal="0 1 0" aria-label="Cubierta de filtro de polvo fino"data-visibility-attribute="visible">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 5h18v2H3V5zm2 4h14v2H5V9zm3 4h8v2H8v-2zm2 4h4v2h-4v-2z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Barredora -->
+      <button class="hotspot hotspot--robot" id="hotspot-robot" slot="hotspot-robot"
+        data-position="0 0.2 0" data-normal="0 1 0" aria-label="Barredora JetBot+">
+        <span class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 15h18v2H3v-2zm2-4h14l-2 4H7l-2-4zm4-6h6v4H9V5z"/></svg>
+        </span>
+      </button>
+
+      <!-- 🔵 Sensor de obstáculos -->
+      <button class="hotspot hotspot--robot-scope hotspot--obstacle" id="hotspot-obstacle" slot="hotspot-obstacle"
+        data-position="-0.5 0.25 1.3" data-normal="0 1 0" aria-label="Sensor de obstáculos">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3a9 9 0 109 9h-2a7 7 0 11-7-7V3z"/>
+            <path d="M12 7a5 5 0 105 5h-2a3 3 0 11-3-3V7z"/>
+            <circle cx="12" cy="12" r="1.4"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Ranura del cable de alimentación -->
+      <button class="hotspot hotspot--cable" id="hotspot-cable" slot="hotspot-cable"
+        data-position="-0.05 0.1 -1" data-normal="0 1 0" aria-label="Ranura del cable de alimentación"data-visibility-attribute="visible">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 2h2v6H7V2zm8 0h2v6h-2V2zM6 10h12v4a6 6 0 01-12 0v-4z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Succión -->
+      <button class="hotspot hotspot--suction" id="hotspot-suction" slot="hotspot-suction"
+        data-position="0.2 0.1 -0.05" data-normal="0 1 0" aria-label="Puerto de succión de polvo">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 8v7l-4-2v-5L3 4z"/></svg>
+        </span>
+      </button>
+
+      <!-- Transmisor de señal de carga -->
+      <button class="hotspot hotspot--transmitter" id="hotspot-transmitter" slot="hotspot-transmitter"
+        data-position="0 .4 -0.6" data-normal="0 1 0" aria-label="Transmisor de señal de carga">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+            <path d="M6.343 13.657a8 8 0 0 1 11.314 0l1.414-1.414a10 10 0 0 0-14.142 0l1.414 1.414z"/>
+            <path d="M3.515 10.828a12 12 0 0 1 16.97 0l1.414-1.414a14 14 0 0 0-19.798 0l1.414 1.414z"/>
+          </svg>
+        </span>
+      </button>
+
+      <!-- Terminal -->
+      <button class="hotspot hotspot--terminal" id="hotspot-terminal" slot="hotspot-terminal"
+        data-position="0 0.2 -0.2" data-normal="0 1 0" aria-label="Terminal de carga">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h10v4H7V3zm-2 6h14v10H5V9zm4 2v6h2v-6H9zm4 0v6h2v-6h-2z"/></svg>
+        </span>
+      </button>
+
+      <!-- Indicador (clásico) -->
+      <button class="hotspot hotspot--indicator" id="hotspot-indicator" slot="hotspot-indicator"
+        data-position="-0.1 1.95 -0.2" data-normal="0 1 0" aria-label="Indicador de estado">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4a8 8 0 100 16 8 8 0 000-16zm1 4v5h4v2h-6V8h2z"/></svg>
+        </span>
+      </button>
+
+      <!-- Cubierta -->
+      <button class="hotspot hotspot--cover" id="hotspot-cover" slot="hotspot-cover"
+        data-position="0 2.1 -0.5" data-normal="0 1 0" aria-label="Cubierta">
+        <span class="icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10l8-6 8 6v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8zm14 0l-6-4.5L6 10v8h12v-8z"/></svg>
+        </span>
+      </button>
+
+      <!-- Bolsa de Polvo -->
+      <button class="hotspot hotspot--bag" id="hotspot-bag" slot="hotspot-bag"
+      data-position="0 1.7 -0.8" data-normal="0 1 0" aria-label="Bolsa de Polvo"
+      data-image="bolsa_polvo.png">
+      <span class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 4h10l-2 3h-6L7 4zm-1 5h12l-1.5 9h-9L6 9z"/>
+        </svg>
+      </span>
+    </button>
+    
+    </model-viewer>
+  </div>
+
+  <!-- Paneles -->
+  <div class="info-panel" id="panel-estacion"><h3 class="info-title">Estación de Limpieza</h3><button class="back-button" id="volver-estacion">Volver</button></div>
+  <div class="info-panel" id="panel-barredora"><h3 class="info-title">Barredora JetBot+</h3><button class="back-button" id="volver-barredora">Volver</button></div>
+  <div class="info-panel" id="panel-suction"><h3 class="info-title">Puerto de succión de polvo</h3><button class="back-button" id="volver-suction">Volver</button></div>
+  <div class="info-panel" id="panel-terminal"><h3 class="info-title">Terminal de carga</h3><button class="back-button" id="volver-terminal">Volver</button></div>
+  <div class="info-panel" id="panel-indicator"><h3 class="info-title">Indicador de estado</h3><button class="back-button" id="volver-indicator">Volver</button></div>
+  <div class="info-panel" id="panel-cover">
+    <h3 class="info-title">Cubierta</h3>
+    <button class="back-button" id="abrir-cubierta-btn" style="background:#ff9800;margin-right:.5rem">
+      Abrir cubierta
+    </button>
+    <button class="back-button" id="volver-cover">Volver</button>
+  </div>  
+  
+  <div class="info-panel" id="panel-bag">
+    <h3 class="info-title">Bolsa de Polvo</h3>
+  
+    <!-- 🆕 Imagen ilustrativa -->
+    <div class="media" id="bag-media" hidden>
+      <img id="bag-img" src="" alt="Bolsa de polvo del contenedor" loading="lazy">
+      <small class="caption">Bolsa de polvo – referencia visual</small>
+    </div>
+  
+    <button class="back-button" id="volver-bag">Volver</button>
+  </div>
+  
+  <div class="info-panel" id="panel-cable">
+    <h3 class="info-title">Ranura del cable de alimentación</h3>
+    <button class="back-button" id="volver-cable">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-transmitter">
+    <h3 class="info-title">Transmisor de señal de carga</h3>
+    <button class="back-button" id="volver-transmitter">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-filter">
+    <h3 class="info-title">Cubierta de filtro de polvo fino</h3>
+    <button class="back-button" id="volver-filter">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-finefilter">
+    <h3 class="info-title">Filtro del polvo fino</h3>
+    <button class="back-button" id="volver-finefilter">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-obstacle">
+    <h3 class="info-title">Sensor de obstáculos</h3>
+    <button class="back-button" id="volver-obstacle">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-power">
+    <h3 class="info-title">Botón de encendido</h3>
+    <button class="back-button" id="volver-power">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-lidar">
+    <h3 class="info-title">Sensor LiDAR</h3>
+    <button class="back-button" id="volver-lidar">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-dust">
+    <h3 class="info-title">Contenedor de polvo</h3>
+  
+    <!-- 🆕 Imagen ilustrativa -->
+    <div class="media" id="dust-media" hidden>
+      <img id="dust-img" src="" alt="Contenedor de polvo" loading="lazy">
+      <small class="caption">Contenedor de polvo – referencia visual</small>
+    </div>
+  
+    <button class="back-button" id="volver-dust">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-start">
+    <h3 class="info-title">Botón de inicio/Detención</h3>
+    <button class="back-button" id="volver-start">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-charge">
+    <h3 class="info-title">Botón de carga/descarga</h3>
+    <button class="back-button" id="volver-charge">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-status">
+    <h3 class="info-title">Indicador de estado</h3>
+    <button class="back-button" id="volver-status">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-topcover">
+    <h3 class="info-title">Cubierta superior</h3>
+  
+    <!-- 🆕 Botón para abrir la tapa superior -->
+    <button class="back-button" id="abrir-topcover-btn" style="background:#ff9800;margin-right:.5rem">
+      Abrir puerta superior
+    </button>
+  
+    <button class="back-button" id="volver-topcover">Volver</button>
+  </div>
+  
+  <div class="info-panel" id="panel-chargepin">
+    <h3 class="info-title">Pin de carga</h3>
+    <button class="back-button" id="volver-chargepin">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-brush">
+    <h3 class="info-title">Cepillo</h3>
+    <button class="back-button" id="volver-brush">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-brushtop">
+    <h3 class="info-title">Tapa del cepillo</h3>
+    <button class="back-button" id="volver-brushtop">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-cliff">
+    <h3 class="info-title">Sensor de desnivel</h3>
+    <button class="back-button" id="volver-cliff">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-cliff2">
+    <h3 class="info-title">Sensor de desnivel</h3>
+    <button class="back-button" id="volver-cliff2">Volver</button>
+  </div>
+  
+  <div class="info-panel" id="panel-cliff3">
+    <h3 class="info-title">Sensor de desnivel</h3>
+    <button class="back-button" id="volver-cliff3">Volver</button>
+  </div>
+  
+  <div class="info-panel" id="panel-cliff4">
+    <h3 class="info-title">Sensor de desnivel</h3>
+    <button class="back-button" id="volver-cliff4">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-roller">
+    <h3 class="info-title">Rodillo</h3>
+    <button class="back-button" id="volver-roller">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-batterycover">
+    <h3 class="info-title">Cubierta de la batería</h3>
+    <button class="back-button" id="volver-batterycover">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-drivewheel-left">
+    <h3 class="info-title">Rueda motriz izquierda</h3>
+    <button class="back-button" id="volver-drivewheel-left">Volver</button>
+  </div>
+  
+  <div class="info-panel" id="panel-drivewheel-right">
+    <h3 class="info-title">Rueda motriz derecha</h3>
+    <button class="back-button" id="volver-drivewheel-right">Volver</button>
+  </div>
+  <div class="info-panel" id="panel-sidebrush">
+    <h3 class="info-title">Cepillo lateral</h3>
+    <button class="back-button" id="volver-sidebrush">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-dustout">
+    <h3 class="info-title">Salida de vaciado de polvo</h3>
+    <button class="back-button" id="volver-dustout">Volver</button>
+  </div>  
+  <div class="info-panel" id="panel-brushlock">
+    <h3 class="info-title">Bloqueo de la tapa del cepillo</h3>
+    <button class="back-button" id="volver-brushlock">Volver</button>
+  </div>  
+
+  <script>
+    const mv = document.getElementById('mv');
+    const openTopCoverBtn = document.getElementById('abrir-topcover-btn');
+    // 🆕 Referencias para la imagen del panel de contenedor de polvo
+    const dustMedia = document.getElementById('dust-media');
+    const dustImg   = document.getElementById('dust-img');
+
+    /* ---------- Hotspots ---------- */
+    const hotEst = document.getElementById('hotspot-estacion');
+    const hotRob = document.getElementById('hotspot-robot');
+    const hotSuc = document.getElementById('hotspot-suction');
+    const hotTer = document.getElementById('hotspot-terminal');
+    const hotInd = document.getElementById('hotspot-indicator');
+    const hotCov = document.getElementById('hotspot-cover');
+    const hotBag = document.getElementById('hotspot-bag');
+    const hotTrn = document.getElementById('hotspot-transmitter');
+    const hotCable = document.getElementById('hotspot-cable');
+    const hotFilter = document.getElementById('hotspot-filter');
+    const hotFine   = document.getElementById('hotspot-finefilter');
+    const hotObstacle = document.getElementById('hotspot-obstacle');
+    const hotPower = document.getElementById('hotspot-power');
+    const hotLidar = document.getElementById('hotspot-lidar');
+    const hotDust = document.getElementById('hotspot-dust');
+    const hotStart = document.getElementById('hotspot-start');
+    const hotCharge = document.getElementById('hotspot-charge');
+    const hotStatus = document.getElementById('hotspot-status');
+    const hotTopCover = document.getElementById('hotspot-topcover');
+    const hotChargePin = document.getElementById('hotspot-chargepin');
+    const hotBrush = document.getElementById('hotspot-brush');
+    const hotBrushTop = document.getElementById('hotspot-brushtop');
+    const hotCliff = document.getElementById('hotspot-cliff');
+    const hotCliff2 = document.getElementById('hotspot-cliff2');
+    const hotCliff3 = document.getElementById('hotspot-cliff3');
+    const hotCliff4 = document.getElementById('hotspot-cliff4');
+    const hotRoller = document.getElementById('hotspot-roller');
+    const hotBatteryCover = document.getElementById('hotspot-batterycover');
+    const hotDriveLeft  = document.getElementById('hotspot-drivewheel-left');
+    const hotDriveRight = document.getElementById('hotspot-drivewheel-right');
+    const hotSideBrush = document.getElementById('hotspot-sidebrush');
+    const hotDustOut = document.getElementById('hotspot-dustout');
+    const hotBrushLock = document.getElementById('hotspot-brushlock');
+
+    /* ---------- Paneles ---------- */
+    const pnlEst = document.getElementById('panel-estacion');
+    const pnlRob = document.getElementById('panel-barredora');
+    const pnlSuc = document.getElementById('panel-suction');
+    const pnlTer = document.getElementById('panel-terminal');
+    const pnlInd = document.getElementById('panel-indicator');
+    const pnlCov = document.getElementById('panel-cover');
+    const pnlBag = document.getElementById('panel-bag');
+    const pnlTrn = document.getElementById('panel-transmitter');
+    const pnlCable = document.getElementById('panel-cable');
+    const pnlFilter = document.getElementById('panel-filter');
+    const pnlFine   = document.getElementById('panel-finefilter');
+    const pnlObstacle = document.getElementById('panel-obstacle');
+    const pnlPower = document.getElementById('panel-power');
+    const pnlLidar = document.getElementById('panel-lidar');
+    const pnlDust = document.getElementById('panel-dust');
+    const pnlStart = document.getElementById('panel-start');
+    const pnlCharge = document.getElementById('panel-charge');
+    const pnlStatus = document.getElementById('panel-status');
+    const pnlTopCover = document.getElementById('panel-topcover');
+    const pnlChargePin = document.getElementById('panel-chargepin');
+    const pnlBrush = document.getElementById('panel-brush');
+    const pnlBrushTop = document.getElementById('panel-brushtop');
+    const pnlCliff = document.getElementById('panel-cliff');
+    const pnlCliff2 = document.getElementById('panel-cliff2');
+    const pnlCliff3 = document.getElementById('panel-cliff3');
+    const pnlCliff4 = document.getElementById('panel-cliff4');
+    const pnlRoller = document.getElementById('panel-roller');
+    const pnlBatteryCover = document.getElementById('panel-batterycover');
+    const pnlDriveLeft  = document.getElementById('panel-drivewheel-left');
+    const pnlDriveRight = document.getElementById('panel-drivewheel-right');
+    const pnlSideBrush = document.getElementById('panel-sidebrush');
+    const pnlDustOut = document.getElementById('panel-dustout');
+    const pnlBrushLock = document.getElementById('panel-brushlock');
+
+    /* ---------- Volver ---------- */
+    const backEst = document.getElementById('volver-estacion');
+    const backRob = document.getElementById('volver-barredora');
+    const backSuc = document.getElementById('volver-suction');
+    const backTer = document.getElementById('volver-terminal');
+    const backInd = document.getElementById('volver-indicator');
+    const backCov = document.getElementById('volver-cover');
+    const backBag = document.getElementById('volver-bag');
+    const backTrn = document.getElementById('volver-transmitter');
+    const backCable = document.getElementById('volver-cable');
+    const backFilter = document.getElementById('volver-filter');
+    const backFine  = document.getElementById('volver-finefilter');
+    const backObstacle  = document.getElementById('volver-obstacle');
+    const backPower = document.getElementById('volver-power');
+    const backLidar = document.getElementById('volver-lidar');
+    const backDust = document.getElementById('volver-dust');
+    const backStart = document.getElementById('volver-start');
+    const backCharge = document.getElementById('volver-charge');
+    const backStatus = document.getElementById('volver-status');
+    const backTopCover = document.getElementById('volver-topcover');
+    const backChargePin = document.getElementById('volver-chargepin');
+    const backBrush = document.getElementById('volver-brush');
+    const backBrushTop = document.getElementById('volver-brushtop');
+    const backCliff = document.getElementById('volver-cliff');
+    const backCliff2 = document.getElementById('volver-cliff2');
+    const backCliff3 = document.getElementById('volver-cliff3');
+    const backCliff4 = document.getElementById('volver-cliff4');
+    const backRoller = document.getElementById('volver-roller');
+    const backBatteryCover = document.getElementById('volver-batterycover');
+    const backDriveLeft  = document.getElementById('volver-drivewheel-left');
+    const backDriveRight = document.getElementById('volver-drivewheel-right');
+    const backSideBrush = document.getElementById('volver-sidebrush');
+    const backDustOut = document.getElementById('volver-dustout');
+    const backBrushLock = document.getElementById('volver-brushlock');
+    
+    /* ---------- Cámaras ---------- */
+    const estacionCam = { orbit:'0deg 60deg 6m',    target:'0m 1m 0m',      fov:'30deg' };
+    const robotCam    = { orbit:'60deg 65deg 3.5m', target:'-0.2m 0m 1.2m', fov:'32deg' };
+    const suctionCam  = { orbit:'20deg 0deg 1m',    target:'0m 0m 0m',      fov:'35deg' };
+    const terminalCam = { orbit:'20deg 0deg 1m',    target:'0m 0.8m 0m',    fov:'35deg' };
+    const indicatorCam= { orbit:'10deg 85deg 0.5m', target:'0.05m 2m -0.08m', fov:'20deg' };
+    const coverCam    = { orbit:'0deg 0deg 2.5m',   target:'0m 1.6m -0.9m', fov:'30deg' };
+    const bagCam      = { orbit:'30deg 50deg 4m',   target:'0m 2.3m -1m',   fov:'30deg' };
+    const inicialCam  = { orbit:'0deg 75deg 7m',    target:'0m 1m 0m',      fov:'45deg' };
+    const transmitterCam = { orbit:'50deg 85deg 2m', target:'0.05m 0.35m -0.7m', fov:'10deg'};
+    const cableCam = { orbit:'195deg 85deg 2m', target:'0.2m 0.05m 0.12m', fov:'35deg' };
+    const filterCam = { orbit:'180deg 85deg 5m', target:'0m 1m 0m', fov:'35deg' };
+    const fineCam   = { orbit:'140deg 85deg 5m', target:'0m 1m 0m', fov:'35deg' };//POLVO FINO
+    const obstacleCam = { orbit:'-35deg 85deg 2m', target:'0.18m 0.15m 0.52m', fov:'30deg' };
+    const powerCam = { orbit:'-120deg 85deg 0.5m', target:'-1m 0.18m 0.50m', fov:'5deg' };
+    const lidarCam = { orbit:'40deg 70deg 0.1m', target:'0.5m 0.6m 1.5m', fov:'15deg' };
+    const dustCam = { orbit:'0deg 0deg 0.9m', target:'0m 0.5m 0.2m', fov:'30deg' };
+    const startCam = { orbit:'0deg 22deg 0.1m', target:'-0.02m 0.1m 1.52m', fov:'20deg' };
+    const chargeCam = { orbit:'0deg 22deg 0.1m', target:'0.12m 0.1m 1.52m',  fov:'15deg' };
+    const statusCam = { orbit:'0deg 22deg 0.1m', target:'0.05m 0.1m 1.6m',     fov:'55deg' };
+    const topCoverCam = { orbit:'0deg 22deg 1.5m', target:'0m 1.02m 1.6m', fov:'20deg' };
+    const chargePinCam = { orbit:'0deg 180deg 1.5m', target:'0m -0.05m 0.9m', fov:'12deg' };
+    const brushCam = { orbit:'0deg 180deg 1m', target:'0m 0m 1.5m', fov:'10deg' };
+    const brushTopCam = { orbit:'0deg 180deg 1.5m', target:'0m 0.05m 1.5m', fov:'15deg' };
+    const cliffCam = { orbit:'0deg 180deg 1m', target:'-0.6m 0m 1.3m', fov:'1deg' };
+    const cliff2Cam = { orbit:'0deg 180deg 1m', target:'0.6m 0m 1.3m', fov:'10deg' };
+    const cliff3Cam = { orbit:'0deg 180deg 1m', target:'-0.2m 0m 1.7m', fov:'10deg' };
+    const cliff4Cam = { orbit:'0deg 180deg 1m', target:'0.2m 0m 1.7m', fov:'10deg' };
+    const rollerCam = { orbit:'50deg 100deg 1.2m', target:'0m 0m 0.75m', fov:'10deg' };
+    const batteryCoverCam = { orbit:'0deg 180deg 1.1m', target:'0m -0.05m 1.1m', fov:'15deg' };
+    const driveLeftCam  = { orbit:'-50deg 130deg 1.0m', target:'-0.5m -0.05m 1.25m', fov:'20deg' };
+    const driveRightCam = { orbit:'50deg 130deg 1.0m', target:'0.5m  -0.05m 1.25m', fov:'20deg'  };
+    const sideBrushCam = { orbit:'0deg 180deg 0.9m', target:'-0.32m -0.05m 1.5m', fov:'20deg' };
+    const dustOutCam = { 
+      orbit:'0deg 180deg 0.9m', 
+      target:'-0.1m -0.05m 1.25m',  // 🔧 AJUSTA al punto exacto
+      fov:'12deg' 
+    };
+    const brushLockCam = {
+  orbit:'0deg 180deg 0.9m',
+  target:'0m -0.05m 1.45m',  // 🔧 AJUSTA
+  fov:'9deg'
+};
+// Igual que topCoverCam pero a 0.5m
+const topCoverCamCloser = {
+  orbit: '0deg 22deg 2m',
+target:'0m 0.8m 0.2m',  // 🔧 AJUSTA
+  fov:'20deg'
+};
+
+// 🆕 Referencias para la imagen del panel de bolsa
+const bagMedia = document.getElementById('bag-media');
+const bagImg   = document.getElementById('bag-img');
+
+    const setCam = ({orbit,target,fov}) => { mv.cameraOrbit = orbit; mv.cameraTarget = target; if(fov) mv.fieldOfView = fov; };
+
+    /* ========= ACCIONES / CLIPS ========= */
+    const ACTIONS_MAP = {
+      barredora_entrada: 'barredora_entrada',
+      barredora_salida:  'barredora_salida',
+      tapa_polvo_abrir:  'tapa_polvo_abrir',
+      polvo_fuera:       'polvo_fuera',
+      polvo_dentro:      'polvo_dentro',
+      tapa_polvo_cerrar: 'tapa_polvo_cerrar',
+      
+    };
+
+    ACTIONS_MAP.tapa_barredora_abrir  = 'tapa_barredora_abrir';
+ACTIONS_MAP.tapa_barredora_cerrar = 'tapa_barredora_cerrar';
+ACTIONS_MAP.polvo_1_fuera = (ACTIONS_MAP.polvo_1_fuera) || (ACTIONS_MAP.polvo_fuera) || 'polvo_1_fuera';
+
+const CLIPS = {
+  barredora_entrada: { startFrame:120, endFrame:178, fps:24, durationMs:1200 },
+  barredora_salida:  { startFrame:140, endFrame:179, fps:24, durationMs:1200 },
+
+  tapa_polvo_abrir:  { startFrame: 24, endFrame: 48, fps: 24, durationMs: 1000, freezeAt: 'end' },
+  polvo_fuera:       { startFrame: 100, endFrame: 124, fps: 24, durationMs: 1000, freezeAt: 'end' },
+  polvo_dentro:      { startFrame: 100, endFrame: 124, fps: 24, durationMs: 1000, freezeAt: 'end' },
+  tapa_polvo_cerrar: { startFrame: 24, endFrame: 48, fps: 24, durationMs: 1000, freezeAt: 'end' }
+};
+
+CLIPS.tapa_barredora_abrir  = { durationMs: 1000, freezeAt: 'end' };
+CLIPS.tapa_barredora_cerrar = { durationMs: 1000, freezeAt: 'end' };
+CLIPS.polvo_1_fuera = { durationMs: 1000, freezeAt: 'end' };
+
+    let loaded=false, isBusy=false;
+    let inCoverPanel = false;
+    let inFilterPanel = false;
+
+    let coverOpen = false; // ← nueva bandera
+    let coverEnforcerActive = false;       // nuevo
+    let coverOpenPose = new Map();
+
+    function refreshCoverPanelUI(){
+  const btn = document.getElementById('abrir-cubierta-btn');
+  if(!btn) return;
+  btn.disabled = coverOpen;
+  btn.textContent = coverOpen ? 'Cubierta abierta' : 'Abrir cubierta';
+}
+    // Utils
+    const rAF = () => new Promise(r=>requestAnimationFrame(r));
+    const sleep = ms => new Promise(r=>setTimeout(r,ms));
+    async function waitForDurationStable(v, tries=30){
+      await rAF(); await rAF();
+      let last=v.duration||0;
+      while(tries-- >0){
+        await sleep(30);
+        const now=v.duration||0;
+        if(now>0 && Math.abs(now-last)<1e-3) return now;
+        last=now;
+      }
+      return v.duration||0;
+    }
+
+    function getThree() { return window.THREE || (mv?.$renderer?.threeRenderer?.constructor); } // fallback
+    function getClipByName(name){
+  const anims = mv?.model?.gltf?.animations || [];
+  return anims.find(a => a.name === name) || null;
+}
+
+function showPanel(p){ if(!p || !p.classList) return; if(!p.classList.contains('visible')) requestAnimationFrame(()=>p.classList.add('visible')); }
+function hidePanel(p){ if(!p || !p.classList) return; if(p.classList.contains('visible')) p.classList.remove('visible'); }
+
+function getNodeNamesFromClip(clip){
+  // track.name suele ser "Nodo.position", "Nodo.quaternion" o "Nodo.scale"
+  const names = new Set();
+  (clip?.tracks || []).forEach(t=>{
+    const n = (t.name || '').split('.')[0];
+    if(n) names.add(n);
+  });
+  return [...names];
+}
+
+// Cache de clips enmascarados
+const _maskedCache = new Map();
+
+function getThreeLib(){
+  return (window.THREE) || (mv?.[$renderer]?.threeRenderer?.constructor) || window.THREE;
+}
+
+// Crea (y cachea) un clip con las tracks de ciertos nodos excluidas
+function ensureMaskedClip(baseClipName, maskFromClipName){
+  const gltf = mv?.model?.gltf;
+  const anims = gltf?.animations || [];
+  const THREE = getThreeLib();
+  if(!THREE) return baseClipName;
+
+  const base = anims.find(c => c.name === baseClipName);
+  const maskFrom = anims.find(c => c.name === maskFromClipName);
+  if(!base || !maskFrom) return baseClipName;
+
+  const excludedNodes = new Set(getNodeNamesFromClip(maskFrom));
+  const maskedName = `${baseClipName}__nocover`;
+
+  if(_maskedCache.has(maskedName)){
+    return maskedName;
+  }
+
+  const filteredTracks = base.tracks.filter(tr => {
+    const node = (tr.name || '').split('.')[0];
+    return !excludedNodes.has(node); // quita tracks de la tapa
+  });
+
+  const masked = new THREE.AnimationClip(maskedName, base.duration, filteredTracks);
+  anims.push(masked);              // añade el nuevo clip al GLTF en runtime
+  _maskedCache.set(maskedName, 1); // cache
+
+  return maskedName;
+}
+
+// ⬇️ suma estos dos alias
+ACTIONS_MAP.puerta_trasera_abrir  = 'puerta_trasera_abrir';
+ACTIONS_MAP.puerta_trasera_cerrar = 'puerta_trasera_cerrar';
+
+// ⬇️ sin frames: reproduciremos el clip completo y lo dejaremos “freeze” al final
+CLIPS.puerta_trasera_abrir  = { durationMs: 1000, freezeAt: 'end' };
+CLIPS.puerta_trasera_cerrar = { durationMs: 1000, freezeAt: 'end' };
+
+// Guarda la pose actual de los nodos de la tapa (después de abrir)
+function captureCoverOpenPose(){
+  coverOpenPose.clear();
+  const clip = getClipByName(ACTIONS_MAP['tapa_polvo_abrir'] || 'tapa_polvo_abrir');
+  const nodes = getNodeNamesFromClip(clip);
+  const scene = mv?.model?.scene;
+  if(!scene) return;
+
+  nodes.forEach(name=>{
+    const o = scene.getObjectByName(name);
+    if(!o) return;
+    coverOpenPose.set(name, {
+      p: [o.position.x, o.position.y, o.position.z],
+      q: [o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w],
+      s: [o.scale.x, o.scale.y, o.scale.z]
+    });
+  });
+}
+
+function applyCoverOpenPoseOnce(){
+  if(!coverOpen || coverOpenPose.size===0) return;
+  const scene = mv?.model?.scene; if(!scene) return;
+
+  coverOpenPose.forEach((t,name)=>{
+    const o = scene.getObjectByName(name);
+    if(!o) return;
+    const [px,py,pz] = t.p, [qx,qy,qz,qw] = t.q, [sx,sy,sz] = t.s;
+    o.position.set(px,py,pz);
+    o.quaternion.set(qx,qy,qz,qw);
+    o.scale.set(sx,sy,sz);
+    o.updateMatrixWorld(true);
+  });
+}
+
+let coverRafId = 0;
+
+function startCoverEnforcer(){
+  if(coverEnforcerActive) return;
+  coverEnforcerActive = true;
+
+  // 1) Intento por evento 'render'
+  mv.addEventListener('render', applyCoverOpenPoseOnce);
+
+  // 2) Fallback por RAF (idempotente; no pasa nada por llamar dos veces)
+  const rafLoop = () => {
+    if(!coverEnforcerActive) return;
+    try { applyCoverOpenPoseOnce(); } catch {}
+    coverRafId = requestAnimationFrame(rafLoop);
+  };
+  coverRafId = requestAnimationFrame(rafLoop);
+}
+
+function stopCoverEnforcer(){
+  if(!coverEnforcerActive) return;
+  coverEnforcerActive = false;
+
+  mv.removeEventListener('render', applyCoverOpenPoseOnce);
+  if(coverRafId){ cancelAnimationFrame(coverRafId); coverRafId = 0; }
+}
+
+    function holdAtEnd(logicalName){
+  const action = ACTIONS_MAP[logicalName] || logicalName;
+  const cfg = CLIPS[logicalName]; if(!cfg) return;
+  const fps = Math.max(1, cfg.fps||24);
+  const endSec = (cfg.endFrame / fps);
+  startPoseHold(action, endSec);
+}
+
+function freezeClipEnd(logicalName, frameOverride){
+  const action = ACTIONS_MAP[logicalName] || logicalName;
+  const cfg = CLIPS[logicalName]; if(!cfg) return;
+  const fps = Math.max(1, cfg.fps||24);
+  const endFrame = (frameOverride ?? cfg.endFrame);
+  const endSec = Math.max(0, (endFrame / fps) - (0.75 / fps)); // antes 0.25/fps
+  startPoseHold(action, endSec);
+}
+
+    // Evitar superposición de paneles “Cubierta superior” y “Contenedor de polvo”
+    function layoutTopPanels(){
+      const both = pnlTopCover.classList.contains('visible') && pnlDust.classList.contains('visible');
+      if(!both){ resetTopPanelsLayout(); return; }
+
+      const vw = window.innerWidth || 1280;
+      const isWide = vw >= 1100;
+
+      if(isWide){
+        // lado a lado
+        pnlDust.style.right = '78%';
+        pnlDust.style.bottom = '340px';
+        pnlDust.style.transform = 'translateX(26%)';
+
+        pnlTopCover.style.right = '64%';
+        pnlTopCover.style.bottom = '300px';
+        pnlTopCover.style.transform = 'translateX(12%)';
+      }else{
+        // en columna (uno debajo del otro)
+        pnlDust.style.right = '74%';
+        pnlDust.style.bottom = '360px';
+        pnlDust.style.transform = 'translateX(22%)';
+
+        pnlTopCover.style.right = '74%';
+        pnlTopCover.style.bottom = '260px';
+        pnlTopCover.style.transform = 'translateX(22%)';
+      }
+    }
+    function resetTopPanelsLayout(){
+      pnlTopCover.style.right = '70%';
+      pnlTopCover.style.bottom = '300px';
+      pnlTopCover.style.transform = 'translateX(18%)';
+
+      pnlDust.style.right = '78%';
+      pnlDust.style.bottom = '340px';
+      pnlDust.style.transform = 'translateX(26%)';
+    }
+
+    function updateCliffVisibilityByViewGeneric(hot, pnl){
+  if(!pnlRob.classList.contains('visible')){ 
+    hot.style.display = 'none'; return; 
+  }
+  if(pnl.classList.contains('visible')){ 
+    hot.style.display = 'none'; return; 
+  }
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+  const phiOK = (p >= 90 && p <= 175);
+  const dTheta = ((t + 540) % 360) - 180; // centrado en 0
+  const thetaOK = Math.abs(dTheta) <= 70;
+  hot.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateFineVisibility(){
+  // Visible solo cuando estás dentro del panel del Filtro (padre)
+  // y NO estás dentro del panel del Filtro Fino (hijo).
+  const insideFinePanel = pnlFine.classList.contains('visible');
+  hotFine.style.display = (inFilterPanel && !insideFinePanel) ? 'flex' : 'none';
+}
+
+    // 🔧 Scope Barredora
+    const robotScoped = () => Array.from(document.querySelectorAll('.hotspot--robot-scope'));
+    // ⛔ Dejar que la visibilidad la manejen solo los update* (no forzar 'flex')
+    function showRobotScopedHotspots(){ /* no-op */ }
+    function hideRobotScopedHotspots(){ robotScoped().forEach(el => el.style.display='none'); }
+
+    // Estación: util para apagarla siempre que no corresponde
+    function hideStationHotspots(){
+  // Hotspots de la ESTACIÓN (no deben verse en Barredora)
+  hotTrn.style.display   = 'none'; // transmisor
+  hotTer.style.display   = 'none'; // terminal
+  hotSuc.style.display   = 'none'; // succión
+  hotCable.style.display = 'none'; // puerto/cable
+  hotFilter.style.display= 'none'; // cubierta filtro fino
+  hotFine.style.display  = 'none'; // filtro fino (interno)
+}
+
+    let _poseHold=null;
+    function startPoseHold(actionName,timeSec){
+      stopPoseHold();
+      const token={};
+      _poseHold={running:true,token,actionName,timeSec};
+      const loop=async()=>{
+        const h=_poseHold;
+        if(!h||!h.running||h.token!==token) return;
+        try{
+          if(mv.animationName!==h.actionName){
+            try{mv.pause();}catch{}
+            mv.animationLoop=false; mv.animationTimeScale=0; mv.animationName=h.actionName;
+            await waitForDurationStable(mv);
+          }
+          mv.animationTimeScale=0; mv.currentTime=h.timeSec;
+        }finally{
+          const h2=_poseHold;
+          if(h2&&h2.running&&h2.token===token) requestAnimationFrame(loop);
+        }
+      };
+      requestAnimationFrame(loop);
+    }
+    function stopPoseHold(){ if(_poseHold){_poseHold.running=false;}_poseHold=null; }
+
+    async function playActionSegment(
+  actionName,
+  {
+    startFrame,
+    endFrame,
+    fps = 24,
+    durationMs = 1000,
+    freezeAt = 'end',
+    sameClip = false,
+    endBiasFrames = 0,
+  } = {}
+){
+  const av = mv?.availableAnimations || [];
+  const gltfAnims = mv?.model?.gltf?.animations || [];
+  const exists = av.includes(actionName) || gltfAnims.some(c => c.name === actionName);
+  if(!exists){ console.warn('Acción no encontrada:', actionName, av); return; }
+
+  try{ mv.pause(); }catch{}
+  mv.animationLoop = false;
+  mv.animationTimeScale = 0;
+
+  if (!sameClip || mv.animationName !== actionName){
+    mv.animationName = actionName;
+    await waitForDurationStable(mv);
+    await mv.updateComplete;
+  }
+
+  const fpsSafe = Math.max(1, fps);
+  const clipDurSec = mv.duration || 1;
+
+  // ✅ si no pasas startFrame/endFrame, usamos TODO el clip
+  let startSec, endSec, reverse = false;
+  if (typeof startFrame === 'number' && typeof endFrame === 'number'){
+    reverse = endFrame < startFrame;
+    const eBias = Math.max(0, endBiasFrames||0);
+    const aF = startFrame;
+    const bF = reverse ? (startFrame + eBias) : (endFrame - eBias);
+    startSec = Math.min(aF, bF) / fpsSafe;
+    endSec   = Math.max(aF, bF) / fpsSafe;
+  } else {
+    startSec = 0;
+    endSec   = Math.max(clipDurSec - (0.5/fpsSafe), 0); // pequeño margen para congelar
+  }
+
+  if (!sameClip){
+    mv.currentTime = reverse ? endSec : startSec;
+    await mv.updateComplete;
+  }
+
+  const spanSec = Math.max(1/Math.max(24,fpsSafe), Math.abs(endSec - startSec));
+  const t0 = performance.now();
+  const total = Math.max(60, durationMs);
+  const dir = reverse ? -1 : 1;
+
+  return new Promise(resolve=>{
+    function step(now){
+      const elapsed = Math.min(1, (now - t0) / total);
+      const t = startSec + dir * (elapsed * spanSec);
+      mv.currentTime = Math.min(Math.max(t, Math.min(startSec,endSec)), Math.max(startSec,endSec));
+      if (elapsed < 1){
+        requestAnimationFrame(step);
+      } else {
+        const EPS = 0.5 / fpsSafe;
+        let finalPose = (freezeAt==='start')
+          ? (reverse ? Math.min(endSec, startSec + EPS) : Math.max(startSec, startSec + EPS))
+          : (reverse ? Math.max(startSec, startSec + EPS) : Math.max(startSec, endSec - EPS));
+        try{ mv.pause(); }catch{}
+        mv.animationTimeScale = 0;
+        mv.currentTime = finalPose;
+        const until = performance.now() + 300;
+        (function holdPump(){
+          mv.currentTime = finalPose;
+          if (performance.now() < until) requestAnimationFrame(holdPump);
+          else resolve();
+        })();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+async function playClip(logicalName, overrides = {}){
+  let action = ACTIONS_MAP[logicalName] || logicalName;
+
+  // Si la tapa está abierta, enmascara cualquier anim que no sea abrir/cerrar la tapa
+  if(coverOpen && logicalName !== 'tapa_polvo_abrir' && logicalName !== 'tapa_polvo_cerrar'){
+    action = ensureMaskedClip(action, ACTIONS_MAP['tapa_polvo_abrir']);
+  }
+
+  const cfg = { ...(CLIPS[logicalName]||{}), ...overrides };
+  await playActionSegment(action, cfg);
+}
+
+    /* ========= Helpers UI ========= */
+    function showPanel(p){ if(!p.classList.contains('visible')) requestAnimationFrame(()=>p.classList.add('visible')); }
+    function hidePanel(p){ if(p.classList.contains('visible')) p.classList.remove('visible'); }
+    function hideAllPanels(){
+      [pnlEst,pnlRob,pnlSuc,pnlTer,pnlInd,pnlCov,pnlBag,pnlTrn,pnlCable,
+       pnlFilter,pnlFine,pnlObstacle,pnlPower,pnlLidar,pnlDust,pnlTopCover,
+       pnlStart,pnlCharge,pnlStatus]
+        .filter(Boolean)
+        .forEach(hidePanel);
+    }
+
+    function showMainHotspots(){ hotEst.style.display='flex'; hotRob.style.display='flex'; }
+    function hideMainHotspots(){ hotEst.style.display='none'; hotRob.style.display='none'; }
+
+    function hideSubHotspots(){
+      hotSuc.style.display='none';
+      hotInd.style.display='none';
+      hotCov.style.display='none';
+      hotBag.style.display='none';
+      hotCable.style.display='none';
+      hotFilter.style.display='none';   // ✅ asegurar que se oculta
+      hotFine.style.display='none';
+      hotTer.style.display='none';
+      hotTrn.style.display='none';
+    }
+    function showSubHotspots(){
+      hotSuc.style.display='flex';
+      hotInd.style.display='flex';
+      hotCov.style.display = inCoverPanel ? 'none' : 'flex';
+      // ✅ mostrar el Filtro solo cuando NO estamos dentro del panel de Filtro
+      hotFilter.style.display = inFilterPanel ? 'none' : 'flex';
+    }
+
+    function showSubHotspotsAndUpdate(){
+      showSubHotspots();
+      updateCableVisibilityByView();
+      updateDockHotspotsByView();
+    }
+
+    function hideAllHotspots(){
+      document.querySelectorAll('.hotspot').forEach(el => el.style.display = 'none');
+    }
+
+    function updateBagVisibility(){
+  const show = inCoverPanel && coverOpen && !pnlBag.classList.contains('visible');
+  hotBag.style.display = show ? 'flex' : 'none';
+}
+
+
+function exitCoverPanelIfAny(){
+  if (inCoverPanel){
+    inCoverPanel = false;
+    stopCoverEnforcer();     // ⬅️ apaga el enforcer si estaba activo
+    hotCov.style.display = 'flex';
+    updateBagVisibility();
+  }
+}
+
+    // --- helpers de ángulos
+    const toDeg = r => r * 180 / Math.PI;
+    const normDeg = d => ((d % 360) + 360) % 360;
+    const angDiff = (a,b) => {
+      const A = normDeg(a), B = normDeg(b);
+      let d = Math.abs(A-B);
+      return d>180 ? 360-d : d;
+    };
+
+    // ----- Rango de visibilidad para la parte inferior (añadido) -----
+    const INFERIOR_PHI_MIN = 105; // ajusta este umbral si quieres verlos antes desde abajo
+    const phiDeg = () => (mv.getCameraOrbit().phi * 180 / Math.PI);
+    const isBottomView = () => phiDeg() >= INFERIOR_PHI_MIN;
+
+    function isBackView(thetaDeg){
+  const BACK_THETA_CENTER = 180;
+  const BACK_THETA_TOL    = 140; // antes 115 → más tolerancia lateral
+  const a = ((thetaDeg % 360) + 360) % 360;
+  const delta = Math.abs(a - BACK_THETA_CENTER);
+  return delta <= BACK_THETA_TOL;
+}
+
+    function isFrontView(thetaDeg){
+      const a = normDeg(thetaDeg);
+      const delta = Math.min(a, 360 - a);
+      return delta <= 95;
+    }
+
+    function updateDockHotspotsByView(){
+      // Si estás en Barredora o con cubierta abierta, oculta estación
+      if (pnlRob.classList.contains('visible') || inCoverPanel) {
+        hideStationHotspots();
+        return;
+      }
+      // Si NO estás en Estación, oculta estación
+      if (!pnlEst.classList.contains('visible')) {
+        hideStationHotspots();
+        return;
+      }
+      // Sólo con Estación visible controlamos por ángulo frontal
+      const { theta } = mv.getCameraOrbit();
+      const thetaDeg = (theta * 180 / Math.PI);
+      const front = isFrontView(thetaDeg);
+
+      hotTrn.style.display = front ? 'flex' : 'none';
+      hotTer.style.display = front ? 'flex' : 'none';
+      hotSuc.style.display = front ? 'flex' : 'none';
+    }
+
+    function updateRollerVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ 
+    hotRoller.style.display = 'none'; 
+    return; 
+  }
+  if(pnlRoller.classList.contains('visible')){
+    hotRoller.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  const phiOK = (p >= 90 && p <= 175);
+  const dTheta = ((t + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotRoller.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateBatteryCoverVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ 
+    hotBatteryCover.style.display = 'none'; 
+    return; 
+  }
+  if(pnlBatteryCover.classList.contains('visible')){
+    hotBatteryCover.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // mismo rango que los inferiores
+  const phiOK   = (p >= 90 && p <= 175);
+  const dTheta  = ((t + 540) % 360) - 180; // centro ~0°
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotBatteryCover.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateDriveWheelVisibilityByView(hotEl, pnlEl){
+  if(!pnlRob.classList.contains('visible')){ hotEl.style.display = 'none'; return; }
+  if(pnlEl.classList.contains('visible'))   { hotEl.style.display = 'none'; return; }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // “inferior”: desde ~abajo y tolerancia amplia en theta (frente)
+  const phiOK   = (p >= 90 && p <= 175);
+  const dTheta  = ((t + 540) % 360) - 180; // centro ~0°
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotEl.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateSideBrushVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ hotSideBrush.style.display = 'none'; return; }
+  if(pnlSideBrush.classList.contains('visible')){ hotSideBrush.style.display = 'none'; return; }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // inferior (phi alto) + frente ~0° con tolerancia
+  const phiOK   = (p >= 90 && p <= 175);
+  const dTheta  = ((t + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotSideBrush.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateDustOutVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ hotDustOut.style.display = 'none'; return; }
+  if(pnlDustOut.classList.contains('visible')){ hotDustOut.style.display = 'none'; return; }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // inferior (phi alto) + frente ~0° con tolerancia
+  const phiOK   = (p >= 90 && p <= 175);
+  const dTheta  = ((t + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotDustOut.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+function updateBrushLockVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ hotBrushLock.style.display = 'none'; return; }
+  if(pnlBrushLock.classList.contains('visible')){ hotBrushLock.style.display = 'none'; return; }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // Vista inferior (phi alto) + alrededor del frente (0°) con tolerancia
+  const phiOK   = (p >= 90 && p <= 175);
+  const dTheta  = ((t + 540) % 360) - 180;   // diferencia respecto a 0°
+  const thetaOK = Math.abs(dTheta) <= 70;
+
+  hotBrushLock.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+    // 👀 Visibilidad angular Sensor de desnivel (inferior)
+const CLIFF_PHI_MIN = 90;
+const CLIFF_PHI_MAX = 175;
+const CLIFF_THETA_CENTER = 0;
+const CLIFF_THETA_TOL = 70;
+
+function updateCliffVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ 
+    hotCliff.style.display = 'none'; 
+    return; 
+  }
+  if(pnlCliff.classList.contains('visible')){
+    hotCliff.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  const phiOK = (p >= CLIFF_PHI_MIN && p <= CLIFF_PHI_MAX);
+  const dTheta = ((t - CLIFF_THETA_CENTER + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= CLIFF_THETA_TOL;
+
+  hotCliff.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+    // 👀 Visibilidad angular Tapa del cepillo (inferior) — igual que el cepillo
+const BRUSHTOP_PHI_MIN = 90;
+const BRUSHTOP_PHI_MAX = 175;
+const BRUSHTOP_THETA_CENTER = 0;
+const BRUSHTOP_THETA_TOL = 70;
+
+function updateBrushTopVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ 
+    hotBrushTop.style.display = 'none'; 
+    return; 
+  }
+  if(pnlBrushTop.classList.contains('visible')){
+    hotBrushTop.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  const phiOK = (p >= BRUSHTOP_PHI_MIN && p <= BRUSHTOP_PHI_MAX);
+  const dTheta = ((t - BRUSHTOP_THETA_CENTER + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= BRUSHTOP_THETA_TOL;
+
+  hotBrushTop.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+    // 👀 Visibilidad angular Pin de carga (inferior)
+const CHARGEPIN_PHI_MIN = 80;  // desde ~abajo
+const CHARGEPIN_PHI_MAX = 175;
+const CHARGEPIN_THETA_CENTER = 0;  // ajusta si el pin está más hacia un lado
+const CHARGEPIN_THETA_TOL = 70;
+
+function updateChargePinVisibilityByView(){
+  // Solo en el panel de la Barredora
+  if(!pnlRob.classList.contains('visible')){ 
+    hotChargePin.style.display = 'none'; 
+    return; 
+  }
+  // Si el panel propio está abierto, ocultar el botón para no duplicar
+  if(pnlChargePin.classList.contains('visible')){
+    hotChargePin.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  // “Inferior” = phi alto (mirando desde abajo)
+  const phiOK   = (p >= CHARGEPIN_PHI_MIN && p <= CHARGEPIN_PHI_MAX);
+
+  // Orientación aproximada (opcional): alrededor del frente 0°
+  const dTheta = ((t - CHARGEPIN_THETA_CENTER + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= CHARGEPIN_THETA_TOL;
+
+  hotChargePin.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+// 👀 Visibilidad angular Cepillo (inferior) — igual al pin de carga
+const BRUSH_PHI_MIN = 80;
+const BRUSH_PHI_MAX = 175;
+const BRUSH_THETA_CENTER = 0;
+const BRUSH_THETA_TOL = 70;
+
+function updateBrushVisibilityByView(){
+  if(!pnlRob.classList.contains('visible')){ 
+    hotBrush.style.display = 'none'; 
+    return; 
+  }
+  if(pnlBrush.classList.contains('visible')){
+    hotBrush.style.display = 'none';
+    return;
+  }
+
+  const { theta, phi } = mv.getCameraOrbit();
+  const t = (theta * 180/Math.PI);
+  const p = (phi   * 180/Math.PI);
+
+  const phiOK = (p >= BRUSH_PHI_MIN && p <= BRUSH_PHI_MAX);
+  const dTheta = ((t - BRUSH_THETA_CENTER + 540) % 360) - 180;
+  const thetaOK = Math.abs(dTheta) <= BRUSH_THETA_TOL;
+
+  hotBrush.style.display = (phiOK && thetaOK) ? 'flex' : 'none';
+}
+
+    // 👀 Visibilidad angular del Botón de inicio (cenital)
+    const START_PHI_MAX = 90;
+    function updateStartVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotStart.style.display = 'none'; return; }
+      const { phi } = mv.getCameraOrbit();
+      const p = (phi * 180 / Math.PI);
+      const fromTopOK = p <= START_PHI_MAX;
+      const finalVisible = fromTopOK && !pnlStart.classList.contains('visible');
+      hotStart.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    function updateCableVisibilityByView(){
+  // Mostrar/ocultar SOLO en vista de Estación (no en Barredora ni dentro de paneles)
+  if (!pnlEst.classList.contains('visible') || pnlRob.classList.contains('visible') || inFilterPanel || inCoverPanel) {
+    hotCable.style.display  = 'none';
+    hotFilter.style.display = 'none';
+    if (!pnlFine.classList.contains('visible')) hotFine.style.display = 'none';
+    return;
+  }
+
+  // Si alguno de sus paneles está abierto, no forzamos ángulo (ya están “en foco”)
+  if (pnlCable.classList.contains('visible') || pnlFilter.classList.contains('visible')) {
+    hotCable.style.display  = pnlCable.classList.contains('visible')  ? 'flex' : 'none';
+    hotFilter.style.display = pnlFilter.classList.contains('visible') ? 'flex' : 'none';
+    if (!pnlFine.classList.contains('visible')) hotFine.style.display = 'none';
+    return;
+  }
+
+  // ---- Gating angular (parte trasera) ----
+  const { theta, phi } = mv.getCameraOrbit();
+  const toDeg = r => r * 180 / Math.PI;
+  const normDeg = d => ((d % 360) + 360) % 360;
+  const angDiff = (a,b) => { const A=normDeg(a), B=normDeg(b); let d=Math.abs(A-B); return d>180? 360-d : d; };
+
+  const BACK_THETA_CENTER = 180;  // atrás
+  const BACK_THETA_TOL    = 115;
+  const BACK_PHI_CENTER   = 90;   // horizonte
+  const BACK_PHI_TOL      = 70;
+
+  const thetaDeg = toDeg(theta);
+  const phiDeg   = toDeg(phi);
+
+  const backOK = angDiff(thetaDeg, BACK_THETA_CENTER) <= BACK_THETA_TOL;
+  const phiOK  = Math.abs(phiDeg - BACK_PHI_CENTER)   <= BACK_PHI_TOL;
+
+  const showByAngle = backOK && phiOK;
+
+  hotCable.style.display  = showByAngle ? 'flex' : 'none';
+  hotFilter.style.display = showByAngle ? 'flex' : 'none';
+  if (!pnlFine.classList.contains('visible')) hotFine.style.display = 'none';
+}
+
+
+    // 👀 Visibilidad angular del LiDAR (cenital)
+    const LIDAR_PHI_MAX = 90;
+    function updateLidarVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotLidar.style.display = 'none'; return; }
+      const { phi } = mv.getCameraOrbit();
+      const p = (phi * 180 / Math.PI);
+      const fromTopOK = p <= LIDAR_PHI_MAX;
+      const finalVisible = fromTopOK && !pnlLidar.classList.contains('visible');
+      hotLidar.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    // 👀 Contenedor visible solo dentro de Cubierta superior
+    function updateDustVisibilityByContext(){
+      const inTopCover = pnlTopCover.classList.contains('visible');
+      const dustPanelOpen = pnlDust.classList.contains('visible');
+      hotDust.style.display = (inTopCover && !dustPanelOpen) ? 'flex' : 'none';
+    }
+
+    // 👀 Visibilidad angular carga/descarga (cenital)
+    const CHARGE_PHI_MAX = 90;
+    function updateChargeVisibilityByView(){
+  if (!pnlRob.classList.contains('visible')) { 
+    hotCharge.style.display = 'none'; 
+    return; 
+  }
+  // Visible salvo cuando el propio panel de "Carga" está abierto
+  hotCharge.style.display = pnlCharge.classList.contains('visible') ? 'none' : 'flex';
+}
+
+// Botón "Abrir puerta superior"
+const topBtn = document.getElementById('abrir-topcover-btn');
+
+topBtn.addEventListener('click', async () => {
+  if (!loaded || isBusy) return;
+  isBusy = true;
+  stopPoseHold();
+
+  try{
+    setCam(topCoverCamCloser);                 // mueve la cámara
+    await playClip('tapa_barredora_abrir', {   // ▶️ reproduce el clip
+      freezeAt: 'end'
+    });
+
+    showPanel(pnlTopCover);
+    updateDustVisibilityByContext();
+  } finally {
+    isBusy = false;
+  }
+});
+
+    // 👀 Visibilidad angular cubierta superior (cenital)
+    const TOPCOVER_PHI_MAX = 90;
+    function updateTopCoverVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotTopCover.style.display = 'none'; return; }
+      const { phi } = mv.getCameraOrbit();
+      const p = (phi * 180 / Math.PI);
+      const fromTopOK = p <= TOPCOVER_PHI_MAX;
+      const finalVisible = fromTopOK && !pnlTopCover.classList.contains('visible');
+      hotTopCover.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    // 👀 Visibilidad angular del Indicador (cenital)
+    const STATUS_PHI_MAX = 90;
+    function updateStatusVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotStatus.style.display = 'none'; return; }
+      const { phi } = mv.getCameraOrbit();
+      const p = (phi * 180 / Math.PI);
+      const fromTopOK = p <= STATUS_PHI_MAX;
+      const finalVisible = fromTopOK && !pnlStatus.classList.contains('visible');
+      hotStatus.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    /* ==== LATERALES ==== */
+    const OBSTACLE_THETA_CENTER = -35;
+    const OBSTACLE_THETA_TOL    = 35;
+    const OBSTACLE_PHI_CENTER   = 60;
+    const OBSTACLE_PHI_TOL      = 35;
+
+    function updateObstacleVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotObstacle.style.display = 'none'; return; }
+      const { theta, phi } = mv.getCameraOrbit();
+      const t = toDeg(theta);
+      const p = toDeg(phi);
+      const thOK = angDiff(t, OBSTACLE_THETA_CENTER) <= OBSTACLE_THETA_TOL;
+      const phOK = Math.abs(p - OBSTACLE_PHI_CENTER) <= OBSTACLE_PHI_TOL;
+      const finalVisible = thOK && phOK && !pnlObstacle.classList.contains('visible');
+      hotObstacle.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    const POWER_THETA_CENTER = -35;
+    const POWER_THETA_TOL    = 40;
+    const POWER_PHI_CENTER   = 85;
+    const POWER_PHI_TOL      = 25;
+
+    function updatePowerVisibilityByView(){
+      if(!pnlRob.classList.contains('visible')){ hotPower.style.display = 'none'; return; }
+      const { theta, phi } = mv.getCameraOrbit();
+      const t = toDeg(theta);
+      const p = toDeg(phi);
+      const thOK = angDiff(t, POWER_THETA_CENTER) <= POWER_THETA_TOL;
+      const phOK = Math.abs(p - POWER_PHI_CENTER) <= POWER_PHI_TOL;
+      const finalVisible = thOK && phOK && !pnlPower.classList.contains('visible');
+      hotPower.style.display = finalVisible ? 'flex' : 'none';
+    }
+
+    /* ========= LÓGICA ========= */
+
+    // Estación
+    hotEst.addEventListener('click', async (e)=>{
+      hideRobotScopedHotspots();
+      hotBag.style.display = 'none';
+      stopPoseHold(); exitCoverPanelIfAny();
+      e.stopPropagation();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hideMainHotspots(); showSubHotspotsAndUpdate();
+      updateBagVisibility();
+      mv.autoRotate = false;
+      hideAllPanels();
+      setCam(estacionCam);
+      showPanel(pnlEst);
+      try{ await playClip('barredora_salida'); } finally { isBusy=false; }
+    });
+
+    backEst.addEventListener('click', async (e)=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      e.stopPropagation();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hidePanel(pnlEst);
+      hideSubHotspots();
+      try{
+        await playClip('barredora_entrada');
+        setCam(inicialCam);
+        mv.autoRotate = false;
+      } finally { showMainHotspots(); updateBagVisibility(); isBusy=false; }
+    });
+
+    hotSideBrush.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(sideBrushCam);
+  showPanel(pnlSideBrush);
+
+  isBusy = false;
+});
+
+backSideBrush.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlSideBrush);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateSideBrushVisibilityByView();
+
+  isBusy = false;
+});
+
+// Indicador (estación)
+hotInd.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  hideRobotScopedHotspots();
+  stopPoseHold(); exitCoverPanelIfAny();
+  if(!loaded||isBusy) return; isBusy=true;
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  updateBagVisibility();
+
+  setCam(indicatorCam);
+  showPanel(pnlInd);
+
+  isBusy=false;
+});
+
+backInd.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  hideRobotScopedHotspots();
+  stopPoseHold(); exitCoverPanelIfAny();
+  if(!loaded||isBusy) return; isBusy=true;
+
+  hidePanel(pnlInd);
+  setCam(estacionCam);
+  showPanel(pnlEst);
+  showSubHotspotsAndUpdate();
+  updateBagVisibility();
+
+  isBusy=false;
+});
+
+// 🔄 REEMPLAZA este handler:
+hotBag.addEventListener('click', async (e)=>{
+  e.stopPropagation();
+  if(!loaded || isBusy) return;
+  isBusy = true;
+
+  hotBag.style.display = 'none';
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  setCam(bagCam);
+  showPanel(pnlBag);
+
+  // 🆕 Cargar y mostrar la imagen
+  const imgUrl = (hotBag?.dataset?.image) || 'img/bolsa_polvo.webp'; // fallback
+  if (bagImg) bagImg.src = imgUrl;
+  if (bagMedia) bagMedia.hidden = false;
+
+  requestAnimationFrame(() => updateBagVisibility());
+
+  try{
+    await playClip('polvo_fuera', { durationMs: 1000 });
+  } finally {
+    isBusy = false;
+  }
+});
+
+backBag.addEventListener('click', async (e)=>{
+  e.stopPropagation();
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+
+  try{
+    await playClip('polvo_dentro', { durationMs: 1000 });
+    coverOpen = true;
+    captureCoverOpenPose();
+  } finally {
+    // 🆕 Ocultar la imagen al cerrar el panel
+    if (bagMedia) bagMedia.hidden = true;
+
+    hidePanel(pnlBag);
+    setCam(coverCam);
+    showPanel(pnlCov);
+    refreshCoverPanelUI();
+    updateBagVisibility();
+    isBusy = false;
+  }
+});
+
+hotCov.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  hideRobotScopedHotspots();
+  stopPoseHold();
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+
+  inCoverPanel = true;
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+
+  setCam(coverCam);
+  showPanel(pnlCov);
+  refreshCoverPanelUI();   // ← muestra "Abrir cubierta" habilitado/deshabilitado
+  updateBagVisibility();   // ← la bolsa aparece solo si ya está abierta
+
+  isBusy = false;
+});
+
+backCov.addEventListener('click', async (e)=>{
+  e.stopPropagation();
+  if(!loaded || isBusy) return;
+  isBusy = true;
+
+  try{
+    // Si la tapa estaba abierta, primero ciérrala
+    if (coverOpen){
+      stopCoverEnforcer();
+      await playClip('tapa_polvo_cerrar', { durationMs: 1000 });
+      coverOpen = false;
+      coverOpenPose.clear();
+      refreshCoverPanelUI();
+    }
+
+    // Sal del panel de Cubierta y vuelve a "Estación"
+    inCoverPanel = false;
+    hidePanel(pnlCov);
+    setCam(estacionCam);
+    showPanel(pnlEst);
+    showSubHotspotsAndUpdate();
+    updateBagVisibility();
+
+    // ▶️ Lanza la animación de transición
+    await playClip('barredora_salida'); // usa los tiempos de CLIPS
+  } finally {
+    isBusy = false;
+  }
+});
+
+
+hotBrushLock.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(brushLockCam);
+  showPanel(pnlBrushLock);
+
+  isBusy = false;
+});
+
+backBrushLock.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlBrushLock);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateBrushLockVisibilityByView();
+
+  isBusy = false;
+});
+
+openTopCoverBtn.addEventListener('click', async ()=>{
+  if(!loaded || isBusy) return;
+  isBusy = true;
+  stopPoseHold();
+
+  try{
+    // ▶️ Abre la tapa superior y congela la pose al final
+    await playClip('tapa_barredora_abrir', { freezeAt:'end' });
+
+    // (opcional) mantener cámara/panel actuales:
+    setCam(topCoverCam);
+    showPanel(pnlTopCover);
+    updateDustVisibilityByContext();
+  } finally {
+    isBusy = false;
+  }
+});
+
+    // Cubierta superior (entrar)
+    hotTopCover.addEventListener('click', ()=>{
+      hotBag.style.display = 'none'; 
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots(); // extra seguridad
+
+      setCam(topCoverCam);
+      showPanel(pnlTopCover);
+
+      updateDustVisibilityByContext();
+      layoutTopPanels();
+      isBusy = false;
+    });
+
+    // Cubierta superior (volver)
+    backTopCover.addEventListener('click', async ()=>{
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+  stopPoseHold();
+
+  try{
+    // Oculta el panel de cubierta y su hotspot interno
+    hidePanel(pnlTopCover);
+    hotDust.style.display = 'none';
+
+    // ▶️ Dispara la animación de salida y congélala al final
+    await playClip('barredora_salida', { freezeAt:'end' });
+
+    // Regresa a la vista/panel de la Barredora
+    setCam(robotCam);
+    showPanel(pnlRob);
+    showRobotScopedHotspots(); // no-op
+    updateTopCoverVisibilityByView();
+    updateDustVisibilityByContext();
+    resetTopPanelsLayout();
+  } finally {
+    isBusy = false;
+  }
+});
+
+    // Pin de carga (inferior)
+hotChargePin.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+
+  setCam(chargePinCam);
+  showPanel(pnlChargePin);
+
+  isBusy = false;
+});
+
+// Cubierta de la batería (inferior)
+hotBatteryCover.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(batteryCoverCam);
+  showPanel(pnlBatteryCover);
+
+  isBusy = false;
+});
+
+backBatteryCover.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlBatteryCover);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateBatteryCoverVisibilityByView();
+
+  isBusy = false;
+});
+
+
+backChargePin.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlChargePin);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  showRobotScopedHotspots();
+  updateChargePinVisibilityByView();
+
+  isBusy = false;
+});
+
+// Rodillo (inferior)
+hotRoller.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(rollerCam);
+  showPanel(pnlRoller);
+
+  isBusy = false;
+});
+
+backRoller.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlRoller);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateRollerVisibilityByView();
+
+  isBusy = false;
+});
+
+hotDustOut.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(dustOutCam);
+  showPanel(pnlDustOut);
+
+  isBusy = false;
+});
+
+backDustOut.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlDustOut);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateDustOutVisibilityByView();
+
+  isBusy = false;
+});
+
+// Contenedor de polvo — abrir panel y mostrar imagen
+hotDust.addEventListener('click', ()=>{
+  if(!loaded || isBusy) return;
+  isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlTopCover);
+  setCam(dustCam);
+  showPanel(pnlDust);
+  hotDust.style.display = 'none';
+
+  // 🆕 Cargar y mostrar la imagen
+  const imgUrl = (hotDust?.dataset?.image) || 'img/contenedor_polvo.webp';
+  if (dustImg)   dustImg.src = imgUrl;
+  if (dustMedia) dustMedia.hidden = false;
+
+  isBusy = false;
+});
+
+backDust.addEventListener('click', async ()=>{
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+  stopPoseHold();
+
+  try{
+    await playClip('tapa_barredora_cerrar', { freezeAt:'end' }); // tu animación de volver
+  } finally {
+    if (dustMedia) dustMedia.hidden = true;  // 🆕 ocultar imagen
+    hidePanel(pnlDust);
+    setCam(topCoverCam);
+    showPanel(pnlTopCover);
+    updateDustVisibilityByContext();
+    isBusy = false;
+  }
+});
+
+    // Rueda motriz IZQUIERDA
+hotDriveLeft.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(driveLeftCam);
+  showPanel(pnlDriveLeft);
+
+  isBusy = false;
+});
+backDriveLeft.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlDriveLeft);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateDriveWheelVisibilityByView(hotDriveLeft, pnlDriveLeft);
+  updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+
+  isBusy = false;
+});
+
+// Rueda motriz DERECHA
+hotDriveRight.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(driveRightCam);
+  showPanel(pnlDriveRight);
+
+  isBusy = false;
+});
+backDriveRight.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlDriveRight);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateDriveWheelVisibilityByView(hotDriveLeft, pnlDriveLeft);
+  updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+
+  isBusy = false;
+});
+
+    // Tapa del cepillo (inferior)
+hotBrushTop.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(brushTopCam);
+  showPanel(pnlBrushTop);
+
+  isBusy = false;
+});
+
+backBrushTop.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlBrushTop);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateBrushTopVisibilityByView();
+
+  isBusy = false;
+});
+
+    // Carga/descarga
+    hotCharge.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(chargeCam);
+      showPanel(pnlCharge);
+
+      isBusy = false;
+    });
+
+    backCharge.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hidePanel(pnlCharge);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updateChargeVisibilityByView();
+
+      isBusy = false;
+    });
+
+    hotCable.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  hideRobotScopedHotspots();
+  stopPoseHold(); exitCoverPanelIfAny();
+  if(!loaded||isBusy) return; isBusy=true;
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  updateBagVisibility();
+  setCam(cableCam);
+  showPanel(pnlCable);
+  isBusy=false;
+});
+
+backCable.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  hideRobotScopedHotspots();
+  stopPoseHold(); exitCoverPanelIfAny();
+  if(!loaded||isBusy) return; isBusy=true;
+
+  hidePanel(pnlCable);
+  setCam(estacionCam);
+  showPanel(pnlEst);
+  showSubHotspotsAndUpdate();
+  updateBagVisibility();
+  isBusy=false;
+});
+
+// Sensor de desnivel (inferior)
+hotCliff.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(cliffCam);
+  showPanel(pnlCliff);
+
+  isBusy = false;
+});
+
+backCliff.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlCliff);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateCliffVisibilityByView();
+
+  isBusy = false;
+});
+
+// Cepillo (inferior)
+hotBrush.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+  hideRobotScopedHotspots();
+  hideStationHotspots();
+
+  setCam(brushCam);
+  showPanel(pnlBrush);
+
+  isBusy = false;
+});
+
+backBrush.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  stopPoseHold();
+
+  hidePanel(pnlBrush);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  // Deja que la visibilidad angular lo muestre/oculte
+  updateBrushVisibilityByView();
+
+  isBusy = false;
+});
+
+
+    // Power
+    hotPower.addEventListener('click', ()=>{
+      stopPoseHold();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(powerCam);
+      showPanel(pnlPower);
+
+      isBusy=false;
+    });
+
+    backPower.addEventListener('click', ()=>{
+      stopPoseHold();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hidePanel(pnlPower);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updatePowerVisibilityByView();
+
+      isBusy=false;
+    });
+
+    // LiDAR
+    hotLidar.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(lidarCam);
+      showPanel(pnlLidar);
+
+      isBusy = false;
+    });
+
+    backLidar.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hidePanel(pnlLidar);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updateLidarVisibilityByView();
+
+      isBusy = false;
+    });
+
+    // Start
+    hotStart.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(startCam);
+      showPanel(pnlStart);
+
+      isBusy = false;
+    });
+
+    backStart.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hidePanel(pnlStart);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updateStartVisibilityByView();
+
+      isBusy = false;
+    });
+
+    // Indicador (nuevo)
+    hotStatus.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(statusCam);
+      showPanel(pnlStatus);
+
+      isBusy = false;
+    });
+
+    backStatus.addEventListener('click', ()=>{
+      if(!loaded||isBusy) return; isBusy = true;
+      stopPoseHold();
+
+      hidePanel(pnlStatus);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updateStatusVisibilityByView();
+
+      isBusy = false;
+    });
+
+    // Filtro padre
+    hotFilter.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy=true;
+
+  inFilterPanel = true;     // ✅ estamos dentro del panel de filtro
+  inCoverPanel = false;     
+  hideAllPanels();
+  hideMainHotspots();
+  hideSubHotspots();
+
+  setCam({ orbit:'180deg 85deg 5m', target:'0m 1m 0m', fov:'35deg' }); // filterCam
+  showPanel(pnlFilter);
+
+  updateFineVisibility();   // ✅ mostrar/ocultar hotspot hijo según corresponda
+  isBusy=false;
+});
+
+backFilter.addEventListener('click', async ()=>{
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+  try{
+    inFilterPanel = false;            // salimos del panel de filtro
+    hidePanel(pnlFilter);
+    setCam(estacionCam);              // vuelve a la estación
+    showPanel(pnlEst);
+    showSubHotspotsAndUpdate();       // actualiza visibilidad de hotspots de la base
+    updateBagVisibility();
+    updateFineVisibility();
+
+    // ▶️ dispara la animación de salida (una vez y congelada al final)
+    await playClip('barredora_salida', { durationMs: 1000, freezeAt:'end' });
+  } finally {
+    isBusy = false;
+  }
+});
+
+    // Filtro fino
+    hotFine.addEventListener('click', async ()=>{
+  stopPoseHold();
+  if(!loaded||isBusy) return; isBusy=true;
+  try{
+    hideAllPanels();
+    hideMainHotspots();
+    hideSubHotspots();
+    hideStationHotspots();
+
+    setCam(fineCam);
+    showPanel(pnlFine);
+    hotFine.style.display = 'none';
+
+    // ▶️ abrir puerta trasera
+    await playClip('puerta_trasera_abrir', { durationMs: 1000, freezeAt:'end' });
+  } finally {
+    isBusy=false;
+  }
+});
+
+backFine.addEventListener('click', async ()=>{
+  stopPoseHold();
+  if(!loaded||isBusy) return; isBusy=true;
+  try{
+    // ▶️ cerrar puerta trasera
+    await playClip('puerta_trasera_cerrar', { durationMs: 1000, freezeAt:'end' });
+
+    hidePanel(pnlFine);
+    inFilterPanel = true;
+    setCam(filterCam);
+    showPanel(pnlFilter);
+    updateFineVisibility();
+  } finally {
+    isBusy=false;
+  }
+});
+
+    backFine.addEventListener('click', ()=>{
+      stopPoseHold();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hidePanel(pnlFine);
+      inFilterPanel = true;
+      setCam(filterCam);
+      showPanel(pnlFilter);
+      updateFineVisibility();
+
+      isBusy=false;
+    });
+
+    // Barredora (ENTRAR)
+    hotRob.addEventListener('click', async (e)=>{
+      hotBag.style.display = 'none';
+      stopPoseHold(); exitCoverPanelIfAny();
+      e.stopPropagation();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots(); // ✅ oculta todo lo de estación
+
+      mv.autoRotate = false;
+      hideAllPanels();
+      setCam(robotCam);
+      showPanel(pnlRob);
+
+      // Que manden solo los "update*"
+      showRobotScopedHotspots(); // no-op
+      updateObstacleVisibilityByView();
+      updatePowerVisibilityByView();
+      updateLidarVisibilityByView();
+      updateStartVisibilityByView();
+      updateChargeVisibilityByView();
+      updateStatusVisibilityByView();
+      updateTopCoverVisibilityByView();
+      updateDustVisibilityByContext();
+      updateChargePinVisibilityByView();
+      updateBrushTopVisibilityByView();
+      updateCliffVisibilityByView();
+      updateCliffVisibilityByViewGeneric(hotCliff2, pnlCliff2);
+      updateCliffVisibilityByViewGeneric(hotCliff3, pnlCliff3);
+      updateCliffVisibilityByViewGeneric(hotCliff4, pnlCliff4);
+      updateRollerVisibilityByView();
+      updateBatteryCoverVisibilityByView();
+      updateDriveWheelVisibilityByView(hotDriveLeft,  pnlDriveLeft);
+      updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+      updateSideBrushVisibilityByView();
+      updateDustOutVisibilityByView();
+      updateBrushLockVisibilityByView();
+
+      try{ await playClip('barredora_salida'); } finally { isBusy=false; }
+    });
+
+    // Barredora (SALIR)
+    backRob.addEventListener('click', async (e)=>{
+      stopPoseHold(); exitCoverPanelIfAny();
+      e.stopPropagation();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hideRobotScopedHotspots();
+
+      hidePanel(pnlRob);
+      try{
+        await playClip('barredora_entrada');
+        setCam(inicialCam);
+        mv.autoRotate = false;
+      } finally { showMainHotspots(); updateBagVisibility(); isBusy=false; }
+    });
+
+    // Succión
+    hotSuc.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hideAllPanels(); hideMainHotspots(); hideSubHotspots(); updateBagVisibility();
+      setCam(suctionCam); showPanel(pnlSuc);
+      isBusy=false;
+    });
+    backSuc.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hidePanel(pnlSuc); setCam(estacionCam); showPanel(pnlEst); showSubHotspotsAndUpdate(); updateBagVisibility(); isBusy=false;
+    });
+
+    // Cliff 2
+hotCliff2.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hideAllPanels(); hideMainHotspots(); hideSubHotspots(); hideRobotScopedHotspots(); hideStationHotspots();
+  setCam(cliff2Cam);
+  showPanel(pnlCliff2);
+  isBusy = false;
+});
+backCliff2.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hidePanel(pnlCliff2);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateCliffVisibilityByViewGeneric(hotCliff2,pnlCliff2);
+  isBusy = false;
+});
+
+// Cliff 3
+hotCliff3.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hideAllPanels(); hideMainHotspots(); hideSubHotspots(); hideRobotScopedHotspots(); hideStationHotspots();
+  setCam(cliff3Cam);
+  showPanel(pnlCliff3);
+  isBusy = false;
+});
+backCliff3.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hidePanel(pnlCliff3);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateCliffVisibilityByViewGeneric(hotCliff3,pnlCliff3);
+  isBusy = false;
+});
+
+// Cliff 4
+hotCliff4.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hideAllPanels(); hideMainHotspots(); hideSubHotspots(); hideRobotScopedHotspots(); hideStationHotspots();
+  setCam(cliff4Cam);
+  showPanel(pnlCliff4);
+  isBusy = false;
+});
+backCliff4.addEventListener('click', ()=>{
+  if(!loaded||isBusy) return; isBusy = true;
+  hidePanel(pnlCliff4);
+  setCam(robotCam);
+  showPanel(pnlRob);
+  updateCliffVisibilityByViewGeneric(hotCliff4,pnlCliff4);
+  isBusy = false;
+});
+
+    // Terminal
+    hotTer.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hideAllPanels(); hideMainHotspots(); hideSubHotspots(); updateBagVisibility();
+      setCam(terminalCam); showPanel(pnlTer);
+      isBusy=false;
+    });
+    backTer.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hidePanel(pnlTer); setCam(estacionCam); showPanel(pnlEst); showSubHotspotsAndUpdate(); updateBagVisibility(); isBusy=false;
+    });
+
+    // Transmisor
+    hotTrn.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hideAllPanels(); hideMainHotspots(); hideSubHotspots(); updateBagVisibility();
+      setCam(transmitterCam); showPanel(pnlTrn);
+      isBusy=false;
+    });
+    backTrn.addEventListener('click', ()=>{
+      hideRobotScopedHotspots();
+      stopPoseHold(); exitCoverPanelIfAny();
+      if(!loaded||isBusy) return; isBusy=true;
+      hidePanel(pnlTrn); setCam(estacionCam); showPanel(pnlEst); showSubHotspotsAndUpdate(); updateBagVisibility(); isBusy=false;
+    });
+
+    // Obstáculos
+    hotObstacle.addEventListener('click', ()=>{
+      stopPoseHold();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hideAllPanels();
+      hideMainHotspots();
+      hideSubHotspots();
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+
+      setCam(obstacleCam);
+      showPanel(pnlObstacle);
+
+      isBusy=false;
+    });
+
+    backObstacle.addEventListener('click', ()=>{
+      stopPoseHold();
+      if(!loaded||isBusy) return; isBusy=true;
+
+      hidePanel(pnlObstacle);
+      setCam(robotCam);
+      showPanel(pnlRob);
+      showRobotScopedHotspots(); // no-op
+      updateObstacleVisibilityByView();
+
+      isBusy=false;
+    });
+
+    const openCoverBtn = document.getElementById('abrir-cubierta-btn');
+
+openCoverBtn.addEventListener('click', async ()=>{
+  if(!loaded||isBusy) return; 
+  isBusy = true;
+  stopPoseHold();                 // ¡quitamos cualquier hold!
+
+  try{
+    await playClip('tapa_polvo_abrir', { durationMs: 1000 });
+    coverOpen = true;
+
+    // La escena ya está en pose abierta: la capturamos…
+    captureCoverOpenPose();
+    // …y desde ahora la reimponemos cada frame mientras dure el flujo:
+    startCoverEnforcer();
+  } finally {
+    refreshCoverPanelUI();
+    updateBagVisibility();        // aparece el hotspot de bolsa
+    isBusy = false;
+  }
+});
+
+    // Reset (doble clic)
+    mv.addEventListener('dblclick', async () => {
+      if (bagMedia) bagMedia.hidden = true;
+      if (dustMedia) dustMedia.hidden = true;
+      stopPoseHold();
+      loaded = true;
+      inCoverPanel = false;
+      inFilterPanel = false;
+      hideRobotScopedHotspots();
+      hideStationHotspots();
+      hideAllPanels();
+      try{ mv.pause(); }catch{}
+      mv.animationTimeScale = 0;
+      setCam(inicialCam);
+      mv.autoRotate = false;
+      showMainHotspots();
+      updateBagVisibility();
+      updateCableVisibilityByView();
+      updateDockHotspotsByView();
+      updateFineVisibility();
+      updateObstacleVisibilityByView();
+      updatePowerVisibilityByView();
+      updateLidarVisibilityByView();
+      updateStartVisibilityByView();
+      updateChargeVisibilityByView();
+      updateStatusVisibilityByView();
+      updateTopCoverVisibilityByView();
+      updateDustVisibilityByContext();
+      updateChargePinVisibilityByView();
+      updateBrushVisibilityByView();
+      updateBrushTopVisibilityByView();
+      updateCliffVisibilityByView();
+      updateCliffVisibilityByViewGeneric(hotCliff2, pnlCliff2);
+      updateCliffVisibilityByViewGeneric(hotCliff3, pnlCliff3);
+      updateCliffVisibilityByViewGeneric(hotCliff4, pnlCliff4);
+      updateRollerVisibilityByView();
+      resetTopPanelsLayout();
+      updateBatteryCoverVisibilityByView();
+      updateDriveWheelVisibilityByView(hotDriveLeft,  pnlDriveLeft);
+      updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+      updateSideBrushVisibilityByView();
+      updateDustOutVisibilityByView();
+      updateBrushLockVisibilityByView();
+      coverOpen = false; // ← asegúrate de resetear este estado
+      refreshCoverPanelUI();
+      updateBagVisibility();
+      coverOpen = false;
+      stopCoverEnforcer();
+
+      await rAF();
+
+      isBusy = false;
+    });
+
+    mv.addEventListener('load', async ()=>{
+      loaded=true;
+      try { mv.animationCrossfadeDuration = 0; } catch {}
+      console.log('✅ Animaciones:', mv.availableAnimations);
+      hideRobotScopedHotspots();
+      hideStationHotspots(); // ⛔ que no se vean de inicio
+      updateCableVisibilityByView();
+      updateDockHotspotsByView();
+      updateFineVisibility();
+      updateObstacleVisibilityByView();
+      updatePowerVisibilityByView();
+      updateLidarVisibilityByView();
+      updateStartVisibilityByView();
+      updateChargeVisibilityByView();
+      updateStatusVisibilityByView();
+      updateTopCoverVisibilityByView();
+      updateDustVisibilityByContext();
+      updateChargePinVisibilityByView();
+      updateBrushVisibilityByView();
+      updateBrushTopVisibilityByView();
+      updateCliffVisibilityByView();
+      updateCliffVisibilityByViewGeneric(hotCliff2, pnlCliff2);
+      updateCliffVisibilityByViewGeneric(hotCliff3, pnlCliff3);
+      updateCliffVisibilityByViewGeneric(hotCliff4, pnlCliff4);
+      updateRollerVisibilityByView();
+      layoutTopPanels();
+      updateBatteryCoverVisibilityByView();
+      updateDriveWheelVisibilityByView(hotDriveLeft,  pnlDriveLeft);
+      updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+      updateSideBrushVisibilityByView();
+      updateDustOutVisibilityByView();
+      updateBrushLockVisibilityByView();
+
+    });
+
+    // Recalcular en cada movimiento de cámara
+    mv.addEventListener('camera-change', ()=>{
+      updateCableVisibilityByView();
+      updateDockHotspotsByView();
+      updateFineVisibility();
+      updateObstacleVisibilityByView();
+      updatePowerVisibilityByView();
+      updateLidarVisibilityByView();
+      updateStartVisibilityByView();
+      updateChargeVisibilityByView();
+      updateStatusVisibilityByView();
+      updateTopCoverVisibilityByView();
+      updateDustVisibilityByContext();
+      updateChargePinVisibilityByView();
+      updateBrushVisibilityByView();
+      updateBrushTopVisibilityByView();
+      updateCliffVisibilityByView();
+      updateCliffVisibilityByViewGeneric(hotCliff2, pnlCliff2);
+      updateCliffVisibilityByViewGeneric(hotCliff3, pnlCliff3);
+      updateCliffVisibilityByViewGeneric(hotCliff4, pnlCliff4);
+      updateRollerVisibilityByView();
+      updateBatteryCoverVisibilityByView();
+      updateDriveWheelVisibilityByView(hotDriveLeft,  pnlDriveLeft);
+      updateDriveWheelVisibilityByView(hotDriveRight, pnlDriveRight);
+      updateSideBrushVisibilityByView();
+      updateDustOutVisibilityByView();
+      updateBrushLockVisibilityByView();
+
+    });
+
+    // Reacomodar si cambia el tamaño de la ventana
+    window.addEventListener('resize', layoutTopPanels);
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="data:,">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meta | Realidad Inmersiva</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-1000">
+  <div id="particles-js" class="absolute inset-0"></div>
+  <div class="relative z-10 flex flex-col items-center justify-center w-full h-full">
+    <div class="relative w-48  h-48 mb-8">
+      <div class="absolute inset-0 rounded-full bg-[#4625FF] opacity-20 blur-2xl"></div>
+      <div class="absolute inset-4 border-2 border-[#00A3E0] rounded-full animate-orbit"></div>
+      <div class="absolute inset-6 border-2 border-[#00B2A9] rounded-full animate-orbit-reverse"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+
+      </div>
+    </div>
+    
+    <div class="logo-container mb-6">
+      <img 
+        src="imagenes/logo.png" 
+        alt="Logotipo" 
+        class="logo-image w-90 h-60 object-contain filter drop-shadow-2xl"
+        onerror="this.style.display='none'; document.getElementById('fallback-text').style.display='block';" >
+      <h1 id="fallback-text" class="text-5xl font-bold mb-6 text-center hidden">
+        <span class="gradient-text">LOGO</span>
+      </h1>
+    </div>
+
+    <div class="text-center mb-6 space-y-2">
+      <p class="loading-message">Inicializando metaverso...</p>
+      <p class="loading-message">Cargando activos 3D...</p>
+      <p class="loading-message">Preparando experiencia inmersiva...</p>
+    </div>
+    <div id="progress-bar-container" class="relative w-64 h-16 mb-6">
+      <svg class="w-full h-full" viewBox="0 0 100 20">
+        <rect x="0" y="8" width="100" height="4" fill="#1e293b" rx="2"/>
+        <rect id="progress-bar" x="0" y="8" width="0" height="4" fill="url(#progress-gradient)" rx="2"/>
+        <defs>
+          <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#25ff5b"/>
+            <stop offset="100%" style="stop-color:#00A3E0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div id="loading-text" class="absolute top-0 left-1/2 transform -translate-x-1/2 text-xl font-mono font-semibold text-[#00B2A9] mt-2">0%</div>
+    </div>
+    <button id="start-button" class="start-button hidden px-10 py-4 rounded-full text-lg font-bold text-white bg-gradient-to-r from-[#4625FF] to-[#00A3E0] hover:bg-gradient-to-r hover:from-[#00A3E0] hover:to-[#4625FF] transition-all duration-300 transform hover:scale-105 neon-glow">
+      ENTRAR AL METAVERSO
+    </button>
+    <div id="loading-indicator" class="flex space-x-3 mt-6">
+      <div class="loading-dot w-4 h-4 bg-[#00B2A9] rounded-full"></div>
+      <div class="loading-dot w-4 h-4 bg-[#00B2A9] rounded-full"></div>
+      <div class="loading-dot w-4 h-4 bg-[#00B2A9] rounded-full"></div>
+    </div>
+  </div>
+ <div id="instruction-box" class="absolute bottom-6 left-6 glass-effect p-4 rounded-xl block">
+    <div class="grid grid-cols-2 gap-3 text-sm text-[#e2e8f0]">
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md font-mono font-bold">W</span>
+        <span>Avanzar</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md font-mono font-bold">S</span>
+        <span>Retroceder</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md font-mono font-bold">A</span>
+        <span>Izquierda</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md font-mono font-bold">D</span>
+        <span>Derecha</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md">
+          <i class="fas fa-mouse-pointer"></i>
+        </span>
+        <span>Mirar</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="w-8 h-8 flex items-center justify-center bg-[#00A3E0] rounded-md font-mono font-bold">E</span>
+        <span>Interactuar</span>
+      </div>
+    </div>
+  </div>
+  <div id="mobile-instruction" class="absolute bottom-4 glass-effect p-3 rounded-xl md:hidden text-[#e2e8f0]">
+    <div class="text-center text-sm">
+      <p>Desliza para moverte | Toca para interactuar</p>
+    </div>
+  </div>
+</div>
+<div id="transition-screen" class="fixed inset-0 z-40 flex flex-col items-center justify-center hidden space-y-6">
+
+  <div class="loader-orb"></div>
+  
+  <p class="loading-text-soft">Preparando experiencia...</p>
+  <div class="progress-liquid">
+    <div id="transition-progress" class="fill" style="width: 0%"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+
+  window.addEventListener('load', () => {
+    if (typeof particlesJS === 'undefined') {
+      console.warn('particlesJS no está definido. Verifica que el script se cargó correctamente.');
+    } else {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 50, density: { enable: true, value_area: 800 } },
+          color: { value: ['000000', '#1e40af', '#1e293b'] },
+          shape: {
+            type: ['circle', 'triangle', 'polygon'],
+            polygon: { nb_sides: 5 }
+          },
+          opacity: { value: 0.5, random: true },
+          size: { value: 5, random: true },
+          line_linked: {
+            enable: true,
+            distance: 130,
+            color: '80DCE8',
+            opacity: 0.3,
+            width: 1
+          },
+          move: {
+            enable: true,
+            speed: 2,
+            direction: 'none',
+            random: true,
+            straight: false,
+            out_mode: 'out',
+            bounce: false
+          }
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: { enable: true, mode: 'repulse' },
+            onclick: { enable: true, mode: 'push' },
+            resize: true
+          }
+        },
+        retina_detect: true
+      });
+    }
+  });
+
+  // Simulación de carga (como respaldo si loadingManager no actualiza)
+  let progress = 0;
+  const progressBar = document.getElementById('progress-bar');
+  const loadingText = document.getElementById('loading-text');
+  const startButton = document.getElementById('start-button');
+  const loadingIndicator = document.getElementById('loading-indicator');
+  
+  if (!progressBar || !loadingText || !startButton || !loadingIndicator) {
+    console.error('Uno o más elementos DOM no están disponibles:', {
+      progressBar: !!progressBar,
+      loadingText: !!loadingText,
+      startButton: !!startButton,
+      loadingIndicator: !!loadingIndicator
+    });
+  } else {
+    const loadInterval = setInterval(() => {
+      progress += Math.random() * 5 + 5;
+      if (progress > 100) progress = 100;
+      
+      progressBar.style.width = `${progress}%`;
+      loadingText.textContent = `${Math.floor(progress)}%`;
+      
+      if (progress >= 100) {
+        clearInterval(loadInterval);
+        setTimeout(() => {
+          startButton.classList.remove('hidden');
+          startButton.classList.add('show');
+          loadingIndicator.classList.add('hidden');
+        }, 500);
+      }
+    }, 300);
+  }
+
+
+  const loadingDots = document.querySelectorAll('.loading-dot');
+  loadingDots.forEach(dot => {
+    dot.style.animationDuration = `${1 + Math.random() * 0.5}s`;
+  });
+
+  const holographicLines = document.querySelectorAll('.holographic-line');
+  holographicLines.forEach(line => {
+    line.style.animationDuration = `${4 + Math.random() * 3}s`;
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && chatActive) {
+      chatActive = false;
+      const chatBox = document.getElementById('chat-box');
+      const chatInput = document.getElementById('chat-input');
+      if (chatBox) chatBox.classList.add('hidden');
+      if (chatInput) chatInput.blur();
+    }
+  });
+</script>
+
+<script async src="https://unpkg.com/es-module-shims@1.5.2/dist/es-module-shims.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/",
+    "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js",
+    "gsap": "https://unpkg.com/gsap@3.12.2/dist/gsap.min.js",
+    "./characterSelection.js": "./characterSelection.js"
+  }
+}
+</script>
+<script type="module" src="script.js"></script>
+
+<button id="fullscreen-toggle" class="ui-button fullscreen-btn" title="Pantalla completa">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+  </svg>
+</button>
+
+
+<button id="chat-toggle" class="chat-toggle-btn fixed z-50 hidden" style="bottom: 20px; right: 20px;">
+  <div class="chat-icon">
+    <i class="fas fa-comment-dots"></i>
+    <div class="notification-dot"></div>
+  </div>
+  <span class="chat-tooltip">Abrir Chat</span>
+</button>
+
+<div id="chat-box" class="hidden fixed bottom-16 right-4 w-80 glass-effect rounded-2xl p-0 z-50 overflow-hidden">
+  <div id="chat-header">
+    <span>Chat</span>
+    <button id="chat-close"><i class="fas fa-times"></i></button>
+  </div>
+  <div id="chat-messages" class="h-48 overflow-y-auto space-y-2 text-sm"></div>
+  <div class="chat-input-container">
+    <input id="chat-input" type="text" placeholder="Escribe un mensaje..." class="w-full px-3 py-2 rounded-lg bg-gray-800 text-white focus:outline-none"/>
+    <button id="chat-send" class="chat-send-button">
+      <i class="fas fa-paper-plane text-white"></i>
+    </button>
+  </div>
+</div>
+
+
+</body>
+</html>

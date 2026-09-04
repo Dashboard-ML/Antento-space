@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="design.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+   <script src="script1.js"></script> 
+   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyDVEtM7aJibGineoTWqf-3e9lUeBzsq2Fs",
+  authDomain: "atentoreelsspace.firebaseapp.com",
+  projectId: "atentoreelsspace",
+  storageBucket: "atentoreelsspace.firebasestorage.app",
+  messagingSenderId: "502898196425",
+  appId: "1:502898196425:web:07589718cc6a08d013f218" 
+  };
+
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+</script>
+</head>
+<body>
+
+<div id="registro-container">
+  <img src="videos/reels atento.png" alt="Imagen de fondo registro" class="registro-fondo" />
+  <div class="registro-box">
+    <h2>Ingresa tu SAP</h2>
+<input type="text" id="nombreUsuario" placeholder="Ingresa tu SAP..." 
+       maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+<button id="btnContinuar">Continuar</button>
+  </div>
+</div>
+
+
+<div id="lottie-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>
+
+
+<canvas id="background-lines"></canvas>
+<div id="floating-svgs"></div>
+
+
+  <div class="video-slider">
+    <button class="fullscreen-button" id="fullscreen-global" style="position:fixed; right:14px; bottom:14px; z-index:9999;">
+  <img src="recursos/expand-arrows_5255377.png" alt="Pantalla completa" />
+</button>
+    <div class="slider-container">
+
+
+<div class="user-profile">
+  <div class="profile-circle">
+    <img src="videos/logocirculos.png" alt="Foto de perfil" id="profile-image">
+  </div>
+  <div id="usuarioNombre" class="nombre-saludo"></div>
+</div>
+
+<div id="toast" style="
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9em;
+  z-index: 9999;
+  display: none;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+">
+  ¡Comentario enviado!
+</div>
+
+      
+    </div>
+  </div>
+    <script>
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const sliderContainer = document.querySelector('.slider-container');
+            const videoContainers = document.querySelectorAll('.video-container');
+            let currentIndex = 0;
+            let isAnimating = false;
+
+            function restartVideo(videoElement) {
+                videoElement.currentTime = 0;
+                videoElement.pause();
+                void videoElement.play(); 
+            }
+
+
+            videoContainers.forEach((container, index) => {
+                if (index !== 0) {
+                    container.style.transform = 'translateY(100%)';
+                    const video = container.querySelector('video');
+                    video.pause(); 
+                }
+            });
+
+            function preloadNextVideo() {
+                const nextIndex = (currentIndex + 1) % videoContainers.length;
+                const nextContainer = videoContainers[nextIndex];
+                
+                if (!nextContainer.dataset.loaded) {
+                    const video = nextContainer.querySelector('video');
+                    video.load();
+                    nextContainer.dataset.loaded = true;
+                }
+            }
+
+            function navigateVideo(direction) {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const newIndex = direction === 'next' 
+                    ? (currentIndex + 1) % videoContainers.length 
+                    : (currentIndex - 1 + videoContainers.length) % videoContainers.length;
+
+                const currentContainer = videoContainers[currentIndex];
+                const nextContainer = videoContainers[newIndex];
+
+
+                const nextVideo = nextContainer.querySelector('video');
+                restartVideo(nextVideo);
+
+ 
+                nextContainer.style.transform = direction === 'next'
+                    ? 'translateY(0%)'
+                    : 'translateY(0%)';
+
+
+                requestAnimationFrame(() => {
+                    currentContainer.style.transform = direction === 'next'
+                        ? 'translateY(-100%)'
+                        : 'translateY(100%)';
+
+                    setTimeout(() => {
+                        currentContainer.classList.remove('active');
+                        nextContainer.classList.add('active');
+                        
+
+                        const currentVideo = currentContainer.querySelector('video');
+                  currentVideo.pause();
+                  currentVideo.removeAttribute('src');
+                  currentVideo.load(); 
+
+                        
+                        currentIndex = newIndex;
+                        isAnimating = false;
+                        preloadNextVideo();
+                    }, 400);
+                });
+            }
+
+
+            document.querySelector('.prev').addEventListener('click', () => navigateVideo('prev'));
+            document.querySelector('.next').addEventListener('click', () => navigateVideo('next'));
+
+
+            let touchStartY = 0;
+            sliderContainer.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            });
+
+            sliderContainer.addEventListener('touchend', (e) => {
+                const touchEndY = e.changedTouches[0].clientY;
+                const diff = touchStartY - touchEndY;
+
+                if (diff > 50 && !isAnimating) { 
+                    navigateVideo(touchStartY > touchEndY ? 'next' : 'prev');
+                }
+            });
+
+            preloadNextVideo();
+        });
+    document.querySelectorAll('.like-button').forEach(btn => {
+        const videoId = btn.dataset.id || 'video_0';
+        loadLikes(videoId, btn);
+          btn.addEventListener('click', () => {
+    addLike(videoId, btn);
+  });
+
+      btn.addEventListener('click', () => {
+        const count = btn.querySelector('span');
+        count.textContent = parseInt(count.textContent) + 1;
+      });
+    });
+
+console.log('Contenedores de video:', document.querySelectorAll('.video-container').length);
+console.log('Botones de like:', document.querySelectorAll('.like-button').length);
+console.log('Likes actuales:', JSON.parse(localStorage.getItem('videoLikes') || '[]'));
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+MIGRACION FIREBASE -> SUPABASE
+
+1) En Supabase abre SQL Editor.
+2) Ejecuta completo: supabase_setup.sql
+3) En tu proyecto reemplaza:
+   - index.html por este index.html
+   - script.js por este script.js
+4) No necesitas modificar los demás archivos JS/CSS de esta entrega.
+5) Publica de nuevo tu sitio y prueba con dos navegadores/ventanas para verificar multijugador y chat.
+
+Configuración incluida:
+SUPABASE_URL=https://cpmaiwupksujvuajtarn.supabase.co
+La publishable key está configurada en script.js.
+
+IMPORTANTE:
+La app actual no usa Supabase Auth. Las políticas SQL permiten acceso anon para conservar el comportamiento público actual. Para producción conviene endurecer RLS con autenticación/propiedad por usuario.

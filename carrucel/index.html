@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carrusel Baraja 3D con Líneas Onduladas</title>
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(-45deg, rgb(59, 36, 71) 0%, rgb(0, 167, 157) 100%);
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+}
+
+/* Fondo de líneas onduladas */
+.wavy-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.wave-line {
+  position: absolute;
+  width: 120%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255,255,255,0.1) 20%, 
+    rgba(255,255,255,0.3) 50%, 
+    rgba(255,255,255,0.1) 80%, 
+    transparent 100%);
+  animation: waveMove 15s linear infinite;
+}
+
+.wave-line:nth-child(1) {
+  top: 50%;
+  animation-delay: 0s;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(74, 144, 226, 0.2) 20%, 
+    rgba(74, 144, 226, 0.4) 50%, 
+    rgba(74, 144, 226, 0.2) 80%, 
+    transparent 100%);
+}
+
+.wave-line:nth-child(2) {
+  top: 55%;
+  animation-delay: -2s;
+  animation-duration: 18s;
+  height: 3.5px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 107, 107, 0.724) 20%, 
+    rgba(255, 107, 107, 0.3) 50%, 
+    rgba(255, 107, 107, 0.772) 80%, 
+    transparent 100%);
+}
+
+.wave-line:nth-child(3) {
+  top: 65%;
+  animation-delay: -4s;
+  animation-duration: 23s;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(120, 224, 143, 0.1) 20%, 
+    rgba(120, 224, 143, 0.837) 50%, 
+    rgba(120, 224, 143, 0.74) 80%, 
+    transparent 100%);
+}
+
+.wave-line:nth-child(4) {
+  top: 70%;
+  animation-delay: -6s;
+  animation-duration: 16s;
+  height: 3.2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(224, 194, 120, 0.886) 20%, 
+    rgba(131, 131, 131, 0.782) 50%, 
+    rgba(197, 179, 134, 0.739) 80%, 
+    transparent 100%);
+}
+
+.wave-line:nth-child(5) {
+  top: 75%;
+  animation-delay: -8s;
+  animation-duration: 32s;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(157, 154, 157, 0.872) 20%, 
+    rgba(215, 92, 237, 0.625) 50%, 
+    rgba(219, 216, 219, 0.742) 80%, 
+    transparent 100%);
+}
+
+.wave-line:nth-child(6) {
+  top: 80%;
+  animation-delay: -10s;
+  animation-duration: 44s;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(127, 192, 201, 0.825) 20%, 
+    rgba(77, 208, 225, 0.3) 50%, 
+    rgba(192, 192, 192, 0.591) 80%, 
+    transparent 100%);
+}
+
+/* Efecto de onda en las líneas */
+.wave-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  filter: blur(8px);
+  opacity: 0.3;
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(100%) translateY(0) scaleY(1);
+    opacity: 0.3;
+  }
+  10% {
+    transform: translateX(80%) translateY(-2px) scaleY(1.1);
+    opacity: 0.6;
+  }
+  20% {
+    transform: translateX(60%) translateY(2px) scaleY(0.9);
+    opacity: 0.8;
+  }
+  30% {
+    transform: translateX(40%) translateY(-1px) scaleY(1.05);
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(20%) translateY(1px) scaleY(0.95);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(0%) translateY(0) scaleY(1);
+    opacity: 0.7;
+  }
+  60% {
+    transform: translateX(-20%) translateY(-1px) scaleY(1.1);
+    opacity: 0.5;
+  }
+  70% {
+    transform: translateX(-40%) translateY(2px) scaleY(0.9);
+    opacity: 0.3;
+  }
+  80% {
+    transform: translateX(-60%) translateY(-2px) scaleY(1.05);
+    opacity: 0.2;
+  }
+  90% {
+    transform: translateX(-80%) translateY(1px) scaleY(0.95);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateX(-100%) translateY(0) scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* INFO IZQUIERDA */
+.info {
+  width: 35%;
+  padding-left: 80px;
+  z-index: 1;
+  position: relative;
+}
+.info h1 {
+  font-size: 2.2rem;
+  color: #fff;
+  margin-bottom: 12px;
+  transition: opacity 0.5s, transform 0.5s;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  font-weight: 600;
+}
+.info p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+  max-width: 400px;
+  line-height: 1.6;
+  transition: opacity 0.5s, transform 0.5s;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+/* CARRUSEL DERECHA */
+.carousel-container {
+  width: 65%;
+  height: 80vh;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  perspective: 1400px;
+  overflow: visible;
+  z-index: 1;
+  position: relative;
+}
+
+.carousel {
+  position: relative;
+  width: 750px;
+  height: 420px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotateY(-12deg);
+}
+
+.carousel video {
+  position: absolute;
+  width: 640px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.8s ease, opacity 0.8s ease, filter 0.5s ease;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  opacity: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* BOTONES */
+/* BOTONES - ESTILO NEÓN MODERNO */
+.buttons {
+  position: absolute;
+  bottom: -70px;
+  right: 80px;
+  display: flex;
+  gap: 25px;
+  z-index: 1;
+}
+/* BOTONES - FLOTANTES 3D */
+.buttons {
+  position: absolute;
+  bottom: -70px;
+  right: 80px;
+  display: flex;
+  gap: 20px;
+  z-index: 1;
+}
+
+button {
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.15), 
+    rgba(255, 255, 255, 0.05));
+  color: white;
+  border: none;
+  padding: 14px 26px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    transparent 50%, 
+    rgba(0, 0, 0, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+button:hover::before {
+  opacity: 1;
+}
+
+button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 25px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.2), 
+    rgba(255, 255, 255, 0.1));
+}
+
+button:active {
+  transform: translateY(-1px) scale(1.02);
+  transition: all 0.1s ease;
+}
+/* Efecto de brillo en hover para videos */
+.carousel video:hover {
+  filter: brightness(1.15) drop-shadow(0 0 20px rgba(100, 150, 255, 0.4));
+  transform: translateZ(20px) scale(1.02);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.4s ease;
+}
+
+.modal-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #1a1a1a;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 25px;
+  background: rgba(30, 30, 40, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 2;
+}
+
+.modal-title {
+  color: white;
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.modal-iframe {
+  width: 100%;
+  height: calc(100% - 60px);
+  border: none;
+  background: white;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1.2rem;
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Efecto de carga */
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #00a79d;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- Fondo de líneas onduladas -->
+<div class="wavy-lines">
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+  <div class="wave-line"></div>
+</div>
+
+<div class="info">
+  <h1 id="titulo">Título del video 1</h1>
+  <p id="descripcion">Descripción breve del video 1.</p>
+</div>
+
+<div class="carousel-container">
+  <div class="carousel" id="carousel">
+    <video src="videos/AtentoAV.mp4" muted autoplay loop></video>
+    <video src="videos/BBVAazul.mov" muted autoplay loop></video>
+    <video src="videos/barredora.mov" muted autoplay loop></video>
+    <video src="videos/bbva.mov" muted autoplay loop></video>
+  </div>
+
+  <div class="buttons">
+    <button id="prev">⟨ Atrás</button>
+    <button id="next">Adelante ⟩</button>
+  </div>
+</div>
+
+<div id="webModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Cargando...</h2>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Cargando contenido...
+    </div>
+    <iframe class="modal-iframe" id="modalIframe" style="display: none;"></iframe>
+  </div>
+</div>
+
+<!-- Efecto de sonido -->
+<audio id="clickSound" src="assets/swoosh-018-383967.mp3"></audio>
+
+<script>
+const carousel = document.getElementById('carousel');
+const videos = [...carousel.querySelectorAll('video')];
+const titulos = [
+  "Atento Realidad Aumentada",
+  "BBVA",
+  "Barredora",
+  "Tarjeta Débito Aqua"
+];
+const descripciones = [
+  "Explora las estructuras más impresionantes de la arquitectura actual.",
+  "Sumérgete en la belleza de los paisajes naturales más espectaculares.",
+  "Descubre los últimos avances en tecnología y su impacto en nuestra vida.",
+  "Adéntrate en el mundo del arte contemporáneo y sus expresiones únicas.",
+  "Conoce los diseños más innovadores que están transformando nuestro mundo."
+];
+
+const paginasWeb = [
+  "../RealidaAumentada/index.html",   
+  "../BBVA/index.html", 
+  "../Barredora/instrucciones.html",  
+  "../tarjeta_debito_aqua/index.html"  
+];
+
+const tituloEl = document.getElementById('titulo');
+const descripcionEl = document.getElementById('descripcion');
+const clickSound = document.getElementById('clickSound');
+
+let index = 0;
+const total = videos.length;
+
+const modal = document.getElementById('webModal');
+const modalIframe = document.getElementById('modalIframe');
+const modalTitle = document.getElementById('modalTitle');
+const loading = document.getElementById('loading');
+const closeModal = document.getElementById('closeModal');
+
+
+function updateCarousel() {
+  videos.forEach((video, i) => {
+    const offset = ((i - index + total) % total);
+    const adjusted = offset > total / 2 ? offset - total : offset;
+
+    const translateX = adjusted * 260 - 60;
+    const translateZ = -Math.abs(adjusted) * 160;
+    const scale = adjusted === 0 ? 1.3 : Math.max(0.8, 1 - Math.abs(adjusted) * 0.1);
+    const opacity = Math.max(0.25, 1 - Math.abs(adjusted) * 0.3);
+
+    video.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) scale(${scale}) rotateY(${adjusted*3}deg)`;
+    video.style.opacity = opacity;
+    video.style.filter = adjusted === 0 ? 'blur(0px)' : 'blur(2px)';
+    video.style.zIndex = 100 - Math.abs(adjusted);
+    video.onclick = () => openWebPage(i);
+  });
+
+  // Animación de texto
+  tituloEl.style.opacity = 0;
+  descripcionEl.style.opacity = 0;
+  tituloEl.style.transform = 'translateY(20px)';
+  descripcionEl.style.transform = 'translateY(20px)';
+
+  setTimeout(() => {
+    tituloEl.textContent = titulos[index];
+    descripcionEl.textContent = descripciones[index];
+    tituloEl.style.opacity = 1;
+    descripcionEl.style.opacity = 1;
+    tituloEl.style.transform = 'translateY(0)';
+    descripcionEl.style.transform = 'translateY(0)';
+  }, 300);
+}
+
+function openWebPage(videoIndex) {
+  const url = paginasWeb[videoIndex];
+  const titulo = titulos[videoIndex];
+  
+  if (videoIndex === 2) { 
+    window.open(url, "_blank", );
+    return;
+  }
+  
+  modalTitle.textContent = titulo;
+  modal.style.display = 'block';
+  document.body.classList.add('modal-open');
+  loading.style.display = 'block';
+  modalIframe.style.display = 'none';
+  modalIframe.src = url;
+  modalIframe.onload = () => {
+    loading.style.display = 'none';
+    modalIframe.style.display = 'block';
+  };
+  modalIframe.onerror = () => {
+    loading.innerHTML = `
+      <div style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+        <div>Error al cargar la página</div>
+        <button onclick="closeWebModal()" style="margin-top: 15px; padding: 10px 20px; background: #00a79d; border: none; border-radius: 8px; color: white; cursor: pointer;">
+          Cerrar
+        </button>
+      </div>
+    `;
+  };
+}
+
+function closeWebModal() {
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  modalIframe.src = '';
+}
+
+closeModal.addEventListener('click', closeWebModal);
+
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    closeWebModal();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'block') {
+    closeWebModal();
+  }
+});
+
+document.getElementById('next').onclick = () => {
+  index = (index + 1) % total;
+  clickSound.play();
+  updateCarousel();
+};
+document.getElementById('prev').onclick = () => {
+  index = (index - 1 + total) % total;
+  clickSound.play();
+  updateCarousel();
+};
+
+window.addEventListener('wheel', (e) => {
+  if (e.deltaY > 0) {
+    index = (index + 1) % total;
+  } else {
+    index = (index - 1 + total) % total;
+  }
+  clickSound.play();
+  updateCarousel();
+});
+
+updateCarousel();
+</script>
+</body>
+</html>

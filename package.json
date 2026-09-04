@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@types/three": "^0.178.1",
+    "express": "^5.1.0",
+    "particles.js": "^2.0.0",
+    "socket.io": "^4.8.1",
+    "three": "^0.179.0"
+  }
+}

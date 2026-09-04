@@ -1,0 +1,252 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+export class CharacterSelection {
+  constructor(onCharacterSelected) {
+    this.onCharacterSelected = onCharacterSelected;
+    this.selectedCharacter = null;
+    this.selectionDiv = null;
+    this.keyHandler = null;
+  }
+
+show() {
+  this.selectionDiv = document.createElement('div');
+  this.selectionDiv.id = 'character-selection';
+this.selectionDiv.innerHTML = `
+ <div class="nebula-effect"></div>
+    <div id="animated-logo"></div>
+    <div id="particles-js"></div>
+
+    <h1 class="text-4xl text-white font-bold text-center mt-4">SELECCIONA TU PERSONAJE</h1>
+    
+    <!-- Contenedor principal -->
+    <div class="character-viewport">
+      <div class="absolute inset-0 transition-all duration-500 ${this.selectedCharacter === 'male' ? 'opacity-100' : 'opacity-0 pointer-events-none'}">
+        <canvas class="model-canvas" id="canvas-male"></canvas>
+      </div>
+      
+      <div class="absolute inset-0 transition-all duration-500 ${this.selectedCharacter === 'female' ? 'opacity-100' : 'opacity-0 pointer-events-none'}">
+        <canvas class="model-canvas" id="canvas-female"></canvas>
+      </div>
+    </div>
+    
+    <!-- Contenedor de información y controles -->
+    <div class="w-full flex flex-col items-center mb-6">
+      <!-- Texto del personaje (centrado) -->
+      <div class="text-center mb-6">
+        <h2 class="text-white text-3xl font-bold">${this.selectedCharacter === 'male' ? 'HOMBRE' : 'MUJER'}</h2>
+      </div>
+      
+      <!-- Controles -->
+      <div class="flex gap-8 items-center">
+        <button class="nav-button bg-blue-500/20 hover:bg-blue-500/30" data-direction="prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+  <button id="confirm-character" disabled
+    class="relative overflow-hidden group">
+    CONFIRMAR SELECCIÓN
+    <span class="absolute inset-0 bg-white opacity-10 group-hover:opacity-5 transition-opacity duration-300"></span>
+  </button>
+        
+        <button class="nav-button bg-blue-500/20 hover:bg-blue-500/30" data-direction="next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+`;
+
+
+  document.body.appendChild(this.selectionDiv);
+
+  createCharacterPreview('canvas-male', 'models/boxman.glb');
+  createCharacterPreview('canvas-female', 'models/mujer.glb');
+
+  const prevBtn = this.selectionDiv.querySelector('[data-direction="prev"]');
+  const nextBtn = this.selectionDiv.querySelector('[data-direction="next"]');
+  const confirmBtn = this.selectionDiv.querySelector('#confirm-character');
+  this.selectedCharacter = 'male';
+  this.handleCardClick('male');
+  prevBtn.addEventListener('click', () => this.handleCardClick('prev'));
+  nextBtn.addEventListener('click', () => this.handleCardClick('next'));
+  confirmBtn.addEventListener('click', () => this.confirmSelection());
+
+  this.keyHandler = (e) => {
+    if (e.key === 'ArrowLeft') this.handleCardClick('prev');
+    if (e.key === 'ArrowRight') this.handleCardClick('next');
+    if (e.key === 'Enter' && !confirmBtn.disabled) this.confirmSelection();
+  };
+  document.addEventListener('keydown', this.keyHandler);
+}
+
+handleCardClick(direction) {
+  if (direction === 'next' || direction === 'prev') {
+    this.selectedCharacter = this.selectedCharacter === 'male' ? 'female' : 'male';
+  } else {
+    this.selectedCharacter = direction;
+  }
+
+  const maleDisplay = this.selectionDiv.querySelector('#canvas-male').parentElement;
+  const femaleDisplay = this.selectionDiv.querySelector('#canvas-female').parentElement;
+  
+  maleDisplay.classList.toggle('opacity-0', this.selectedCharacter !== 'male');
+  maleDisplay.classList.toggle('pointer-events-none', this.selectedCharacter !== 'male');
+  femaleDisplay.classList.toggle('opacity-0', this.selectedCharacter !== 'female');
+  femaleDisplay.classList.toggle('pointer-events-none', this.selectedCharacter !== 'female');
+
+  const characterName = this.selectionDiv.querySelector('.text-center h2');
+  characterName.textContent = this.selectedCharacter === 'male' ? 'HOMBRE' : 'MUJER';
+
+  // Habilitar botón de confirmación
+  const confirmBtn = this.selectionDiv.querySelector('#confirm-character');
+  confirmBtn.addEventListener('mouseenter', (e) => {
+  if (confirmBtn.disabled) return;
+  
+  // Crear partículas
+  for (let i = 0; i < 5; i++) {
+    const particle = document.createElement('span');
+    particle.className = 'particle';
+    particle.style.cssText = `
+      position: absolute;
+      width: ${Math.random() * 6 + 4}px;
+      height: ${Math.random() * 6 + 4}px;
+      background: rgba(255, 255, 255, ${Math.random() * 0.5 + 0.3});
+      border-radius: 50%;
+      left: ${Math.random() * 100}%;
+      bottom: 0;
+      animation: float-up ${Math.random() * 1 + 1}s ease-out forwards;
+    `;
+    confirmBtn.appendChild(particle);
+    
+    // Eliminar después de la animación
+    setTimeout(() => {
+      particle.remove();
+    }, 1000);
+  }
+});
+  confirmBtn.disabled = false;
+  confirmBtn.classList.remove('opacity-50');
+}
+
+confirmSelection() {
+  if (!this.selectedCharacter) return;
+  
+  document.removeEventListener('keydown', this.keyHandler);
+  
+  const confirmBtn = this.selectionDiv.querySelector('#confirm-character');
+  
+  confirmBtn.disabled = true;
+  
+  this.selectionDiv.style.opacity = '0';
+  this.selectionDiv.style.transition = 'opacity 0.5s ease';
+  
+  setTimeout(() => {
+    this.selectionDiv.remove();
+    this.onCharacterSelected(this.selectedCharacter);
+  }, 500);
+}
+}
+
+function createCharacterPreview(canvasId, modelPath) {
+  const canvas = document.getElementById(canvasId);
+  const renderer = new THREE.WebGLRenderer({ 
+    canvas, 
+    alpha: true,
+    antialias: true 
+  });
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    60, 
+    canvas.clientWidth / canvas.clientHeight, 
+    0.1, 
+    100
+  );
+  
+  camera.position.set(0, 1.5, 4);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+  
+  const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.9);
+  directionalLight1.position.set(10, 3, 10);
+  scene.add(directionalLight1);
+  
+  const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight2.position.set(-1, 3.5, -1);
+  scene.add(directionalLight2);
+
+  let mixer, clock;
+
+  const loader = new GLTFLoader();
+  loader.load(modelPath, gltf => {
+    const model = gltf.scene;
+    
+    const bbox = new THREE.Box3().setFromObject(model);
+    const center = bbox.getCenter(new THREE.Vector3());
+    const size = bbox.getSize(new THREE.Vector3());
+    
+   
+    const targetHeight = 4.0;
+    const scale = targetHeight / size.y;
+    model.scale.set(scale, scale, scale);
+    model.position.y = -center.y * scale + 0.8; 
+    model.position.x = -center.x * scale;
+    model.rotation.y = Math.PI*1.5;
+    scene.add(model);
+
+    if (gltf.animations && gltf.animations.length > 0) {
+      clock = new THREE.Clock();
+      mixer = new THREE.AnimationMixer(model);
+      
+      const idleAnimation = gltf.animations.find(anim => anim.name === "idle");
+      
+      if (idleAnimation) {
+        const action = mixer.clipAction(idleAnimation);
+        action.setLoop(THREE.LoopRepeat, Infinity);
+        action.play();
+      } else {
+        console.warn('Animación "idle" no encontrada en el modelo');
+      }
+    }
+
+    const modelHeight = size.y * scale;
+    camera.position.z = modelHeight * 4.2;
+    camera.position.y = modelHeight * 1.8;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (mixer) {
+        mixer.update(clock.getDelta());
+      }
+      
+      model.rotation.y += 0.005;
+      
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    const onResize = () => {
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    };
+    
+    window.addEventListener('resize', onResize);
+    
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (mixer) {
+        mixer.uncacheRoot(model); 
+      }
+      renderer.dispose();
+    };
+  }, undefined, error => {
+    console.error(`Error loading ${modelPath}:`, error);
+  });
+}
+
