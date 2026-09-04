@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lavavajillas Samsung</title>
+    <style>
+        /* Estilos CSS optimizados */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap');
+        
+        :root {
+            --color-primary: #00a3e0;
+            --color-secondary: #4619ff;
+            --color-white: #ffffff;
+            --shadow-light: 0 4px 15px rgba(0, 113, 227, 0.1);
+            --shadow-medium: 0 6px 25px rgba(0, 113, 227, 0.2);
+            --transition-fast: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 1.5);
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Omnes', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            overflow: hidden;
+        }
+        
+        .titulo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: var(--color-primary);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 800;
+            z-index: 100;
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 80%;
+        }
+
+        .modelo {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            font-weight: 600;
+            color: var(--color-primary);
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(0, 163, 224, 0.2);
+            z-index: 100;
+        }
+
+        model-viewer {
+            width: 100vw;
+            height: 100vh;
+            --progress-bar-color: transparent;
+            --progress-mask: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: var(--transition-fast);
+        }
+
+        #custom-progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            z-index: 1000;
+            background: rgba(0, 163, 224, 0.1);
+        }
+
+        #custom-progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 163, 224, 0.5);
+        }
+
+        /* ESTILO UNIFICADO PARA TODOS LOS HOTSPOTS */
+        .hotspot {
+            display: block;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            position: absolute;
+            z-index: 10;
+            border: 2px solid var(--color-primary);
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%);
+            transform-origin: center center;
+        }
+
+        .hotspot:hover {
+            transform: translate(-50%, -50%) scale(1.25);
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 163, 224, 0.7);
+            z-index: 11;
+        }
+
+        /* ICONOS DE HOTSPOTS */
+        .hotspot-door::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--color-primary);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 2px;
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-estante {
+            position: relative;
+        }
+
+        .hotspot-reja-media::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: calc(50% - 6px);
+            width: 5px;
+            height: 5px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 2px rgba(255,255,255,0.8),
+                0 0 0 3px var(--color-primary);
+            transform: translate(-50%, -50%);
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-reja-media::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: calc(50% + 6px);
+            width: 3px;
+            height: 3px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 2px rgba(255,255,255,0.8),
+                0 0 0 3px var(--color-primary);
+            transform: translate(-50%, -50%);
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-panel::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 16px solid var(--color-primary);
+            transition: var(--transition-fast);
+        }
+        
+        .hotspot-door-control::before {
+            content: "↕";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--color-primary);
+            font-size: 18px;
+            font-weight: bold;
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-dispensador::before {
+            content: "💧";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            transition: var(--transition-fast);
+            
+        }
+
+        .hotspot-detergente {
+    position: fixed;
+    width: 48px;
+    height: 48px;
+    transform: translate(-50%, -50%);
+}
+
+/* Caja centrada y ajustada */
+.hotspot-detergente::before {
+    content: "";
+    position: absolute;
+    top: 12%;
+    left: 12%;
+    width: 20px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--color-primary) 100%);
+    transform: skewY(-20deg) rotate(-10deg);
+    box-shadow: inset -1.5px -1.5px 0 rgba(255,255,255,0.2);
+    z-index: 1;
+}
+
+
+/* Bolitas más proporcionadas y mejor colocadas */
+.hotspot-detergente::after {
+    content: "";
+    position: absolute;
+    top: 62%;
+    left: 62%;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    box-shadow:
+        0 5px 0 var(--color-primary),
+        -3px 8px 0 var(--color-primary),
+        3px 10px 0 var(--color-primary),
+        0 13px 0 var(--color-primary),
+        -4px 15px 0 var(--color-primary),
+        4px 17px 0 var(--color-primary);
+    z-index: 0;
+
+    transform: none;
+    animation: none;
+    opacity: 1;
+}
+
+.hotspot-detergente::before,
+.hotspot-detergente::after {
+    transition: none !important;
+    animation: none !important;
+}
+
+.hotspot-detergente:hover::before,
+.hotspot-detergente:hover::after {
+    transform: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.hotspot-detergente::before,
+.hotspot-detergente::after {
+    transition: none !important;
+    animation: none !important;
+}
+
+.hotspot-detergente:hover::before,
+.hotspot-detergente:hover::after {
+    transform: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.hotspot-enjuague {
+    position: fixed;
+    width: 48px;
+    height: 48px;
+    transform: translate(-50%, -50%);
+}
+
+/* Eliminamos el círculo central: ya no hay ::before */
+
+.hotspot-enjuague::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    background:
+        /* Primer aro */
+        linear-gradient(var(--color-primary), var(--color-primary)) 50% 28% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 64% 36% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 72% 50% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 64% 64% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 50% 72% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 36% 64% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 28% 50% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 36% 36% / 4px 4px,
+
+        /* Segundo aro */
+        linear-gradient(var(--color-primary), var(--color-primary)) 50% 15% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 75% 25% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 85% 50% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 75% 75% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 50% 85% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 25% 75% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 15% 50% / 4px 4px,
+        linear-gradient(var(--color-primary), var(--color-primary)) 25% 25% / 4px 4px;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+/* Animaciones */
+.hotspot-enjuague:hover::after {
+    animation: pulsar-enjuague 0.6s infinite alternate;
+}
+
+@keyframes pulsar-enjuague {
+    0% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.9; }
+    100% { transform: translate(-50%, -50%) scale(1.02); opacity: 1; }
+}
+
+
+        .hotspot-reja-inferior::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3px;
+            height: 3px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 2px rgba(255,255,255,0.8),
+                0 0 0 3px var(--color-primary),
+                -12px 0 0 0 var(--color-primary),
+                -12px 0 0 2px rgba(255,255,255,0.8),
+                -12px 0 0 3px var(--color-primary),
+                12px 0 0 0 var(--color-primary),
+                12px 0 0 2px rgba(255,255,255,0.8),
+                12px 0 0 3px var(--color-primary);
+            transform: translate(-50%, -50%);
+        }
+
+        .hotspot-estante::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            height: 3px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 2px rgba(255,255,255,0.8),
+                0 0 0 3px var(--color-primary);
+            transition: var(--transition-fast);
+        }
+
+        .hotspot:hover::before {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .hotspot-cubiertos {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(0, 163, 224, 0.3);
+        }
+
+        .hotspot-cubiertos::before {
+            content: "🍴";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 22px;
+            transform: translate(-50%, -50%);
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-cubiertos:hover::before {
+            animation: cubiertos-shake 0.5s ease-in-out;
+        }
+
+        .hotspot-rejas-plastico::before {
+            content: "✖";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: var(--color-primary);
+            font-weight: bold;
+            transition: var(--transition-fast);
+        }
+
+        .hotspot-rejas-plastico:hover::before {
+            transform: translate(-50%, -50%) scale(1.3);
+            color: #ff0000;
+        }
+
+        @keyframes cubiertos-shake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(15deg); }
+            75% { transform: translate(-50%, -50%) rotate(-15deg); }
+        }
+
+        /* POSICIONES DE HOTSPOTS */
+        button[slot="hotspot-puerta"] {
+            left: 50%;
+            top: 60%;
+        }
+
+        button[slot="hotspot-panel"] {
+            left: 50%;
+            top: 30%;
+        }
+
+        button[slot="hotspot-door-control"] {
+            left: 60%;
+            top: 65%;
+        }
+
+        button[slot="hotspot-dispensador"] {
+            left: 45%;
+            top: 55%;
+            display: none;
+        }
+
+        button[slot="hotspot-detergente"] {
+            left: 45%;
+            top: 50%;
+            display: none;
+        }
+
+        button[slot="hotspot-enjuague"] {
+            left: 45%;
+            top: 45%;
+            display: none;
+        }
+
+        button[slot="hotspot-estante"] {
+            left: 40%;
+            top: 45%;
+            display: none;
+        }
+
+        /* Animación de pulso para todos los hotspots */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .hotspot {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .hotspot:hover {
+            animation: none;
+        }
+
+        .hotspot {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .hotspot[hidden] {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* HOTSPOT LAVADO POTENTE */
+        .hotspot-lavado-potente {
+            display: block;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            position: absolute;
+            z-index: 10;
+            border: 2px solid var(--color-primary);
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%);
+            transform-origin: center center;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .hotspot-lavado-potente:hover {
+            transform: translate(-50%, -50%) scale(1.25);
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 163, 224, 0.7);
+            z-index: 11;
+        }
+
+        .hotspot-lavado-potente::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translate(-50%, -50%);
+            background: 
+                linear-gradient(135deg, transparent 45%, var(--color-primary) 45%, var(--color-primary) 55%, transparent 55%),
+                linear-gradient(45deg, transparent 45%, var(--color-primary) 45%, var(--color-primary) 55%, transparent 55%),
+                radial-gradient(circle at center, var(--color-primary) 30%, transparent 30%);
+            transition: var(--transition-fast);
+        }
+
+        button[slot="hotspot-lavado-potente"] {
+            left: 55%;
+            top: 50%;
+        }
+
+        .hotspot-lavado::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, var(--color-primary) 0%, rgba(0,163,224,0.4) 70%);
+            border-radius: 50%;
+            box-shadow: 
+                0 -5px 10px rgba(255,255,255,0.8),
+                0 5px 15px rgba(0,163,224,0.3);
+            animation: water-splash 1.5s infinite ease-out;
+        }
+
+        .hotspot-filtro::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, var(--color-primary) 0%, rgba(0,163,224,0.4) 70%);
+            border-radius: 50%;
+            box-shadow: 
+                0 -5px 10px rgba(255,255,255,0.8),
+                0 5px 15px rgba(0,163,224,0.3);
+            animation: water-splash 1.5s infinite ease-out;
+        }
+
+        /* MENSAJES DE INFORMACIÓN */
+        .info-message {
+            position: fixed;
+            top: 50%;
+            left: 75%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 163, 224, 0.9);
+            color: var(--color-white);
+            padding: 20px 30px;
+            border-radius: 16px;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 113, 227, 0.5);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-back-btn {
+            background: var(--color-white);
+            color: var(--color-primary);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-back-btn:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-inferior {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: clamp(100px, 10vw, 150px);
+            height: auto;
+            z-index: 90;
+            border-radius: 12px;
+        }
+
+
+        /* Panel de imagen */
+        .panel-image {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            width: auto;
+            height: auto;
+            max-width: 70vw;
+            max-height: 70vh;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        #panel-message {
+            top: 65%;
+            left: 20%;
+            transform: translate(-50%, 0);
+        }
+
+        .panel-image img {
+            max-width: 60vw;
+            max-height: 50vh;
+            width: auto;
+            height: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .panel-image.show {
+            opacity: 1;
+            display: flex;
+        }
+
+        /* Botón de pantalla completa */
+        .btn-fullscreen {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-white);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 113, 227, 0.4);
+            transition: var(--transition-fast);
+            z-index: 101;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-fullscreen:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 113, 227, 0.6);
+        }
+
+        .btn-fullscreen svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-fullscreen.fullscreen-active {
+            background: linear-gradient(45deg, #ff3a3a, #ff6b6b);
+        }
+        /* Añade esto a tus estilos CSS */
+button[slot="hotspot-enjuague"] {
+    position: fixed !important;
+    transform: translate(-50%, -50%) !important;
+    left: 45% !important;
+    top: 45% !important;
+    pointer-events: auto !important;
+    z-index: 100 !important;
+}
+
+/* Botón de información */
+.btn-info {
+    position: fixed;
+    bottom: 80px;
+    left: 30px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-white);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0, 113, 227, 0.4);
+    transition: var(--transition-fast);
+    z-index: 100;
+    border: none;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-info:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 25px rgba(0, 113, 227, 0.6);
+}
+
+/* Cuadro de información */
+.info-box {
+    position: fixed;
+    top: 80%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 16px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.info-box.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.close-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+}
+
+.close-info:hover {
+    color: #000;
+}
+
+/* Notificación */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 163, 224, 0.9);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+/* Modifica los estilos para que siempre sea clickeable */
+
+    </style>
+    
+    <!-- Importación de model-viewer -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+</head>
+
+<body>
+    <!-- Barra de progreso -->
+    <div id="custom-progress-container">
+        <div id="custom-progress-bar"></div>
+    </div>
+
+    <!-- Títulos y modelo -->
+    <div class="titulo">Lavavajillas BESPOKE</div>
+    <div class="modelo">BW80B70</div>
+    
+    <!-- Mensajes de información -->
+    <div class="info-message" id="door-message">
+        Puerta
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="panel-message">
+        Panel de Control<br>
+        DW80B7
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="panel-image" id="panel-image" style="display: none;">
+        <img src="panel_2.3.png" alt="Panel de control detallado">
+    </div>
+
+    <div class="info-message" id="dispensador-message">
+        Dispensador de agua
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="detergente-message">
+        Compartimento para el detergente
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="enjuague-message">
+        Compartimento para el enjuague
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="estante-message">
+        3er estante
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="reja-media-message">
+        Estante Superior
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="reja-inferior-message">
+        Estante Inferior
+        <button class="info-back-btn">Volver</button>
+    </div>
+    
+    <div class="info-message" id="cubiertos-message">
+        Estante para Cubiertos
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="rejas-plastico-message">
+        Mecanismo interno
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="lavado-potente-message">
+        Boquilla inferior
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="lavado-message">
+        Lavado potente
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-message" id="filtro-message">
+        Filtro de comida
+        <button class="info-back-btn">Volver</button>
+    </div>
+
+    <div class="info-box" id="infoBox">
+        <button class="close-info" id="closeInfo">×</button>
+        <p>Una vez que hayas explorado todas las funciones del lavavajillas (presionando cada botón interactivo), se activará automáticamente el acceso a la encuesta de satisfacción. Al completarla, finalizarás exitosamente tu capacitación.</p>
+    </div>
+
+    <!-- Modelo 3D con hotspots -->
+    <model-viewer 
+        id="modelo3d"
+        src="lavavajillas_prueba_10.glb"
+        alt="Lavavajillas Samsung 3D"
+        camera-controls
+        shadow-intensity="1"
+        exposure="0.8"
+        environment-image="neutral"
+        loading="eager"
+        autoplay
+        animation-name="Cerrar_Puerta"
+        animation-crossfade-duration="0">
+        
+        <button slot="hotspot-puerta" class="hotspot hotspot-door" data-position="0 0.5 0" data-normal="0 0 1"></button>
+        <button slot="hotspot-panel" class="hotspot hotspot-panel" data-position="-0.2 1.2 .17" data-normal="0 0 1"></button>
+        <button slot="hotspot-door-control" class="hotspot hotspot-door-control" data-position=".6 .8 0.1" data-normal="0 0 1"></button>
+        <button slot="hotspot-dispensador" class="hotspot hotspot-dispensador" data-position="0.1 0.25 0.7" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-detergente" class="hotspot hotspot-detergente" data-position="0.08 0.25 0.62" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-enjuague" class="hotspot hotspot-enjuague" data-position="0.22 -1 0.55" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-estante" class="hotspot hotspot-estante" data-position="0 1.1 0.1" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-reja-media" class="hotspot hotspot-reja-media" data-position="0 .9 .1" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-reja-inferior" class="hotspot hotspot-reja-inferior" data-position="0 0.5 0.1" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-cubiertos" class="hotspot hotspot-cubiertos" data-position="0.25 0.4 0.3" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-rejas-plastico" class="hotspot hotspot-rejas-plastico" data-position="-.6 0.7 .1" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-lavado-potente" class="hotspot hotspot-lavado-potente" data-position="0 0.2 -.3" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-lavado" class="hotspot hotspot-lavado" data-position="-.3 0.2 -.4" data-normal="0 0 1" style="display: none;"></button>
+        <button slot="hotspot-filtro" class="hotspot hotspot-filtro" data-position="-.025 0.2 -.1" data-normal="0 0 1" style="display: none;"></button>
+        <button class="btn-info" id="infoButton">?</button>
+
+        <!-- Botón de pantalla completa -->
+        <button class="btn-fullscreen">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
+    </model-viewer>
+    
+
+
+    <img src="Logotipo Atento-03.png" alt="Logo Atento" class="logo-inferior">
+
+    <!-- Código JavaScript -->
+    <script>
+        
+        // Constantes de configuración
+        const ANIMATION_CONFIG = {
+            'Abrir_Puerta': { startFrame: 0, endFrame: 29, fps: 24 },
+            'Cerrar_Puerta': { startFrame: 30, endFrame: 59, fps: 24 },
+            'reja_sup_out': { startFrame: 60, endFrame: 89, fps: 24 },
+            'reja_int_out': { startFrame: 90, endFrame: 119, fps: 24 },
+            'reja_inf_out': { startFrame: 120, endFrame: 149, fps: 24 }
+        };
+        
+        // Elementos del DOM
+// Elementos del DOM - con verificación de nulidad
+const getElement = (selector) => document.querySelector(selector);
+
+const fullscreenButton = getElement('.btn-fullscreen');
+const tituloElement = getElement('.titulo');
+const modeloElement = getElement('.modelo');
+const logoElement = getElement('.logo-inferior');
+const btnVolverElement = getElement('.btn-volver');
+const modelViewer = document.getElementById('modelo3d');
+const progressBar = document.getElementById('custom-progress-bar');
+const progressContainer = document.getElementById('custom-progress-container');
+const backButtons = document.querySelectorAll('.info-back-btn');
+
+// Mensajes de información
+const doorMessage = getElement('#door-message');
+const panelMessage = getElement('#panel-message');
+const dispensadorMessage = getElement('#dispensador-message');
+const detergenteMessage = getElement('#detergente-message');
+const enjuagueMessage = getElement('#enjuague-message');
+const estanteMessage = getElement('#estante-message');
+const rejaMediaMessage = getElement('#reja-media-message');
+const rejaInferiorMessage = getElement('#reja-inferior-message');
+const cubiertosMessage = getElement('#cubiertos-message');
+const rejasPlasticoMessage = getElement('#rejas-plastico-message');
+const lavadoPotenteMessage = getElement('#lavado-potente-message');
+const lavadoMessage = getElement('#lavado-message');
+const filtroMessage = getElement('#filtro-message');
+
+// Hotspots
+const hotspotDoor = getElement('.hotspot-door');
+const hotspotPanel = getElement('.hotspot-panel');
+const hotspotDoorControl = getElement('.hotspot-door-control');
+const hotspotDispensador = getElement('.hotspot-dispensador');
+const hotspotDetergente = getElement('.hotspot-detergente');
+const hotspotEnjuague = getElement('.hotspot-enjuague');
+const hotspotEstante = getElement('.hotspot-estante');
+const hotspotRejaMedia = getElement('.hotspot-reja-media');
+const hotspotRejaInferior = getElement('.hotspot-reja-inferior');
+const hotspotCubiertos = getElement('.hotspot-cubiertos');
+const hotspotRejasPlastico = getElement('.hotspot-rejas-plastico');
+const hotspotLavadoPotente = getElement('.hotspot-lavado-potente');
+const hotspotLavado = getElement('.hotspot-lavado');
+const hotspotFiltro = getElement('.hotspot-filtro');
+
+// Elementos de información
+const infoButton = getElement('#infoButton');
+const infoBox = getElement('#infoBox');
+const closeInfo = getElement('#closeInfo');
+
+        // Estado de la aplicación
+        const state = {
+            initialView: null,
+            isDoorOpen: false,
+            isAnimating: false,
+            modelReady: false,
+            cubiertosVisible: false,
+            rejasPlasticoVisible: true,
+            clickedHotspots: {
+                door: false,
+                panel: false,
+                doorControl: false,
+                dispensador: false,
+                detergente: false,
+                enjuague: false,
+                estante: false,
+                rejaMedia: false,
+                rejaInferior: false,
+                cubiertos: false,
+                rejasPlastico: false,
+                lavadoPotente: false,
+                lavado: false,
+                filtro: false
+            },
+            allHotspotsClicked: false
+        };
+
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            setupProgressBar();
+            setupModelViewer();
+            setupEventListeners();
+            positionHotspots();
+        });
+
+        // Configuración de la barra de progreso
+        function setupProgressBar() {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+        }
+
+        // Función para alternar pantalla completa
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error al entrar en pantalla completa: ${err.message}`);
+                });
+                fullscreenButton.classList.add('fullscreen-active');
+                localStorage.setItem('fullscreen', 'true');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    fullscreenButton.classList.remove('fullscreen-active');
+                    localStorage.setItem('fullscreen', 'false');
+                }
+            }
+        }
+
+
+        // ========= INDEXEDDB CONFIGURATION =========
+const DB_NAME = 'Lavavajillas3DDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'models';
+const MODEL_KEY = 'lavavajillas_model';
+const MODEL_URL = 'lavavajillas_prueba_10.glb';
+
+// IndexedDB utilities
+const openDB = () => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+    });
+};
+
+const saveModelToDB = async (blob) => {
+    try {
+        const db = await openDB();
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        store.put(blob, MODEL_KEY);
+        return new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error);
+        });
+    } catch (error) {
+        console.warn('Error guardando modelo en IndexedDB:', error);
+    }
+};
+
+const getModelFromDB = async () => {
+    try {
+        const db = await openDB();
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        return new Promise((resolve, reject) => {
+            const request = store.get(MODEL_KEY);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.warn('Error obteniendo modelo de IndexedDB:', error);
+        return null;
+    }
+};
+
+const downloadModel = async () => {
+    try {
+        console.log('📥 Descargando modelo de lavavajillas...');
+        const response = await fetch(MODEL_URL);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const blob = await response.blob();
+        await saveModelToDB(blob);
+        console.log('✅ Modelo guardado en IndexedDB');
+        return URL.createObjectURL(blob);
+    } catch (error) {
+        console.error('Error descargando modelo:', error);
+        return MODEL_URL; // Fallback a la URL original
+    }
+};
+
+const loadModel = async () => {
+    // Intentar cargar desde IndexedDB primero
+    const cachedModel = await getModelFromDB();
+    
+    if (cachedModel) {
+        console.log('✅ Modelo cargado desde caché (IndexedDB)');
+        return URL.createObjectURL(cachedModel);
+    } else {
+        console.log('🔄 Modelo no encontrado en caché, descargando...');
+        return await downloadModel();
+    }
+};
+
+// Función para verificar el estado de la base de datos
+const checkDBStatus = async () => {
+    try {
+        const db = await openDB();
+        const model = await getModelFromDB();
+        console.log('📊 Estado IndexedDB:', model ? 'Modelo en caché' : 'Sin modelo en caché');
+        return !!model;
+    } catch (error) {
+        console.warn('Error verificando estado de IndexedDB:', error);
+        return false;
+    }
+};
+
+// Función para limpiar la caché (útil para desarrollo)
+const clearModelCache = async () => {
+    try {
+        const db = await openDB();
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        store.delete(MODEL_KEY);
+        console.log('🗑️ Caché de modelo limpiada');
+        return new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error);
+        });
+    } catch (error) {
+        console.error('Error limpiando caché:', error);
+    }
+};
+
+        // Configuración del model-viewer
+// Configuración del model-viewer
+async function setupModelViewer() {
+    // Cargar modelo desde IndexedDB o descargar
+    const modelUrl = await loadModel();
+    modelViewer.src = modelUrl;
+    
+    // Verificar estado de la caché
+    await checkDBStatus();
+    
+    modelViewer.addEventListener('loadstart', () => {
+        progressBar.style.width = '5%';
+    });
+    
+    modelViewer.addEventListener('progress', (event) => {
+        const progress = Math.min(0.95, event.detail.totalProgress);
+        progressBar.style.width = `${progress * 100}%`;
+    });
+    
+    modelViewer.addEventListener('load', handleModelLoad);
+    modelViewer.addEventListener('error', handleError);
+    
+    modelViewer.addEventListener('load', () => {
+        state.initialView = {
+            orbit: modelViewer.cameraOrbit,
+            target: modelViewer.cameraTarget,
+            animation: modelViewer.animationName,
+            fieldOfView: modelViewer.fieldOfView
+        };
+    });
+}
+
+        function handleModelLoad() {
+            console.log('Modelo 3D cargado correctamente');
+            progressBar.style.width = '100%';
+            setTimeout(() => {
+                progressContainer.style.opacity = '0';
+                setTimeout(() => progressContainer.style.display = 'none', 300);
+            }, 300);
+            
+            state.initialView = {
+                orbit: modelViewer.getAttribute('camera-orbit'),
+                target: modelViewer.getAttribute('camera-target'),
+                animation: modelViewer.animationName
+            };
+            
+            initializeModel();
+            state.modelReady = true;
+        }
+
+        function initializeModel() {
+            modelViewer.animationName = 'Cerrar_Puerta';
+            modelViewer.currentTime = ANIMATION_CONFIG['Cerrar_Puerta'].endFrame / ANIMATION_CONFIG['Cerrar_Puerta'].fps;
+            modelViewer.pause();
+        }
+
+        // Configuración de event listeners
+        function setupEventListeners() {
+            modelViewer.cameraControls = false;
+            backButtons.forEach(btn => {
+                btn.addEventListener('click', resetView);
+            });
+            
+            setupHotspots();
+            
+            setTimeout(() => {
+                if (progressBar.style.width === '0%') {
+                    progressContainer.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        // Posicionamiento de hotspots
+        function positionHotspots() {
+            hotspotDoor.style.left = '50%';
+            hotspotDoor.style.top = '60%';
+            hotspotPanel.style.left = '50%';
+            hotspotPanel.style.top = '30%';
+            hotspotDoorControl.style.left = '60%';
+            hotspotDoorControl.style.top = '65%';
+            hotspotDispensador.style.left = '45%';
+            hotspotDispensador.style.top = '55%';
+            hotspotDetergente.style.left = '45%';
+            hotspotDetergente.style.top = '50%';
+            hotspotEnjuague.style.left = '45%';
+            hotspotEnjuague.style.top = '45%';
+            hotspotEstante.style.left = '40%';
+            hotspotEstante.style.top = '45%';
+            hotspotRejaMedia.style.left = '45%';
+            hotspotRejaMedia.style.top = '50%';
+            hotspotRejaInferior.style.left = '45%';
+            hotspotRejaInferior.style.top = '40%';
+            hotspotCubiertos.style.left = '50%';
+            hotspotCubiertos.style.top = '35%';
+            hotspotRejasPlastico.style.left = '55%';
+            hotspotRejasPlastico.style.top = '50%';
+        }
+
+
+
+        // Configuración de hotspots
+        function setupHotspots() {
+            // Hotspot Puerta
+            hotspotDoor.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                handleHotspotClick(e, doorMessage, {
+                    orbit: '0deg 75deg 2.25m',
+                    target: '0m .7m 0m'
+                }, 'door');
+            });
+
+            // Hotspot Panel
+            hotspotPanel.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                handleHotspotClick(e, panelMessage, {
+                    orbit: '0deg 0deg 1.5m',
+                    target: '0m .2m .2m'
+                }, 'panel');
+                
+                modelViewer.fieldOfView = '20deg';
+                
+                const panelImage = document.getElementById('panel-image');
+                panelImage.style.display = 'flex';
+                setTimeout(() => {
+                    panelImage.style.opacity = '1';
+                }, 10);
+                
+                panelImage.querySelector('button').onclick = () => {
+                    modelViewer.cameraControls = false;
+                    panelImage.style.opacity = '0';
+                    setTimeout(() => {
+                        panelImage.style.display = 'none';
+                    }, 500);
+                };
+            });
+
+            // Hotspot Dispensador
+            hotspotDispensador.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                // Mostrar los hotspots de detergente y enjuague
+                hotspotDetergente.style.display = 'block';
+                hotspotEnjuague.style.display = 'block';
+                
+                handleHotspotClick(e, dispensadorMessage, {
+                    orbit: '0deg 5deg 0.01m',
+                    target: '0.1m 0.6m 0.75m'
+                }, 'dispensador');
+                
+                modelViewer.fieldOfView = '10deg';
+            });
+
+            infoButton.addEventListener('click', () => {
+                infoBox.classList.add('show');
+                // Ocultar otros elementos cuando se muestra la info
+                tituloElement.style.opacity = '0';
+                modeloElement.style.opacity = '0';
+                logoElement.style.opacity = '0';
+                btnVolverElement.style.opacity = '0';
+                fullscreenButton.style.opacity = '0';
+            });
+
+            closeInfo.addEventListener('click', () => {
+                infoBox.classList.remove('show');
+                // Mostrar otros elementos cuando se cierra la info
+                tituloElement.style.opacity = '1';
+                modeloElement.style.opacity = '1';
+                logoElement.style.opacity = '1';
+                btnVolverElement.style.opacity = '1';
+                fullscreenButton.style.opacity = '1';
+            });
+
+            // Cerrar al hacer clic fuera del cuadro
+            infoBox.addEventListener('click', (e) => {
+                if (e.target === infoBox) {
+                    infoBox.classList.remove('show');
+                    tituloElement.style.opacity = '1';
+                    modeloElement.style.opacity = '1';
+                    logoElement.style.opacity = '1';
+                    btnVolverElement.style.opacity = '1';
+                    fullscreenButton.style.opacity = '1';
+                }
+            });
+
+            // Hotspot Detergente
+            hotspotDetergente.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                handleHotspotClick(e, detergenteMessage, {
+                    orbit: '0deg 5deg 0.01m',
+                    target: '0.1m -1m .5m'
+                    
+                }, 'detergente');
+                 // Añadir zoom adicional con fieldOfView
+                    modelViewer.fieldOfView = '5deg';
+            });
+
+            // Hotspot Enjuague
+            hotspotEnjuague.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                handleHotspotClick(e, enjuagueMessage, {
+                    orbit: '0deg 5deg 0.01m',
+                    target: '.2m -1m .6m'
+                }, 'enjuague');
+                
+                modelViewer.fieldOfView = '5deg';
+            });
+            
+            // Hotspot Control Puerta
+            hotspotDoorControl.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (!state.modelReady || state.isAnimating) return;
+                
+                // Marcar como clickeado
+                if (!state.clickedHotspots.doorControl) {
+                    state.clickedHotspots.doorControl = true;
+                    checkAllHotspotsClicked();
+                }
+                
+                toggleDoorAnimation().catch(error => {
+                    console.error('Error al interactuar con el hotspot:', error);
+                });
+            });
+
+            // Hotspot Estante
+            hotspotEstante.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                handleHotspotClick(e, estanteMessage, {
+                    orbit: '70deg 75deg 1.5m',
+                    target: '0.15m 1m 0.5m'
+                }, 'estante');
+                
+                if (!state.isAnimating) {
+                    playAnimation('reja_sup_out', false);
+                }
+            });
+
+            // Hotspot Reja Media
+            hotspotRejaMedia.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                handleHotspotClick(e, rejaMediaMessage, {
+                    orbit: '70deg 75deg 1.5m',
+                    target: '0.15m 0.65m 0.5m'
+                }, 'rejaMedia');
+                
+                if (!state.isAnimating) {
+                    playAnimation('reja_int_out', false);
+                }
+            });
+
+            // Hotspot Reja Inferior
+            hotspotRejaInferior.addEventListener('click', async (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                if (state.isAnimating) return;
+                
+                handleHotspotClick(e, rejaInferiorMessage, {
+                    orbit: '70deg 75deg 1.5m',
+                    target: '0.15m 0.3m 0.5m'
+                }, 'rejaInferior');
+                
+                await playAnimation('reja_inf_out', false);
+                
+                state.cubiertosVisible = true;
+                hotspotCubiertos.style.display = 'block';
+            });
+
+            // Hotspot Cubiertos
+            hotspotCubiertos.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                handleHotspotClick(e, cubiertosMessage, {
+                    orbit: '10deg 60deg 0.1m',
+                    target: '0.2m 0.3m 0.1m'
+                }, 'cubiertos');
+            });
+
+            // Hotspot Rejas Plástico
+            hotspotRejasPlastico.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                if (!state.clickedHotspots.rejasPlastico) {
+                    state.clickedHotspots.rejasPlastico = true;
+                    checkAllHotspotsClicked();
+                }
+                
+                tituloElement.style.opacity = '0';
+                modeloElement.style.opacity = '0';
+                logoElement.style.opacity = '0';
+                btnVolverElement.style.opacity = '0';
+                tituloElement.style.pointerEvents = 'none';
+                modeloElement.style.pointerEvents = 'none';
+                logoElement.style.pointerEvents = 'none';
+                btnVolverElement.style.pointerEvents = 'none';
+                
+                state.previousView = {
+                    orbit: modelViewer.cameraOrbit,
+                    target: modelViewer.cameraTarget,
+                    fieldOfView: modelViewer.fieldOfView
+                };
+                
+                document.querySelectorAll('.hotspot').forEach(h => h.style.display = 'none');
+                hotspotLavadoPotente.style.display = 'block';
+                hotspotLavado.style.display = 'block';
+                hotspotFiltro.style.display = 'block';
+                
+                hideAllMessages();
+                showMessage(rejasPlasticoMessage);
+                
+                modelViewer.cameraOrbit = '0deg 60deg 0.3m';
+                modelViewer.cameraTarget = '-0m 0.7m 0.5m';
+                modelViewer.fieldOfView = '15deg';
+                
+                toggleRejasPlastico(false);
+            });
+
+            // Hotspot Lavado Potente
+            hotspotLavadoPotente.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+
+                if (!state.clickedHotspots.lavadoPotente) {
+                    state.clickedHotspots.lavadoPotente = true;
+                    checkAllHotspotsClicked();
+                }
+                
+                tituloElement.style.opacity = '0';
+                modeloElement.style.opacity = '0';
+                logoElement.style.opacity = '0';
+                btnVolverElement.style.opacity = '0';
+                tituloElement.style.pointerEvents = 'none';
+                modeloElement.style.pointerEvents = 'none';
+                logoElement.style.pointerEvents = 'none';
+                btnVolverElement.style.pointerEvents = 'none';
+                
+                hideAllMessages();
+                showMessage(lavadoPotenteMessage);
+                
+                modelViewer.cameraOrbit = '0deg 40deg 0.1m';
+                modelViewer.cameraTarget = '0m .1m -.5m';
+            });
+
+            document.querySelector('#lavado-potente-message .info-back-btn').addEventListener('click', () => {
+                resetView();
+            });
+
+            // Hotspot Lavado
+            hotspotLavado.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                if (!state.clickedHotspots.lavado) {
+                    state.clickedHotspots.lavado = true;
+                    checkAllHotspotsClicked();
+                }
+                
+                tituloElement.style.opacity = '0';
+                modeloElement.style.opacity = '0';
+                logoElement.style.opacity = '0';
+                btnVolverElement.style.opacity = '0';
+                tituloElement.style.pointerEvents = 'none';
+                modeloElement.style.pointerEvents = 'none';
+                logoElement.style.pointerEvents = 'none';
+                btnVolverElement.style.pointerEvents = 'none';
+                
+                hideAllMessages();
+                showMessage(lavadoMessage);
+                
+                modelViewer.cameraOrbit = '0deg 40deg 0.1m';
+                modelViewer.cameraTarget = '-.1m .1m -.5m';
+            });
+
+            document.querySelector('#lavado-message .info-back-btn').addEventListener('click', () => {
+                resetView();
+            });
+
+            // Hotspot Filtro
+            hotspotFiltro.addEventListener('click', (e) => {
+                modelViewer.cameraControls = false;
+                e.stopPropagation();
+                
+                if (!state.clickedHotspots.filtro) {
+                    state.clickedHotspots.filtro = true;
+                    checkAllHotspotsClicked();
+                }
+                
+                tituloElement.style.opacity = '0';
+                modeloElement.style.opacity = '0';
+                logoElement.style.opacity = '0';
+                btnVolverElement.style.opacity = '0';
+                tituloElement.style.pointerEvents = 'none';
+                modeloElement.style.pointerEvents = 'none';
+                logoElement.style.pointerEvents = 'none';
+                btnVolverElement.style.pointerEvents = 'none';
+                
+                hideAllMessages();
+                showMessage(filtroMessage);
+                
+                modelViewer.cameraOrbit = '0deg 30deg 0.05m';
+                modelViewer.cameraTarget = '0m .1m -.3m';
+                modelViewer.fieldOfView = '15deg';
+            });
+
+            document.querySelector('#filtro-message .info-back-btn').addEventListener('click', () => {
+                resetView();
+            });
+
+            document.querySelector('#rejas-plastico-message .info-back-btn').addEventListener('click', () => {
+                toggleRejasPlastico(true);
+                resetView();
+            });
+
+            // Botón de pantalla completa
+            fullscreenButton.addEventListener('click', toggleFullscreen);
+
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    fullscreenButton.classList.remove('fullscreen-active');
+                    localStorage.setItem('fullscreen', 'false');
+                }
+            });
+        }
+
+        
+
+        // Función para verificar si todos los hotspots fueron clickeados
+        function checkAllHotspotsClicked() {
+            const allClicked = Object.values(state.clickedHotspots).every(clicked => clicked);
+            if (allClicked && !state.allHotspotsClicked) {
+                state.allHotspotsClicked = true;
+                enableSurveyButton();
+                
+                // Mostrar notificación
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = '¡Todos los hotspots explorados! Ahora puedes acceder a la encuesta.';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        }
+
+        // Función para habilitar el botón de encuesta
+        function enableSurveyButton() {
+            btnVolverElement.classList.add('enabled');
+        }
+
+        // Función para mostrar/ocultar rejas de plástico
+        function toggleRejasPlastico(forceVisible = false) {
+            if (!modelViewer.model) return;
+
+            const materials = modelViewer.model.materials;
+            state.rejasPlasticoVisible = forceVisible !== null ? forceVisible : !state.rejasPlasticoVisible;
+
+            materials.forEach(material => {
+                const name = material.name.toLowerCase();
+                if (name.includes('plastico') || name.includes('reja') || name.includes('rack')) {
+                    if (state.rejasPlasticoVisible) {
+                        material.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
+                        material.setAlphaMode('OPAQUE');
+                    } else {
+                        material.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 0]);
+                        material.setAlphaMode('BLEND');
+                    }
+                }
+            });
+        }
+
+function handleHotspotClick(event, messageElement, cameraSettings, hotspotName) {
+    event.stopPropagation();
+    
+    // Verificar que los elementos existan antes de acceder a sus propiedades
+    const elements = {
+        titulo: document.querySelector('.titulo'),
+        modelo: document.querySelector('.modelo'),
+        logo: document.querySelector('.logo-inferior'),
+        btnVolver: document.querySelector('.btn-volver'),
+        fullscreenButton: document.querySelector('.btn-fullscreen')
+    };
+    
+    // Marcar el hotspot como clickeado
+    if (hotspotName && !state.clickedHotspots[hotspotName]) {
+        state.clickedHotspots[hotspotName] = true;
+        checkAllHotspotsClicked();
+    }
+    
+    modelViewer.cameraControls = false;
+    
+    // Ocultar elementos solo si existen
+    Object.values(elements).forEach(element => {
+        if (element) {
+            element.style.opacity = '0';
+            element.style.pointerEvents = 'none';
+        }
+    });
+    
+    hideAllMessages();
+    
+    // Mostrar mensaje solo si existe
+    if (messageElement) {
+        showMessage(messageElement);
+    }
+    
+    modelViewer.style.transition = 'all 0.5s ease-out';
+    
+    if (cameraSettings) {
+        if (cameraSettings.orbit) {
+            modelViewer.cameraOrbit = cameraSettings.orbit;
+        }
+        if (cameraSettings.target) {
+            modelViewer.cameraTarget = cameraSettings.target;
+        }
+    }
+    
+    setTimeout(() => {
+        modelViewer.style.transition = 'none';
+    }, 500);
+}
+        async function toggleDoorAnimation() {
+            const animationName = state.isDoorOpen ? 'Cerrar_Puerta' : 'Abrir_Puerta';
+            playAnimation(animationName, true);
+        }
+
+        function playAnimation(animationName, affectsDoorState = true) {
+            if (state.isAnimating || !state.modelReady) return;
+            
+            const config = ANIMATION_CONFIG[animationName];
+            if (!config) return;
+            
+            state.isAnimating = true;
+            
+            if (affectsDoorState) {
+                if (animationName === 'Abrir_Puerta') {
+                    hotspotDoor.style.display = 'none';
+                    hotspotPanel.style.display = 'none';
+                } else if (animationName === 'Cerrar_Puerta') {
+                    hotspotDispensador.style.display = 'none';
+                    hotspotDetergente.style.display = 'none';
+                    hotspotEnjuague.style.display = 'none';
+                    hotspotEstante.style.display = 'none';
+                    hotspotRejaMedia.style.display = 'none';
+                    hotspotRejaInferior.style.display = 'none';
+                    hotspotCubiertos.style.display = 'none';
+                    hotspotRejasPlastico.style.display = 'none';
+                    state.cubiertosVisible = false;
+                }
+            }
+
+            modelViewer.animationName = animationName;
+            modelViewer.currentTime = config.startFrame / config.fps;
+            modelViewer.play();
+            
+            const duration = ((config.endFrame - config.startFrame) / config.fps) * 1000;
+            
+            setTimeout(() => {
+                modelViewer.pause();
+                modelViewer.currentTime = config.endFrame / config.fps;
+                state.isAnimating = false;
+                
+                if (affectsDoorState) {
+                    state.isDoorOpen = animationName === 'Abrir_Puerta';
+                    updateHotspotsVisibility();
+                }
+            }, duration);
+        }
+
+        function updateHotspotsVisibility() {
+            // Hotspots que siempre están visibles (cuando la puerta está cerrada)
+            hotspotDoor.style.display = !state.isDoorOpen ? 'block' : 'none';
+            hotspotPanel.style.display = !state.isDoorOpen ? 'block' : 'none';
+            hotspotDoorControl.style.display = 'block';
+            
+            // Hotspots que solo aparecen cuando la puerta está abierta
+            const interiorHotspots = [
+                hotspotDispensador,
+                hotspotEstante,
+                hotspotRejaMedia,
+                hotspotRejaInferior,
+                hotspotRejasPlastico
+            ];
+            
+            interiorHotspots.forEach(hotspot => {
+                hotspot.style.display = state.isDoorOpen ? 'block' : 'none';
+            });
+            
+            // Hotspot especial de cubiertos
+            hotspotCubiertos.style.display = (state.cubiertosVisible && state.isDoorOpen) ? 'block' : 'none';
+            
+            // Los hotspots de detergente y enjuague se manejan aparte
+            hotspotDetergente.style.display = 'none';
+            hotspotEnjuague.style.display = 'none';
+        }
+
+        function hideAllMessages() {
+            document.querySelectorAll('.info-message').forEach(msg => {
+                msg.style.opacity = '0';
+            });
+        }
+
+        function showMessage(element) {
+            if (element) {
+                element.style.opacity = '1';
+            }
+        }
+function resetView() {
+    // Verificar que los elementos existan
+    const elements = {
+        titulo: tituloElement,
+        modelo: modeloElement,
+        logo: logoElement,
+        btnVolver: btnVolverElement,
+        fullscreenButton: fullscreenButton
+    };
+    
+    // Ocultar los hotspots de detergente y enjuague
+    if (hotspotDetergente) hotspotDetergente.style.display = 'none';
+    if (hotspotEnjuague) hotspotEnjuague.style.display = 'none';
+    
+    modelViewer.cameraControls = true;
+    
+    // Mostrar elementos solo si existen
+    Object.values(elements).forEach(element => {
+        if (element) {
+            element.style.opacity = '1';
+            element.style.pointerEvents = 'auto';
+        }
+    });
+    
+    hideAllMessages();
+    
+    if (hotspotLavadoPotente) hotspotLavadoPotente.style.display = 'none';
+    if (hotspotLavado) hotspotLavado.style.display = 'none';
+    if (hotspotFiltro) hotspotFiltro.style.display = 'none';
+    
+    toggleRejasPlastico(true);
+    
+    modelViewer.fieldOfView = '30deg';
+    
+    const panelImage = document.getElementById('panel-image');
+    if (panelImage) {
+        panelImage.style.opacity = '0';
+        setTimeout(() => {
+            panelImage.style.display = 'none';
+        }, 500);
+    }
+    
+    modelViewer.style.transform = 'none';
+    
+    updateHotspotsVisibility();
+    
+    if (state.initialView) {
+        modelViewer.cameraOrbit = state.initialView.orbit;
+        modelViewer.cameraTarget = state.initialView.target;
+        modelViewer.animationName = state.initialView.animation;
+        modelViewer.fieldOfView = state.initialView.fieldOfView || '30deg';
+        modelViewer.pause();
+    }
+    
+    if (window.zoomInterval) {
+        clearInterval(window.zoomInterval);
+    }
+}
+        function handleError(error) {
+            console.error('Error en model-viewer:', error);
+            progressBar.style.background = '#ff3e3e';
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

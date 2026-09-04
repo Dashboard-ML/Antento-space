@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Refrigerador Samsung</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background: black;
+        }
+        #video-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            -webkit-media-controls { display: none !important; }
+        }
+        
+        .cubito {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            background: transparent;
+            width: auto;
+            height: auto;
+        }
+        
+        .cubito::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.6s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .cubito img {
+            width: 450px;
+            height: auto;
+            filter: drop-shadow(0 2px 5px rgba(0, 149, 255, 0));
+            transition: all 0.3s;
+        }
+        
+        .cubito:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        
+        .cubito:hover img {
+            transform: translateX(5px);
+            filter: drop-shadow(0 0 15px #00a3e0) drop-shadow(0 3px 6px #4619ffff);
+        }
+        
+        .cubito:hover::before {
+            left: 100%;
+        }
+
+        .audio-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 30px;
+            border: 2px solid #a4d7ff;
+            box-shadow: 0 0 15px #00a3e0;
+            transition: all 0.3s;
+        }
+        
+        .audio-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(0, 247, 255, 0.3);
+        }
+
+        /* Botón de pantalla completa */
+        .fullscreen-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #00a3e0, #4619ff);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 113, 227, 0.4);
+            transition: all 0.3s;
+            z-index: 101;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .fullscreen-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 113, 227, 0.6);
+        }
+        
+        .fullscreen-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+        
+        .fullscreen-toggle.fullscreen-active {
+            background: linear-gradient(45deg, #ff3a3a, #ff6b6b);
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="fs-video" playsinline>
+            <source src="INTRESDE.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="cubito" id="cubito">
+        <img src="boton_inicio_2.png" alt="Continuar">
+    </div>
+    
+    <button class="fullscreen-toggle" id="fullscreenBtn">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+    </button>
+    
+    <div class="audio-toggle" id="audioBtn">🔇</div>
+
+    <script>
+        const video = document.getElementById('fs-video');
+        const cubito = document.getElementById('cubito');
+        const audioBtn = document.getElementById('audioBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        // Configuración inicial
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = false;
+
+        // Verificar estado de fullscreen al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('fullscreen') === 'true' && !document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {
+                    console.log("Error al restaurar fullscreen:", e);
+                });
+            }
+        });
+
+        // Mostrar cubito al finalizar
+        video.addEventListener('ended', function() {
+            video.pause();
+            video.currentTime = video.duration - 0.1;
+            cubito.style.display = 'flex';
+        });
+
+        // Redirección con cubito - manteniendo el fullscreen
+        cubito.addEventListener('click', function() {
+            // Guardar estado de fullscreen antes de redirigir
+            localStorage.setItem('fullscreen', !!document.fullscreenElement);
+            window.location.href = "presentacion.html";
+        });
+
+        // Control de audio
+        audioBtn.addEventListener('click', function() {
+            video.muted = !video.muted;
+            this.textContent = video.muted ? '🔇' : '🔊';
+            if (!video.muted && video.paused) {
+                video.play().catch(e => console.log("Error al reproducir:", e));
+            }
+        });
+
+        // Control de pantalla completa
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {
+                    console.log("Error al entrar en pantalla completa:", e);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Actualizar estado visual del botón
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.classList.add('fullscreen-active');
+                localStorage.setItem('fullscreen', 'true');
+            } else {
+                fullscreenBtn.classList.remove('fullscreen-active');
+                localStorage.setItem('fullscreen', 'false');
+            }
+        });
+
+        // Intento de reproducción automática
+        video.play().catch(e => {
+            console.log("Autoplay bloqueado:", e);
+            audioBtn.style.display = 'flex';
+        });
+        
+        // Permitir audio con interacción
+        document.addEventListener('click', function() {
+            if (video.muted) {
+                video.muted = false;
+                audioBtn.textContent = '🔊';
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

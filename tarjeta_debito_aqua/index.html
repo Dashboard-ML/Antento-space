@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tarjeta BBVA 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: "Calibri", Arial, sans-serif;
+        background-color: #f5f5f5;
+        overflow-x: hidden;
+      }
+
+      .model-container {
+        position: relative;
+        width: 95vw;
+        height: 95vh;
+        max-width: 2048px;
+        max-height: 1080px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px;
+      }
+
+      /* Hotspot para VISA */
+      .Hotspot-visa {
+        background: rgba(21, 101, 192, 0.7);
+        border: 2px solid white;
+        box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .Hotspot-visa:hover {
+        background: rgba(21, 101, 192, 0.9);
+        transform: scale(1.1);
+        box-shadow: 0 0 0 5px rgba(21, 101, 192, 0.4);
+      }
+
+      .Hotspot-visa::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: linear-gradient(
+          45deg,
+          transparent 45%,
+          rgba(255, 255, 255, 0.2) 50%,
+          transparent 55%
+        );
+        background-size: 200% 200%;
+        animation: visaShine 3s infinite linear;
+        z-index: 0;
+      }
+
+      @keyframes visaShine {
+        0% {
+          background-position: 100% 100%;
+        }
+        100% {
+          background-position: 0% 0%;
+        }
+      }
+
+      .Hotspot-visa-icon {
+        position: relative;
+        width: 70%;
+        height: 70%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+      }
+
+      .Hotspot-visa-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .Hotspot-visa-icon .visa-text {
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        font-size: 40px;
+        fill: white;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+
+      /* Estilo base para hotspots */
+      .Hotspot {
+        background: rgba(0, 68, 129, 0.7);
+        border-radius: 50%;
+        border: 2px solid white;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Estilo específico para reciclaje */
+      .Hotspot-reciclaje {
+        background: rgba(0, 150, 136, 0.8);
+        border-color: #b2dfdb;
+      }
+
+      .Hotspot-reciclaje:hover {
+        background: rgba(0, 150, 136, 1);
+        transform: scale(1.1);
+      }
+
+      /* Contenedor para el ícono */
+      .icon-container {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Ícono de reciclaje */
+      .recycle-icon {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Estilo para el hotspot de seguridad */
+      .Hotspot-seguridad {
+        background: rgba(0, 107, 62, 0.7);
+        border-radius: 50%;
+        border: 2px solid white;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .Hotspot-seguridad:hover {
+        background: rgba(0, 107, 62, 0.9);
+        transform: scale(1.1);
+      }
+
+      /* Icono de seguridad */
+      .Hotspot-seguridad svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      /* Estilo para el hotspot de contactless */
+      .Hotspot-contactless {
+        background: rgba(0, 150, 200, 0.7);
+        border-radius: 50%;
+        border: 2px solid white;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .Hotspot-contactless:hover {
+        background: rgba(0, 150, 200, 0.9);
+        transform: scale(1.1);
+      }
+
+      /* Hotspot para el logo BBVA */
+      .Hotspot-logo {
+        background: rgba(0, 68, 129, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 0 4px rgba(0, 68, 129, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .Hotspot-logo:hover {
+        background: rgba(0, 68, 129, 0.9);
+        transform: scale(1.15);
+        box-shadow: 0 0 0 6px rgba(0, 68, 129, 0.3);
+      }
+
+      .Hotspot-logo::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.15) 0%,
+          transparent 70%
+        );
+        transform: rotate(45deg);
+        transition: all 0.5s ease;
+      }
+
+      .Hotspot-logo:hover::before {
+        transform: rotate(45deg) translate(20px, 20px);
+      }
+
+      /* Estilo para banda magnética */
+      .Hotspot-banda {
+        background: rgba(0, 68, 129, 0.7);
+        border: 2px solid #a5c8ff;
+      }
+
+      .Hotspot-banda:hover {
+        background: rgba(0, 68, 129, 0.9);
+        transform: scale(1.1);
+      }
+
+      /* Icono personalizado para el logo BBVA */
+      .Hotspot-logo-icon {
+        position: relative;
+        width: 60%;
+        height: 60%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .Hotspot-logo-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .Hotspot-logo-icon .logo-part1 {
+        fill: none;
+        stroke: white;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+
+      .Hotspot-logo-icon .logo-part2 {
+        fill: white;
+      }
+
+      /* Logo BBVA abajo a la derecha */
+      .bbva-logo-container {
+        position: absolute;
+        bottom: 2%;
+        right: 2%;
+        z-index: 10;
+      }
+
+      .bbva-logo-img {
+        width: 100vw;
+        max-width: 170px;
+        min-width: 80px;
+        height: auto;
+        transition: transform 0.3s ease;
+      }
+
+      .bbva-logo-img:hover {
+        transform: scale(1.05);
+      }
+
+      /* Texto "Tarjeta de Débito" arriba a la izquierda */
+      .card-type {
+        position: absolute;
+        top: 2%;
+        left: 3%;
+        z-index: 10;
+        background-color: rgba(240, 240, 240, 0.9);
+        color: #004481;
+        padding: 1vw 2vw;
+        border-radius: 5px;
+        font-size: 3vw;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #004481;
+        transition: all 0.3s ease;
+        max-width: 90%;
+        white-space: nowrap;
+      }
+
+      .card-type:hover {
+        background-color: rgba(240, 240, 240, 1);
+        transform: translateY(-2px);
+      }
+
+      /* Estilo para el botón de instrucciones */
+      .inst-button {
+        position: absolute;
+        top: 90%;
+        left: 3%;
+        z-index: 10;
+        background-color: #004481;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 6vw;
+        height: 6vw;
+        max-width: 44px;
+        max-height: 44px;
+        min-width: 32px;
+        min-height: 32px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .inst-button:hover {
+        background-color: #003366;
+        transform: scale(1.1);
+      }
+
+      /* Contenedor de instrucciones */
+      .inst-container {
+        position: absolute;
+        bottom: 5%;
+        left: 6%;
+        z-index: 10;
+        background-color: white;
+        color: #004481;
+        padding: 2vw;
+        border-radius: 5px;
+        font-size: 1.5vw;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        width: 25vw;
+        min-width: 250px;
+        max-width: 300px;
+        animation: fadeIn 0.3s ease-out;
+        border-left: 4px solid #004481;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .inst-container.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .inst-content {
+        position: relative;
+      }
+
+      .close-inst-button {
+        margin-top: 15px;
+        background-color: #004481;
+        color: white;
+        border: none;
+        padding: 0.5vw 1vw;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.2vw;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .close-inst-button:hover {
+        background-color: #003366;
+      }
+
+      /* Estilos para el hotspot mejorado */
+      .Hotspot {
+        background: rgba(0, 68, 129, 0.7);
+        border-radius: 50%;
+        border: 2px solid white;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .Hotspot:hover {
+        background: rgba(0, 68, 129, 0.9);
+        transform: scale(1.1);
+      }
+
+      .HotspotAnnotation {
+        position: absolute;
+        left: 100%;
+        white-space: nowrap;
+        margin-left: 12px;
+        background: rgba(0, 68, 129, 0.95);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .Hotspot:hover .HotspotAnnotation {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Panel derecho para los mensajes */
+      .info-panel {
+        position: fixed;
+        top: 50%;
+        right: 20%;
+        transform: translateY(-50%);
+        background-color: white;
+        padding: 2vw;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        z-index: 100;
+        width: 25vw;
+        min-width: 250px;
+        max-width: 320px;
+        border-top: 6px solid #004481;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .info-panel.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translate(120%, -50%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(0, -50%);
+          opacity: 1;
+        }
+      }
+
+      .info-panel p {
+        font-size: 1.4vw;
+        min-font-size: 14px;
+        color: #333;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .info-panel button {
+        background-color: #004481;
+        color: white;
+        border: none;
+        padding: 1vw 1.5vw;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.2vw;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+
+      .info-panel button:hover {
+        background-color: #003366;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Botón AR */
+      #ar-button {
+        background-color: #fff;
+        border-radius: 6px;
+        border: none;
+        position: absolute;
+        bottom: 2%;
+        right: 2%;
+        padding: 1vw 2vw;
+        font-family: "Roboto", Helvetica, Arial, sans-serif;
+        font-weight: 600;
+        font-size: 1.2vw;
+        color: #004481;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      #ar-button:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Media Queries para ajustes específicos */
+      @media (max-width: 768px) {
+        .card-type {
+          font-size: 3vw;
+          padding: 0.8vw 1.6vw;
+        }
+
+        .inst-button {
+          top: 70%;
+          width: 8vw;
+          height: 8vw;
+        }
+
+        .inst-container {
+          font-size: 2.5vw;
+          width: 60vw;
+          left: 5%;
+          bottom: 25%;
+        }
+
+        .close-inst-button {
+          font-size: 2.5vw;
+          padding: 1vw 2vw;
+        }
+
+        .Hotspot {
+          width: 8vw;
+          height: 8vw;
+          max-width: 44px;
+          max-height: 44px;
+          min-width: 32px;
+          min-height: 32px;
+        }
+
+        #ar-button {
+          padding: 1.5vw 3vw;
+          font-size: 2.5vw;
+        }
+
+        .info-panel {
+          width: 80vw;
+          right: 5%;
+          left: 5%;
+          margin: auto;
+          padding: 4vw;
+        }
+
+        .info-panel p {
+          font-size: 2.5vw;
+        }
+
+        .info-panel button {
+          font-size: 2.5vw;
+          padding: 2vw 3vw;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .card-type {
+          font-size: 4vw;
+          white-space: normal;
+        }
+
+        .inst-container {
+          font-size: 3.5vw;
+          width: 80vw;
+        }
+
+        .info-panel p {
+          font-size: 3.5vw;
+        }
+
+        .info-panel button {
+          font-size: 3.5vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="model-container">
+      <!-- Texto arriba a la izquierda -->
+      <div class="card-type">Tarjeta de Débito Aqua</div>
+
+      <!-- Botón para mostrar instrucciones (solo ícono) -->
+      <button class="inst-button" onclick="toggleInstructions()">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 16V12M12 8H12.01"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      <!-- Contenedor de instrucciones (inicialmente oculto) -->
+      <div class="inst-container" id="instructionsPanel">
+        <div class="inst-content">
+          <p>Para mayor información,<br />presiona los botones.</p>
+          <button class="close-inst-button" onclick="toggleInstructions()">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Cerrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Logo BBVA abajo a la derecha (PNG) -->
+      <div class="bbva-logo-container">
+        <img
+          src="https://cdn.glitch.global/bad60ce0-35b4-4dd8-8ab8-f02f8b685371/Atento_logo.jpg?v=1743530737661"
+          alt="Logo BBVA"
+          class="bbva-logo-img"
+        />
+      </div>
+
+      <!-- Panel derecho para mensajes -->
+      <div class="info-panel" id="infoPanel">
+        <p id="panelMessage"></p>
+        <button onclick="resetView()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style="margin-right: 8px"
+          >
+            <path
+              d="M5 13L9 17L19 7M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Entendido
+        </button>
+      </div>
+
+      <!-- Modelo 3D con hotspots -->
+      <model-viewer
+        id="tarjeta-model"
+        src="https://cdn.glitch.global/d79589b3-38d9-4a97-a78b-1b81e6a34253/tarjeta_debito_bbva_4.glb?v=1743093510736"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        tone-mapping="neutral"
+        poster="poster.webp"
+        shadow-intensity="1"
+        exposure="1.2"
+        environment-image="neutral"
+        camera-orbit="0deg 75deg 120%"
+        field-of-view="35deg"
+        style="width: 100%; height: 100%"
+      >
+        <!-- Hotspot Reciclaje Simple (Parte trasera tarjeta) - Versión modificada -->
+        <button
+          class="Hotspot Hotspot-reciclaje"
+          slot="hotspot-reciclaje"
+          data-position="-.5m .05m -0.01m"
+          data-normal="0m 0m -1m"
+          onclick="showReciclajeMessage()"
+          style="
+            background: #00c853;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border: 2px solid white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+          "
+        >
+          <!-- Símbolo de reciclaje básico -->
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            style="display: block"
+          >
+            <text
+              x="12"
+              y="18"
+              font-family="Arial"
+              font-weight="bold"
+              font-size="20"
+              fill="white"
+              text-anchor="middle"
+            >
+              ♻
+            </text>
+          </svg>
+
+          <!-- Tooltip modificado para mostrar solo "Reciclaje" -->
+          <div class="HotspotAnnotation" style="background: #00796b">
+            Material reciclado
+          </div>
+        </button>
+
+        <!-- Hotspot sobre el chip en la parte frontal -->
+        <button
+          class="Hotspot"
+          slot="hotspot-chip"
+          data-position="-1.m 0.25m 0.00m"
+          data-normal="0m 0m 1m"
+          onclick="zoomToChip()"
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M9 3V5M15 3V5M9 19V21M15 19V21M5 9H3M5 15H3M21 9H19M21 15H19M7 19H17C18.1046 19 19 18.1046 19 17V7C19 5.89543 18.1046 5 17 5H7C5.89543 5 5 5.89543 5 7V17C5 18.1046 5.89543 19 7 19Z"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Chip
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 3V5M15 3V5M9 19V21M15 19V21M5 9H3M5 15H3M21 9H19M21 15H19M7 19H17C18.1046 19 19 18.1046 19 17V7C19 5.89543 18.1046 5 17 5H7C5.89543 5 5 5.89543 5 7V17C5 18.1046 5.89543 19 7 19Z"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Hotspot Banda Magnética - Parte trasera de la tarjeta -->
+        <button
+          class="Hotspot Hotspot-banda"
+          slot="hotspot-banda"
+          data-position="0m .68m -0.01m"
+          data-normal="0m 0m -1m"
+          onclick="showBandaMessage()"
+        >
+          <!-- Icono SVG de banda magnética -->
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect x="4" y="8" width="16" height="3" fill="white" />
+            <rect x="4" y="12" width="16" height="1" fill="white" />
+            <rect x="4" y="14" width="16" height="2" fill="white" />
+          </svg>
+
+          <!-- Tooltip elevado -->
+          <div
+            class="HotspotAnnotation"
+            style="left: 100%; margin-left: 1px; bottom: 35px"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <rect x="4" y="8" width="16" height="3" fill="white" />
+              <rect x="4" y="12" width="16" height="1" fill="white" />
+              <rect x="4" y="14" width="16" height="2" fill="white" />
+            </svg>
+            Banda Magnética
+          </div>
+        </button>
+
+        <!-- Hotspot para la tecnología Contactless (parte frontal) -->
+        <button
+          class="Hotspot Hotspot-contactless"
+          slot="hotspot-contactless"
+          data-position="-1.45m -0.07m 0.00m"
+          data-normal="0m 0m 1m"
+          onclick="showContactlessMessage()"
+        >
+          <div
+            class="HotspotAnnotation"
+            style="left: auto; right: 100%; margin-left: 0; margin-right: 12px"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
+                fill="white"
+                stroke="white"
+              />
+              <path
+                d="M16.24 7.76C16.7979 8.31739 17.2404 8.98052 17.5424 9.71172C17.8444 10.4429 18 11.2281 18 12.0222C18 12.8164 17.8444 13.6016 17.5424 14.3328C17.2404 15.064 16.7979 15.7271 16.24 16.2845"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M7.76 16.24C7.20211 15.6826 6.75963 15.0195 6.45762 14.2883C6.15561 13.5571 6 12.7719 6 11.9778C6 11.1836 6.15561 10.3984 6.45762 9.66723C6.75963 8.93602 7.20211 8.27291 7.76 7.71554"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M19.07 4.93C20.9447 6.80527 21.9979 9.34835 21.9979 12C21.9979 14.6517 20.9447 17.1947 19.07 19.07"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4.93 19.07C3.05526 17.1947 2.0021 14.6517 2.0021 12C2.0021 9.34835 3.05526 6.80527 4.93 4.93"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Tecnología Contactless
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
+              fill="white"
+              stroke="white"
+            />
+            <path
+              d="M16.24 7.76C16.7979 8.31739 17.2404 8.98052 17.5424 9.71172C17.8444 10.4429 18 11.2281 18 12.0222C18 12.8164 17.8444 13.6016 17.5424 14.3328C17.2404 15.064 16.7979 15.7271 16.24 16.2845"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M7.76 16.24C7.20211 15.6826 6.75963 15.0195 6.45762 14.2883C6.15561 13.5571 6 12.7719 6 11.9778C6 11.1836 6.15561 10.3984 6.45762 9.66723C6.75963 8.93602 7.20211 8.27291 7.76 7.71554"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M19.07 4.93C20.9447 6.80527 21.9979 9.34835 21.9979 12C21.9979 14.6517 20.9447 17.1947 19.07 19.07"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M4.93 19.07C3.05526 17.1947 2.0021 14.6517 2.0021 12C2.0021 9.34835 3.05526 6.80527 4.93 4.93"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Hotspot sobre el QR en la parte trasera -->
+        <button
+          class="Hotspot"
+          slot="hotspot-qr"
+          data-position="1.2m -0.5m -0.01m"
+          data-normal="0m 0m -1m"
+          onclick="zoomToQR()"
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="white" />
+              <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="white" />
+              <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="white" />
+              <path d="M21 19H19V21H21V19Z" fill="white" />
+              <path d="M15 19H17V21H15V19Z" fill="white" />
+              <path d="M13 13H15V15H13V13Z" fill="white" />
+              <path d="M15 15H17V17H15V15Z" fill="white" />
+              <path d="M17 13H19V15H17V13Z" fill="white" />
+              <path d="M17 17H19V19H17V17Z" fill="white" />
+              <path d="M13 17H15V19H13V17Z" fill="white" />
+            </svg>
+            Código QR
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M3 11H11V3H3V11ZM5 5H9V9H5V5Z" fill="white" />
+            <path d="M3 21H11V13H3V21ZM5 15H9V19H5V15Z" fill="white" />
+            <path d="M13 3V11H21V3H13ZM19 9H15V5H19V9Z" fill="white" />
+            <path d="M21 19H19V21H21V19Z" fill="white" />
+            <path d="M15 19H17V21H15V19Z" fill="white" />
+            <path d="M13 13H15V15H13V13Z" fill="white" />
+            <path d="M15 15H17V17H15V15Z" fill="white" />
+            <path d="M17 13H19V15H17V13Z" fill="white" />
+            <path d="M17 17H19V19H17V17Z" fill="white" />
+            <path d="M13 17H15V19H13V17Z" fill="white" />
+          </svg>
+        </button>
+
+        <!-- Hotspot para el nuevo diseño seguro (parte frontal) -->
+        <button
+          class="Hotspot Hotspot-seguridad"
+          slot="hotspot-seguridad"
+          data-position=".8m .1m 0.00m"
+          data-normal="0m 0m 1m"
+          onclick="showSeguridadMessage()"
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9 12L11 14L15 10"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Diseño Seguro
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9 12L11 14L15 10"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Hotspot para el área de firma en la parte trasera -->
+        <button
+          class="Hotspot"
+          slot="hotspot-firma"
+          data-position="-0.45m -0.7m -0.01m"
+          data-normal="0m 0m -1m"
+          onclick="zoomToFirma()"
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M9 12L11 14L15 10M12 3C13.2875 3 14.5681 3.26392 15.764 3.775C16.9599 4.28609 18.0466 5.03482 18.9635 5.97703C19.8804 6.91924 20.6086 8.03498 21.1082 9.26317C21.6078 10.4914 21.8688 11.807 21.8688 13.1364C21.8688 14.4657 21.6078 15.7814 21.1082 17.0096C20.6086 18.2378 19.8804 19.3535 18.9635 20.2957C18.0466 21.2379 16.9599 21.9867 15.764 22.4978C14.5681 23.0088 13.2875 23.2727 12 23.2727C10.7125 23.2727 9.43194 23.0088 8.23604 22.4978C7.04013 21.9867 5.95344 21.2379 5.03654 20.2957C4.11963 19.3535 3.39142 18.2378 2.89183 17.0096C2.39224 15.7814 2.13125 14.4657 2.13125 13.1364C2.13125 11.807 2.39224 10.4914 2.89183 9.26317C3.39142 8.03498 4.11963 6.91924 5.03654 5.97703C5.95344 5.03482 7.04013 4.28609 8.23604 3.775C9.43194 3.26392 10.7125 3 12 3Z"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Área de firma del titular
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 12L11 14L15 10M12 3C13.2875 3 14.5681 3.26392 15.764 3.775C16.9599 4.28609 18.0466 5.03482 18.9635 5.97703C19.8804 6.91924 20.6086 8.03498 21.1082 9.26317C21.6078 10.4914 21.8688 11.807 21.8688 13.1364C21.8688 14.4657 21.6078 15.7814 21.1082 17.0096C20.6086 18.2378 19.8804 19.3535 18.9635 20.2957C18.0466 21.2379 16.9599 21.9867 15.764 22.4978C14.5681 23.0088 13.2875 23.2727 12 23.2727C10.7125 23.2727 9.43194 23.0088 8.23604 22.4978C7.04013 21.9867 5.95344 21.2379 5.03654 20.2957C4.11963 19.3535 3.39142 18.2378 2.89183 17.0096C2.39224 15.7814 2.13125 14.4657 2.13125 13.1364C2.13125 11.807 2.39224 10.4914 2.89183 9.26317C3.39142 8.03498 4.11963 6.91924 5.03654 5.97703C5.95344 5.03482 7.04013 4.28609 8.23604 3.775C9.43194 3.26392 10.7125 3 12 3Z"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Hotspot VISA - Versión que mantiene proporciones -->
+        <button
+          class="Hotspot"
+          slot="hotspot-visa"
+          data-position="1m -1.1m 0.00m"
+          data-normal="0m 0m 1m"
+          onclick="showVisaMessage()"
+          style="
+            border-radius: 8px;
+            width: 60px;
+            height: 38px;
+            background: rgba(21, 101, 192, 0.7);
+          "
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M9.5 8.5L11 12l-1.5 3.5H7l1.5-3.5L7 8.5h2.5zM13 8.5h2.5l1.5 7h-2.5l-.35-1.7h-2.3L11 15.5H8.5L13 8.5zm2.15 3.3l-.4-1.8s-.1-.4-.15-.6h-.05l-.15.6-.4 1.8h1.15z"
+                fill="white"
+              />
+            </svg>
+            Respaldo VISA
+          </div>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 80 50"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <rect width="80" height="50" rx="5" fill="#1a5f9c" />
+            <text
+              x="40"
+              y="30"
+              font-family="Arial"
+              font-weight="bold"
+              font-size="24"
+              fill="white"
+              text-anchor="middle"
+            >
+              VISA
+            </text>
+          </svg>
+        </button>
+
+        <!-- Hotspot Logo BBVA - Misma interfaz que otros hotspots -->
+        <button
+          class="Hotspot"
+          slot="hotspot-logo-bbva"
+          data-position="-.57m .82m 0.00m"
+          data-normal="0m 0m 1m"
+          onclick="showLogoBBVAMessage()"
+        >
+          <div class="HotspotAnnotation">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style="margin-right: 6px"
+            >
+              <path
+                d="M12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3Z"
+                stroke="white"
+                stroke-width="2"
+              />
+              <path
+                d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+                fill="white"
+              />
+            </svg>
+            Logotipo BBVA
+          </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3Z"
+              stroke="white"
+              stroke-width="2"
+            />
+            <path
+              d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+              fill="white"
+            />
+          </svg>
+        </button>
+
+        <div id="ar-prompt">
+          <img src="https://modelviewer.dev/shared-assets/icons/hand.png" />
+        </div>
+      </model-viewer>
+    </div>
+
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+    ></script>
+
+    <script>
+      // Función para mostrar/ocultar instrucciones
+      function toggleInstructions() {
+        const instructionsPanel = document.getElementById("instructionsPanel");
+        instructionsPanel.classList.toggle("show");
+      }
+
+      // Variables para guardar el estado inicial
+      let initialOrbit = "0deg 75deg 120%";
+      let initialFov = "35deg";
+      let initialTarget = "0m 0m 0m";
+
+      // Función para acercar al chip con animación
+      async function zoomToChip() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "-.5m -.4m -2.5m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el chip (parte frontal)
+        animateCamera(modelViewer, "0deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre el chip
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Microprocesador capaz de guardar grandes cantidades de información al cliente.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar el mensaje de reciclaje
+      function showReciclajeMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configuración de cámara para la vista de reciclaje (parte trasera)
+        modelViewer.cameraTarget = "-.2m 0.8m -2m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Animación de cámara
+        animateCamera(modelViewer, "180deg 75deg 50%", 800);
+
+        // Mostrar panel informativo
+        setTimeout(() => {
+          const panel = document.getElementById("infoPanel");
+          const message = document.getElementById("panelMessage");
+
+          message.innerHTML = `
+                    <strong style="color: #004481;">MATERIAL RECICLABLE</strong>
+                    <p style="margin-top: 10px;">
+                        Diseño ecofrendly, hecho de plástico reciclado 
+                        <path d="M5 12V19H19V12M12 5L8 9H11V15H13V9H16L12 5Z" stroke="#004481" stroke-width="2"/>
+                    </p>
+                `;
+
+          panel.classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar mensaje de tecnología Contactless
+      function showContactlessMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "-1.2m -1m -4.5m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el área contactless (parte frontal)
+        animateCamera(modelViewer, "0deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre contactless
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Tu tarjeta cuenta con tecnología Contactless.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar mensaje sobre la banda magnética
+      function showBandaMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "-1m 1.5m -4.0m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia la banda (parte trasera)
+        animateCamera(modelViewer, "180deg 75deg 50%", 800);
+
+        // Mostrar panel informativo
+        setTimeout(() => {
+          document.getElementById("panelMessage").innerHTML = `
+                    <strong style="color: #004481;">BANDA MAGNÉTICA</strong>
+                    <p>Cuenta con banda magnética.</p>
+                `;
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar mensaje del diseño seguro
+      function showSeguridadMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "0m .3m 1m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el área de diseño seguro (parte frontal)
+        animateCamera(modelViewer, "0deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre el diseño seguro
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Tu tarjeta cuenta con un nuevo diseño seguro que no muestra datos sensibles.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para acercar al QR con animación
+      async function zoomToQR() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = ".5m -.5m 1.0m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el QR (parte trasera) con animación
+        animateCamera(modelViewer, "180deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre el QR
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Puedes escanear este código QR dentro de tu aplicación de BBVA para obtener la información completa de tu tarjeta.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para acercar al área de firma con animación
+      async function zoomToFirma() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "-1.3m -.m -.9m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el área de firma (parte trasera) con animación
+        animateCamera(modelViewer, "180deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre el área de firma
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Esta es el área donde debes firmar tu tarjeta.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar mensaje del logo BBVA
+      function showLogoBBVAMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "-.7m .1m -3.00m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el logo BBVA (parte frontal)
+        animateCamera(modelViewer, "0deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre el logo BBVA
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Logotipo de BBVA.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para mostrar mensaje de VISA
+      function showVisaMessage() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Guardar estado inicial
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+
+        // Configurar el zoom
+        modelViewer.cameraTarget = "1.7m -1.1m -2.00m";
+        modelViewer.fieldOfView = "15deg";
+
+        // Orientar la cámara hacia el logo VISA
+        animateCamera(modelViewer, "0deg 75deg 50%", 800);
+
+        // Mostrar panel con el mensaje sobre VISA
+        setTimeout(() => {
+          document.getElementById("panelMessage").textContent =
+            "Tarjeta respaldada por VISA.";
+          document.getElementById("infoPanel").classList.add("show");
+        }, 600);
+      }
+
+      // Función para animar la cámara
+      function animateCamera(modelViewer, targetOrbit, duration) {
+        const startOrbit = modelViewer.cameraOrbit;
+        const startTime = performance.now();
+
+        // Ocultar elementos durante la animación
+        document.querySelector(".bbva-logo-container").style.opacity = "0";
+        document.querySelector(".card-type").style.opacity = "0";
+        document.querySelector(".inst-button").style.opacity = "0";
+
+        function updateCamera() {
+          const elapsed = performance.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          // Interpolación entre los valores iniciales y finales
+          const currentOrbit = interpolateOrbits(
+            startOrbit,
+            targetOrbit,
+            progress
+          );
+          modelViewer.cameraOrbit = currentOrbit;
+
+          if (progress < 1) {
+            requestAnimationFrame(updateCamera);
+          }
+        }
+
+        requestAnimationFrame(updateCamera);
+      }
+
+      // Función para interpolación de órbitas
+      function interpolateOrbits(startOrbit, targetOrbit, progress) {
+        const startParts = startOrbit.split(" ");
+        const targetParts = targetOrbit.split(" ");
+
+        const thetaStart = parseFloat(startParts[0]);
+        const phiStart = parseFloat(startParts[1]);
+        const radiusStart = parseFloat(startParts[2]);
+
+        const thetaTarget = parseFloat(targetParts[0]);
+        const phiTarget = parseFloat(targetParts[1]);
+        const radiusTarget = parseFloat(targetParts[2]);
+
+        // Interpolación lineal para cada componente
+        const theta = thetaStart + (thetaTarget - thetaStart) * progress;
+        const phi = phiStart + (phiTarget - phiStart) * progress;
+        const radius = radiusStart + (radiusTarget - radiusStart) * progress;
+
+        return `${theta}deg ${phi}deg ${radius}%`;
+      }
+
+      // Función para resetear la vista con animación
+      function resetView() {
+        const modelViewer = document.querySelector("#tarjeta-model");
+
+        // Animación de vuelta a la vista inicial
+        animateCamera(modelViewer, initialOrbit, 800);
+        modelViewer.fieldOfView = initialFov;
+        modelViewer.cameraTarget = initialTarget;
+
+        // Mostrar elementos cuando volvemos a la vista inicial
+        setTimeout(() => {
+          document.querySelector(".bbva-logo-container").style.opacity = "1";
+          document.querySelector(".card-type").style.opacity = "1";
+          document.querySelector(".inst-button").style.opacity = "1";
+        }, 800);
+
+        // Ocultar panel con animación
+        document.getElementById("infoPanel").classList.remove("show");
+      }
+
+      // Inicialización
+      document.addEventListener("DOMContentLoaded", () => {
+        const modelViewer = document.querySelector("#tarjeta-model");
+        initialOrbit = modelViewer.cameraOrbit;
+        initialFov = modelViewer.fieldOfView;
+        initialTarget = modelViewer.cameraTarget;
+      });
+    </script>
+  </body>
+</html>

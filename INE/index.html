@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.10.2/lottie.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>INE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Botón de pantalla completa -->
+<button class="fullscreen-btn" id="fullscreen-btn" title="Pantalla completa">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+    </svg>
+</button>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+
+<div id="completedMessage" style="
+  display: none;
+  opacity: 0;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: linear-gradient(135deg, rgba(59, 36, 71, 0.85), rgba(0, 68, 129, 0.75));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 60px 80px;
+  border-radius: 24px;
+  font-size: 28px;
+  font-weight: 500;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  text-align: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  backdrop-filter: blur(16px);
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+">
+ <div style="display: flex; flex-direction: column; align-items: center; gap: 28px;">
+    <div id="lottie-check" style="
+    width: 130vw;
+    max-width: 130px;
+    min-width: 80px;
+    aspect-ratio: 1 / 1;
+    align-items: center;
+    justify-content: center;
+    animation: popin 0.7s ease;
+  "></div>
+    <span style="line-height: 1.6;">
+      ¡Has completado todos los pasos exitosamente!
+    </span>
+<button id="cerrarMensaje" style="
+  padding: 14px 40px;
+  font-size: 18px;
+  background: linear-gradient(135deg, #66d1ff, rgb(59, 36, 71));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+"
+onmouseover="this.style.transform='scale(1.06)'; this.style.boxShadow='0 10px 28px rgba(0,0,0,0.25)'"
+onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'"
+onclick="window.location.href = 'https://forms.office.com/pages/responsepage.aspx?id=VNBWEwz7yUWWYwh8J4u_GIU27o51vZJIs2A6OMGNbi5UM0YzRzMxTzM5TTc3RDEwNUdRM09KRjVWVS4u&route=shorturl';"
+>
+  Aceptar
+</button>
+  </div>
+</div>
+<button id="toggle-progress-panel" title="Ver progreso" style="
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">
+  <lottie-player
+    src="Animacion/ListadeVerificación.json"
+    background="transparent"
+    speed="1"
+    style="width: 60px; height: 60px;"
+    loop
+    autoplay
+  ></lottie-player>
+</button>
+
+<div id="progress-panel">
+  <h3>Progreso</h3>
+  <ul id="progress-list">
+    <li data-id="hotspot-1">Clave de Elector</li>
+    <li data-id="hotspot-2">OVD</li>
+    <li data-id="hotspot-3">Elemento Táctil</li>
+    <li data-id="hotspot-4">Código Bidimensionales QR</li>
+    <li data-id="hotspot-5">QR Ciudadano</li>
+    <li data-id="hotspot-6">Impresión Arcoíris</li>
+    <li data-id="hotspot-7">Microtexto</li>
+    <li data-id="hotspot-8">Fotografía Fantasma</li>
+    <li data-id="hotspot-9">Mapa con tinta OVI</li>
+    <li data-id="hotspot-10">Nombre</li>
+    <li data-id="hotspot-11">Apellido Paterno</li>
+    <li data-id="hotspot-12">Apellido Materno</li>
+    <li data-id="hotspot-13">Número de Emisión</li>
+    <li data-id="hotspot-14">Franja OVI</li>
+  </ul>
+</div>
+
+
+        </div>
+    </div>
+  
+<audio id="successSound" src="Audio/success-221935.mp3"></audio>
+
+
+      <audio id="hotspotAudio"></audio>
+  
+    <div class="model-container">
+        <div class="card-type">INE</div>
+      
+      <div class="model-container">
+        <button class="inst" onclick="mostrarInstrucciones()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 16V12" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 8H12.01" stroke="#004481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+</button>
+
+        <div class="bbva-logo-container">
+            <img src="logoatento.png" 
+                 alt="Logo Atento" 
+                 class="Atento-logo-img">
+        </div>
+        
+<div class="info-panel" id="infoPanel">
+    <p id="panelMessage"></p>
+    <button onclick="closePanel(this)" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; font-size: 16px; border: none; background: rgb(59, 36, 71); color: white; border-radius: 8px; cursor: pointer; font-weight: 600;   justify-content: center;">
+      <lottie-player
+        src="Animacion/seguridad.json" 
+        background="transparent"
+        speed="1"
+        style="width: 24px; height: 24px;"
+        loop
+        autoplay
+      ></lottie-player>
+      Entendido
+    </button>
+  </div>
+  
+        <model-viewer 
+            id="tarjeta-model"
+            src="Inemodelo2.glb" 
+            camera-controls 
+            tone-mapping="neutral" 
+            poster="poster.webp" 
+            shadow-intensity="3"
+            exposure="10"
+            min-camera-orbit="auto 59deg auto"
+            max-camera-orbit="auto 108deg auto"
+            environment-image="moon_lab.webp"
+            camera-orbit="0deg 75deg 120%"
+            field-of-view="35deg"
+            style="width: 100%; height: 100%;">
+            
+          </button>
+            <button class="Hotspot" slot="hotspot-ClaveDeElector" 
+            id="hotspot-1"
+                    data-position="2.00m -1.15m -0.0034379999248750513m" 
+                    data-normal="0m 0m 1m"
+                    onclick="zoomToClaveDeElector(this)">
+                <div class="HotspotAnnotation">
+                    Clave de Elector
+            </button>
+          
+    <div class="HotspotAnnotation" style="left: 100%; margin-left: 1px; bottom: 35px;">
+Código bidimensionales Qr
+    </div>
+</button>
+          
+            <button class="Hotspot hotspot-locked" slot="hotspot-OVD" 
+            id="hotspot-2"
+                    data-position="-1.45m -0.m 0.10m" 
+                    data-normal="0m 0m 1m"
+                    onclick="zoomToOVD(this)">
+                <div class="HotspotAnnotation" style="left: auto; right: 100%; margin-left: 0; margin-right: 12px;">
+                    OVD
+                </div>
+            </button>
+            
+            <button class="Hotspot hotspot-locked" slot="hotspot-ElementoTactil" 
+            id="hotspot-3"
+                    data-position="-3.60m -.3m 0.10m" 
+                    data-normal="0m 0m 1m"
+                    onclick="zoomToElementoTactil(this)">
+                <div class="HotspotAnnotation" style="left: auto; right: 100%; margin-left: 0; margin-right: 12px;">
+                    Elemento Tactil
+                </div>
+            </button>
+            <button class="Hotspot hotspot-locked" slot="hotspot-CodigoBidimensionales" 
+            id="hotspot-4"
+                    data-position="1.328m 0.654m -0.0708m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToCodigoBidimensionales(this)">
+                <div class="HotspotAnnotation">
+                    Código bidimensionales Qr
+                </div>
+
+            </button>
+            <button class="Hotspot hotspot-locked" slot="hotspot-QrCiudadano" 
+            id="hotspot-5"
+                    data-position="-3.528m 1.554m -0.0708m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToQrCiudadano(this)">
+                <div class="HotspotAnnotation">
+                    Qr Ciudadano
+                </div>
+
+            </button>
+            <button class="Hotspot hotspot-locked" slot="hotspot-ImpresionArcoiris" 
+            id="hotspot-6"
+                    data-position="-0.9285m 2.3754m -0.070886m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToImpresionArcoiris(this)">
+                <div class="HotspotAnnotation">
+                    Impresión Arcoíris
+                </div>
+            </button>
+            <button class="Hotspot hotspot-locked" slot="hotspot-Microtexto" 
+            id="hotspot-7"
+                    data-position="-2.328m 2.3754m -0.070886m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToMicrotexto(this)">
+                <div class="HotspotAnnotation">
+                    Microtexto
+                </div>
+            </button>
+
+            <button class="Hotspot hotspot-locked" slot="hotspot-FotografiaFantasma" 
+            id="hotspot-8"
+                    data-position="3.8m .1m 0.00m" 
+                    data-normal="0m 0m 1m"
+                    onclick="showFotografiaFantasmaMessage(this)">
+                <div class="HotspotAnnotation">
+                    Fotografía Fantasma
+                </div>
+            </button>
+
+            <button class="Hotspot hotspot-locked" slot="hotspot-MapaConTintaOvi" 
+            id="hotspot-9"
+                    data-position="3.9m -2.5m 0.00m" 
+                    data-normal="0m 0m 1m"
+                    onclick="showMapaConTintaOviMessage(this)">
+                <div class="HotspotAnnotation">
+                    Mapa con tinta Ovi
+                </div>
+  
+            </button>
+
+            <button class="Hotspot hotspot-locked" slot="hotspot-Nombre" 
+            id="hotspot-10"
+                    data-position="-4.228m -2.275m -0.350m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToNombre(this)">
+                <div class="HotspotAnnotation">
+                    Nombre
+                </div>
+   
+            </button>
+        
+            <button class="Hotspot hotspot-locked" slot="hotspot-ApellidoPaterno" 
+            id="hotspot-11"
+                    data-position="1.228m -2.275m -0.350m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToApellidoPaterno(this)">
+                <div class="HotspotAnnotation">
+                    Apellido Paterno
+                </div>
+   
+            </button>
+
+            <button class="Hotspot hotspot-locked" slot="hotspot-ApellidoMaterno" 
+            id="hotspot-12"
+                    data-position="-1.228m -2.275m -0.350m" 
+                    data-normal="0m 0m -1m"
+                    onclick="zoomToApellidoMaterno(this)">
+                <div class="HotspotAnnotation">
+                    Apellido Materno
+                </div>
+   
+            </button>
+          
+          <button class="Hotspot hotspot-locked" slot="hotspot-NumeroDeEmision" 
+          id="hotspot-13"
+                  data-position="2.617m -1.712m -0.003m" 
+                  data-normal="0m 0m 1m"
+                  onclick="showNumeroDeEmisionMessage(this)">
+              <div class="HotspotAnnotation left">
+                Numero de emisión
+            </div>
+          
+          </button>
+
+        <button class="Hotspot hotspot-locked" slot="hotspot-FranjaOvi" 
+        id="hotspot-14"
+                data-position="-4.289m 1.241m -0.034m" 
+                data-normal="0m 0m 1m"
+                onclick="showFranjaOviMessage(this)">
+            <div class="HotspotAnnotation">
+                Franja con Tinta OVI
+            </div>
+        </button>
+
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    
+    <script>
+
+let progresoActual = 1;
+const totalHotspots = 13;
+
+      
+   function playSound(soundUrl) {
+        const audio = document.getElementById('hotspotAudio');
+        audio.src = soundUrl;
+        audio.play().catch(error => {
+            console.log('Error al reproducir sonido:', error);
+        });
+    }
+
+        // Variables para guardar el estado inicial
+        let initialOrbit = '0deg 75deg 120%';
+        let initialFov = '35deg';
+        let initialTarget = '0m 0m 0m';
+      
+      
+      
+        
+        // Función para acercar Clave de Elector con animación
+           async function zoomToClaveDeElector(clickedHotspot) {
+         const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+           playSound('Audio/Claveelector.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+const hotspots = document.querySelectorAll('.Hotspot');
+hotspots.forEach(hotspot => {
+    if (
+        hotspot !== clickedHotspot &&
+        !hotspot.classList.contains('desbloqueado')
+    ) {
+        hotspot.style.display = 'none';
+    }
+});
+
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            modelViewer.cameraTarget = '3.5m -1.9m -1.1m';
+            modelViewer.fieldOfView = '15deg';
+            animateCamera(modelViewer, '-30deg 75deg 50%', 800);
+            
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Clave de elector es única para cada ciudadano.';
+                document.getElementById('infoPanel').style.display = 'block';
+                desbloquearSiguienteHotspot(clickedHotspot.id);
+                  if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+                
+            }, 600);
+        }
+
+      
+        // Función para acercar OVD con animación
+           async function zoomToOVD(clickedHotspot) {
+              const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+           playSound('Audio/OVD.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+                 const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '2.5m -2.0m -5.1m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el OVDchip (parte frontal)
+            animateCamera(modelViewer, '-30deg 75deg 50%', 800);
+            
+            
+            // Mostrar panel con el mensaje sobre el OVD
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'El dispositivo cambia de color, dependiendo del ángulo de la luz con que se observe, las imágenes que se aprecian son. el logotipo del INE, la urna con la boleta electoral, el escudo de México y un efecto bandera.';
+                document.getElementById('infoPanel').style.display = 'block';
+                desbloquearSiguienteHotspot(clickedHotspot.id);
+                  if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }      
+      
+        // Función para acercar Elemento Tactil con animación
+           async function zoomToElementoTactil(clickedHotspot) {
+              const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+           playSound('Audio/ElementoTactil.mp3');
+          const modelViewer = document.querySelector('#tarjeta-model');
+          const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+             
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-1.3m 1.8m -5.1m';
+            modelViewer.fieldOfView = '0deg';
+            
+            // Orientar la cámara hacia el OVDchip (parte frontal)
+            animateCamera(modelViewer, '-15deg 110deg 50%', 800);
+            
+            
+            // Mostrar panel con el mensaje sobre el OVD
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Al tocar con las yemas de los dedos, se perciben las siglas del INE y la boleta electoral entrando a la urna.';
+                document.getElementById('infoPanel').style.display = 'block';
+                desbloquearSiguienteHotspot(clickedHotspot.id);
+                  if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }      
+            
+            function showFotografiaFantasmaMessage(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/FotografiaFantasma.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+            const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '4.6m 0.0m -4m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de diseño seguro (parte frontal)
+            animateCamera(modelViewer, '0deg 90deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el diseño seguro
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'La fotografía fantasma se fortalece como elemento de seguridad al aplicar un software que crea la imagen a partir de datos de las y los ciudadanos con un patrón variable, lo que la hace única y difícil de reproducir.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+      // Funcionalidad de pantalla completa
+document.addEventListener('DOMContentLoaded', function() {
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const fullscreenIcon = fullscreenBtn.querySelector('svg');
+    
+    // Icono para pantalla completa normal
+    const fullscreenIconPath = 'M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z';
+    // Icono para salir de pantalla completa
+    const exitFullscreenIconPath = 'M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z';
+    
+    // Verificar si estamos en pantalla completa
+    function updateFullscreenButton() {
+        if (document.fullscreenElement || document.webkitFullscreenElement || 
+            document.mozFullScreenElement || document.msFullscreenElement) {
+            fullscreenBtn.classList.add('fullscreen-active');
+            fullscreenIcon.querySelector('path').setAttribute('d', exitFullscreenIconPath);
+        } else {
+            fullscreenBtn.classList.remove('fullscreen-active');
+            fullscreenIcon.querySelector('path').setAttribute('d', fullscreenIconPath);
+        }
+    }
+    
+    // Alternar pantalla completa
+    function toggleFullscreen() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+            !document.mozFullScreenElement && !document.msFullscreenElement) {
+            // Entrar en pantalla completa
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen();
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.mozRequestFullScreen) {
+                docEl.mozRequestFullScreen();
+            } else if (docEl.msRequestFullscreen) {
+                docEl.msRequestFullscreen();
+            }
+        } else {
+            // Salir de pantalla completa
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+    
+    // Event listeners
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', updateFullscreenButton);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+    document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+    document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+    
+    // También permitir F11 para pantalla completa
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F11') {
+            e.preventDefault();
+            toggleFullscreen();
+        }
+    });
+});
+      
+            // Función para mostrar Mapa con tinta ovi
+            function showMapaConTintaOviMessage(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/MapaOvi.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '4.9m -3.3m -6m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de Mapa con tinta ovi (parte frontal)
+            animateCamera(modelViewer, '0deg 75deg 50%', 100);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.0s ease-out';
+            }, 800);
+            
+            // Mostrar panel con el mensaje sobre el Mapa con tinta ovi
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Mapa de la República con tinta de impresión especializada que cambia de color en función del ángulo de la luz con que se observe.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }      
+      
+      
+
+      
+            // Función para acercar al arcoiris con animación
+            async function zoomToImpresionArcoiris(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/ImprecionArcoiris.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+                  // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+  
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-0.7m 2.3m 3.0m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia al arcoiris (parte trasera) con animación
+            animateCamera(modelViewer, '190deg 90deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el arcoiris
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Tienen impresos patrones de líneas con dos o más colores simultáneos de tinta que simulan el efecto de un arcoíris.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+      
+      
+            // Función para acercar al Microtexto con animación
+            async function zoomToMicrotexto(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/MicroTexto.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+                  // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-2.9m 5.4m 9.0m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia Microtexto 
+            animateCamera(modelViewer, '180deg 110deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el Microtexto 
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Contienen la leyenda: INSTITUTO NACIONAL ELECTORAL, que no es legible a simple vista.';
+                document.getElementById('infoPanel').style.display = 'block';
+               desbloquearSiguienteHotspot(clickedHotspot.id);
+                 if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+                  // Función para acercar Código bidimensionales Qr con animación
+            async function zoomToCodigoBidimensionales(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/QrBidimencionales.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+                  // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-.5m .5m 1.0m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia Código bidimensionales Qr (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el Código bidimensionales Qr
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Estos elementos pueden ser escaneados por una aplicación exclusiva del INE que es más ágil y fácil para optimizar la verificación de la Credencial para Votar, además, la forma en la que están generados los datos en los códigos QR permiten garantizar que fueron emitidos por el INE, previniendo el uso de Credenciales falsas o alteradas.';
+                document.getElementById('infoPanel').style.display = 'block';
+                 desbloquearSiguienteHotspot(clickedHotspot.id);
+                   if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+        
+                 // Función para acercar Qr ciudadano con animación
+            async function zoomToQrCiudadano(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/QrCiudadano.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+                  // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-5.5m .5m 1.0m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el Qr ciudadano (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el Qr ciudadano
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Este elemento puede ser escaneado por un teléfono “inteligente” y dirige a una página de servicios que ofrece el INE para las y los ciudadanos.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+            }, 600);
+              if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+        }
+        
+              
+        
+        // Función para acercar al área de nombre con animación
+        async function zoomToNombre(clickedHotspot) {
+              const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/nombre.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+              // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '-4.3m -1.5m -.9m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de Nombre (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el área de Nombre
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'En caso del nombre este vendrá después del signo diple, pero para poder diferenciarlo se agregarán 2 << que se considera como diferenciador entre apellidos y nombre.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+        
+      
+        // Función para acercar al área de Apellido Paterno con animación
+        async function zoomToApellidoPaterno(clickedHotspot) {
+              const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/ApellidoPaterno.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+              // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '0.3m -1.0m -.9m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de Nombre Paterno (parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el área Nombre Paterno 
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Se valida de la siguiente forma, Primero Apellido Paterno se escribe de manera completa y si este estuviera compuesto llevara el signo diple < a forma de espacio entre cada palabra que conforma dicho apellido.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+      
+        // Función para acercar al área de Apellido Materno con animación
+        async function zoomToApellidoMaterno(clickedHotspot) {
+              const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/Apellidomatern0.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+              // Ocultar otros hotspots
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            
+            // Guardar estado inicial
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            
+            // Configurar el zoom
+            modelViewer.cameraTarget = '0.3m -1.0m -.9m';
+            modelViewer.fieldOfView = '15deg';
+            
+            // Orientar la cámara hacia el área de Apellido Materno(parte trasera) con animación
+            animateCamera(modelViewer, '180deg 75deg 50%', 800);
+            
+            // Mostrar botón de volver con animación
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            
+            // Mostrar panel con el mensaje sobre el área Apellido Materno
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'En caso del apellido materno este de va después de este signo diple <, el cual tiene una regla para su redacción la cual puede venir con una capacidad de 8 o 9 caracteres dependiendo la versión del INE, en caso de que el apellido materno exceda el número de caracteres mencionados previamente estos se omitirán los caracteres sobrantes. Por lo cual no se debe de rechazar la identificación en este escenario, es válida y no se debe de enviar con proceso de “Sin opción a reparo”.';
+                document.getElementById('infoPanel').style.display = 'block';
+                desbloquearSiguienteHotspot(clickedHotspot.id);
+                  if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }      
+  
+            function showNumeroDeEmisionMessage(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/Numerodeemision.mp3');
+            const modelViewer = document.querySelector('#tarjeta-model');
+    const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+    
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+
+            modelViewer.cameraTarget = '4.5m -1.1m -5.00m';
+            modelViewer.fieldOfView = '15deg';
+            
+            animateCamera(modelViewer, '0deg 90deg 50%', 800);
+            
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'block';
+                document.querySelector('.back-button').style.animation = 'fadeIn 0.5s ease-out';
+            }, 400);
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Se integra en un campo con la emisión y vigencia.';
+                document.getElementById('infoPanel').style.display = 'block';
+                 desbloquearSiguienteHotspot(clickedHotspot.id);
+                   if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }
+      
+            function showFranjaOviMessage(clickedHotspot) {
+                  const numero = parseInt(clickedHotspot.id.split('-')[1]);
+            clickedHotspot.classList.remove('destacado');
+            playSound('Audio/FranjaOvi.mp3');
+          const modelViewer = document.querySelector('#tarjeta-model');
+          const hotspots = document.querySelectorAll('.Hotspot');
+    hotspots.forEach(hotspot => {
+        if (hotspot !== clickedHotspot) {
+            hotspot.style.display = 'none';
+        }
+    });
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+            modelViewer.cameraTarget = '-3.4m 1.8m -5.1m';
+            modelViewer.fieldOfView = '60deg';
+            animateCamera(modelViewer, '0deg 110deg 50%', 800);
+            setTimeout(() => {
+                document.getElementById('panelMessage').textContent = 'Franja con tinta de impresión especializada que cambia de color en función del ángulo de la luz con que se observe.';
+                document.getElementById('infoPanel').style.display = 'block';
+              desbloquearSiguienteHotspot(clickedHotspot.id);
+                if (numero === progresoActual) {
+    progresoActual++;
+  }
+
+  updateProgressPanel();
+            }, 600);
+        }      
+
+        function animateCamera(modelViewer, targetOrbit, duration) {
+            const startOrbit = modelViewer.cameraOrbit;
+            const startTime = performance.now();
+            
+            function updateCamera() {
+                const elapsed = performance.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentOrbit = interpolateOrbits(startOrbit, targetOrbit, progress);
+                modelViewer.cameraOrbit = currentOrbit;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCamera);
+                }
+            }
+            
+            requestAnimationFrame(updateCamera);
+        }
+        
+        function interpolateOrbits(startOrbit, targetOrbit, progress) {
+            const startParts = startOrbit.split(' ');
+            const targetParts = targetOrbit.split(' ');
+            const thetaStart = parseFloat(startParts[0]);
+            const phiStart = parseFloat(startParts[1]);
+            const radiusStart = parseFloat(startParts[2]);
+            const thetaTarget = parseFloat(targetParts[0]);
+            const phiTarget = parseFloat(targetParts[1]);
+            const radiusTarget = parseFloat(targetParts[2]);
+            const theta = thetaStart + (thetaTarget - thetaStart) * progress;
+            const phi = phiStart + (phiTarget - phiStart) * progress;
+            const radius = radiusStart + (radiusTarget - radiusStart) * progress;
+            
+            return `${theta}deg ${phi}deg ${radius}%`;
+        
+        
+        }
+      
+function animateCamera(modelViewer, targetOrbit, duration) {
+    const startOrbit = modelViewer.cameraOrbit;
+    const startTime = performance.now();
+
+    document.querySelector('.bbva-logo-container').style.opacity = '0';
+    function updateCamera() {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentOrbit = interpolateOrbits(startOrbit, targetOrbit, progress);
+        modelViewer.cameraOrbit = currentOrbit;
+        if (progress < 1) {
+            requestAnimationFrame(updateCamera);
+        }
+    }
+    requestAnimationFrame(updateCamera);
+}
+        function resetView() {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            animateCamera(modelViewer, initialOrbit, 800);
+            modelViewer.fieldOfView = initialFov;
+            modelViewer.cameraTarget = initialTarget;
+            document.querySelector('.back-button').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.querySelector('.back-button').style.display = 'none';
+            }, 300);
+            document.getElementById('infoPanel').style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.getElementById('infoPanel').style.display = 'none';
+            }, 300);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+ 
+            
+        });
+ 
+     function closePanel() {
+    const panel = document.getElementById('infoPanel');
+    panel.classList.add('fadeOut');
+    
+    setTimeout(() => {
+        panel.style.display = 'none';
+        panel.classList.remove('fadeOut');
+    }, 300);
+}
+  
+function closePanel() {
+    const modelViewer = document.querySelector('#tarjeta-model');
+    const audio = document.getElementById('hotspotAudio');
+    audio.pause();
+    audio.currentTime = 0;
+    document.querySelectorAll('.Hotspot').forEach(hotspot => {
+    });
+    
+    document.getElementById('infoPanel').style.animation = 'fadeOut 0.9s ease-out';
+    setTimeout(() => {
+        document.getElementById('infoPanel').style.display = 'none';
+
+            if (progresoActual > totalHotspots) {
+            mostrarMensajeCompletado();
+        }
+    }, 600); 
+    animateCamera(modelViewer, initialOrbit, 800);
+    modelViewer.fieldOfView = initialFov;
+    modelViewer.cameraTarget = initialTarget;
+}
+ 
+function resetView() {
+    const modelViewer = document.querySelector('#tarjeta-model');
+
+    document.querySelector('.bbva-logo-container').style.opacity = '0';
+    document.querySelector('.card-type').style.opacity = '0';
+    document.querySelector('.inst').style.opacity = '0';
+  
+    animateCamera(modelViewer, initialOrbit, 800);
+    modelViewer.fieldOfView = initialFov;
+    modelViewer.cameraTarget = initialTarget;
+    setTimeout(() => {
+        if (modelViewer.cameraOrbit === initialOrbit && 
+            modelViewer.fieldOfView === initialFov && 
+            modelViewer.cameraTarget === initialTarget) {
+            document.querySelector('.bbva-logo-container').style.opacity = '1';
+          document.querySelector('.card-type').style.opacity = '1';
+          document.querySelector('.inst').style.opacity = '1';
+          
+        }
+    }, 800);
+}
+      
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+} 
+
+function updateLogoVisibility() {
+    const modelViewer = document.querySelector('#tarjeta-model');
+    const logo = document.querySelector('.bbva-logo-container');
+    const tipodetarjeta = document.querySelector('.card-type');
+    const informes= document.querySelector('.inst');
+  
+    if (modelViewer.cameraOrbit === initialOrbit && 
+        modelViewer.fieldOfView === initialFov && 
+        modelViewer.cameraTarget === initialTarget) {
+        logo.style.opacity = '1';
+        tipodetarjeta.style.opacity = '1';
+        informes.style.opacity = '1';
+      
+    } else {
+        logo.style.opacity = '0';
+        tipodetarjeta.style.opacity = '0';
+        informes.style.opacity = '0';
+    }
+}
+      function mostrarInstrucciones() {
+    const panel = document.getElementById('infoPanel');
+    const message = document.getElementById('panelMessage');
+    
+    message.innerHTML = `
+        <strong style="color: #004481;">INSTRUCCIONES</strong>
+        <p style="margin-top: 10px;">
+            Presiona los botones circulares en la tarjeta 
+            para descubrir información sobre cada elemento.
+        </p>
+    `;
+    
+    panel.style.display = 'block';
+    panel.style.animation = 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    
+    playSound('https://cdn.glitch.global/04de299b-a988-40d9-b6b9-116761f8e341/click-sound.mp3');
+}
+
+setInterval(updateLogoVisibility, 100);
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelViewer = document.querySelector('#tarjeta-model');
+            initialOrbit = modelViewer.cameraOrbit;
+            initialFov = modelViewer.fieldOfView;
+            initialTarget = modelViewer.cameraTarget;
+        });
+      
+       document.addEventListener('DOMContentLoaded', () => {
+              showModel();
+});
+
+function showModel() {
+    const introContainer = document.getElementById('intro-container');
+    if (introContainer) {
+        introContainer.style.display = 'none'; // Oculta el contenedor del video
+    }
+    
+    // Asegúrate de que el modelo esté visible
+    const modelContainer = document.querySelector('.model-container');
+    if (modelContainer) {
+        modelContainer.style.display = 'block';
+    }
+
+
+
+            setTimeout(() => {
+                introContainer.style.opacity = '0';
+                introContainer.addEventListener('transitionend', () => {
+                introContainer.classList.add('hidden');
+                });
+            }, 900);
+        }
+document.addEventListener('DOMContentLoaded', () => {
+  const totalHotspots = 14;
+const primerHotspot = document.getElementById('hotspot-1');
+if (primerHotspot) {
+    primerHotspot.classList.add('desbloqueado', 'destacado');
+    updateProgressPanel();
+}
+
+for (let i = 2; i <= totalHotspots; i++) {
+    const hotspot = document.getElementById(`hotspot-${i}`);
+    if (hotspot) {
+        hotspot.style.display = 'none';
+    }
+}
+
+  for (let i = 1; i < totalHotspots; i++) {
+    const currentHotspot = document.getElementById(`hotspot-${i}`);
+    const nextHotspot = document.getElementById(`hotspot-${i + 1}`);
+
+    if (currentHotspot && nextHotspot) {
+      currentHotspot.addEventListener('click', () => {
+        setTimeout(() => {
+          nextHotspot.style.display = 'flex'; 
+        }, 800); 
+      });
+    }
+  }
+});
+function desbloquearSiguienteHotspot(actualId) {
+    const numeroActual = parseInt(actualId.split('-')[1]);
+    const siguienteId = `hotspot-${numeroActual + 1}`;
+    const siguienteHotspot = document.getElementById(siguienteId);
+
+    if (siguienteHotspot) {
+        siguienteHotspot.style.display = 'flex';
+        siguienteHotspot.classList.add('desbloqueado', 'destacado');
+
+    }
+}
+
+document.getElementById('toggle-progress-panel').addEventListener('click', () => {
+  const panel = document.getElementById('progress-panel');
+  panel.classList.toggle('open');
+});
+
+function updateProgressPanel() {
+  const lista = document.querySelectorAll('#progress-list li');
+
+  lista.forEach((item, index) => {
+    item.classList.remove('completado', 'activo');
+
+    const paso = index + 1;
+
+    if (paso < progresoActual) {
+      item.classList.add('completado');
+    } else if (paso === progresoActual) {
+      item.classList.add('activo');
+    }
+  });
+}
+function mostrarMensajeCompletado() {
+  const mensaje = document.getElementById('completedMessage');
+  const sonido = document.getElementById('successSound');
+
+  mensaje.style.display = 'block';
+  setTimeout(() => {
+    mensaje.style.opacity = '1';
+    mensaje.style.transform = 'translate(-50%, -50%) scale(1)';
+  }, 50);
+
+lottie.loadAnimation({
+  container: document.getElementById('lottie-check'),
+  renderer: 'svg',
+  loop: true,
+  autoplay: true,
+  path: 'Animacion/SuccessfullyDone.json' 
+});
+
+  sonido.play().catch((e) => console.log('Sonido no pudo reproducirse:', e));
+
+
+    lanzarConfeti();
+}
+
+function lanzarConfeti() {
+  if (typeof confetti === 'function') {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.4 },
+      colors: ['#ffffff', '#66d1ff', '#004481']
+    });
+  }
+
+  setTimeout(() => {
+    mensaje.style.opacity = '0';
+    mensaje.style.transform = 'translate(-50%, -50%) scale(0.95)';
+    setTimeout(() => {
+      mensaje.style.display = 'none';
+    }, 500);
+  }, 3500);
+}
+
+document.getElementById('cerrarMensaje').addEventListener('click', () => {
+  const mensaje = document.getElementById('completedMessage');
+  mensaje.style.opacity = '0';
+  mensaje.style.transform = 'translate(-50%, -50%) scale(0.95)';
+  setTimeout(() => {
+    mensaje.style.display = 'none';
+  }, 500);
+});
+
+
+
+    </script>
+</body>
+</html>
